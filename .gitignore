@@ -1,0 +1,10 @@
+cookies.txt
+body.json
+bot-trading.png
+bot-trading2.png
+stockwise.db
+.venv/
+*.log
+stockwise-fullstack/package-lock.json
+stockwise-fullstack/profile_diff.txt
+stockwise-fullstack/stockwise/dist/
