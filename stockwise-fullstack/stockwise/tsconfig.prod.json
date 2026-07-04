@@ -4,7 +4,8 @@
     "noEmit": false,
     "sourceMap": false,
     "outDir": "dist",
-    "allowImportingTsExtensions": true
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true
   },
   "include": [
     "types/**/*.d.ts",
