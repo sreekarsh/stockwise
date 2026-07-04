@@ -19,13 +19,16 @@ jobs:
         node-version: '20'
         
     - name: Install dependencies
+      working-directory: stockwise-fullstack/stockwise
       run: npm ci
       
     - name: Syntax check
-      run: node -c server.js && node -c js/main.js
+      working-directory: stockwise-fullstack/stockwise
+      run: npx tsc --noEmit
       
     - name: Run health check
+      working-directory: stockwise-fullstack/stockwise
       run: |
-        timeout 10 node server.js &
+        timeout 10 npx tsx server.ts &
         sleep 5
         curl -s http://localhost:3000/api/health || exit 1
