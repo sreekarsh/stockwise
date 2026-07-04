@@ -30,9 +30,8 @@ Production-ready full-stack application with real-time market data, ML-powered t
 ## 🚀 Quick Start
 
 ```bash
-cd stockwise-fullstack/stockwise
 npm install
-npx tsx server.ts
+npx tsx stockwise-fullstack/stockwise/server.ts
 ```
 
 Node runs at `http://localhost:3000` | ML service auto-starts at `http://127.0.0.1:8100`
@@ -42,7 +41,7 @@ Node runs at `http://localhost:3000` | ML service auto-starts at `http://127.0.0
 ### Docker (Recommended)
 
 ```bash
-docker-compose up
+cd stockwise-fullstack/stockwise && docker-compose up
 ```
 
 ### Railway (Free)
@@ -57,7 +56,7 @@ Or manually:
 
 ## 🔧 Environment Variables
 
-Rename `.env.example` to `.env` and configure:
+Rename `stockwise-fullstack/stockwise/.env.example` to `.env` and configure:
 
 | Variable | Purpose |
 |----------|---------|
@@ -130,7 +129,7 @@ Rename `.env.example` to `.env` and configure:
 ## 🐍 ML Training
 
 ```bash
-python ml_engine/trainer.py
+cd stockwise-fullstack/stockwise && python ml_engine/trainer.py
 ```
 
 Trains LSTM/PPO models using Binance OHLCV and sentiment data.
