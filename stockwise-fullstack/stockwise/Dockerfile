@@ -32,6 +32,7 @@ COPY middleware/ ./middleware/
 COPY routes/ ./routes/
 COPY services/ ./services/
 COPY prisma/ ./prisma/
+COPY schemas/ ./schemas/
 COPY types/ ./types/
 
 RUN npx prisma generate
