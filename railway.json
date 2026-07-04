@@ -2,12 +2,12 @@
   "version": "2",
   "builds": [
     {
-      "src": "server.ts",
+      "src": "stockwise-fullstack/stockwise/server.ts",
       "use": "@railway/node"
     }
   ],
   "deploy": {
-    "startCommand": "npx tsx server.ts",
+    "startCommand": "npx tsx stockwise-fullstack/stockwise/server.ts",
     "healthcheckPath": "/api/health",
     "healthcheckTimeout": 30,
     "restartPolicyType": "on_failure",
