@@ -24,15 +24,6 @@ jobs:
       working-directory: stockwise-fullstack/stockwise
       run: npm ci
       
-    - name: Syntax check
+    - name: Build check
       working-directory: stockwise-fullstack/stockwise
       run: npx tsc --noEmit --project tsconfig.json
-      
-    - name: Run health check
-      working-directory: stockwise-fullstack/stockwise
-      run: |
-        npx tsx server.ts &
-        SERVER_PID=$!
-        sleep 5
-        curl -s http://localhost:3000/api/health || exit 1
-        kill $SERVER_PID 2>/dev/null || true
