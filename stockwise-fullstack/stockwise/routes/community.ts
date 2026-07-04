@@ -9,7 +9,7 @@ import {
   groupCreateSchema,
   friendIdSchema,
   avatarUpdateSchema,
-} from "../schemas/community.js";
+} from "../schemas/community.ts";
 
 const window = new JSDOM("").window;
 const purify = DOMPurify(window);

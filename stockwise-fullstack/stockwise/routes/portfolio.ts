@@ -5,7 +5,7 @@ import { env } from "../config/env.js";
 import prisma from "../services/db.js";
 import { decrypt } from "../services/cryptoService.js";
 import logger from "../services/logger.js";
-import { addHoldingSchema, editHoldingSchema } from "../schemas/portfolio.js";
+import { addHoldingSchema, editHoldingSchema } from "../schemas/portfolio.ts";
 
 function safeDecrypt(val: any) {
   if (!val) return "";

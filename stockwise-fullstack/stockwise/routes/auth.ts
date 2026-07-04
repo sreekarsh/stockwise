@@ -20,7 +20,7 @@ import {
   forgotPasswordSchema,
   resetPasswordSchema,
   profileSchema,
-} from "../schemas/auth.js";
+} from "../schemas/auth.ts";
 
 async function isPasswordBreached(password: string) {
   try {
