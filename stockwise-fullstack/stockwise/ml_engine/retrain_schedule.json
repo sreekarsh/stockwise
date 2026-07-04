@@ -1,6 +1,6 @@
 {
-  "consecutiveFailures": 5,
-  "nextRunAt": 1783170096746,
-  "lastStartedAt": 1783155696541,
+  "consecutiveFailures": 6,
+  "nextRunAt": 1783191696794,
+  "lastStartedAt": 1783170096756,
   "lastError": "Forbidden: Invalid or missing CSRF token"
 }
