@@ -3,7 +3,8 @@
   "compilerOptions": {
     "noEmit": false,
     "sourceMap": false,
-    "outDir": "dist"
+    "outDir": "dist",
+    "allowImportingTsExtensions": true
   },
   "include": [
     "types/**/*.d.ts",
