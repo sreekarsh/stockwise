@@ -205,8 +205,8 @@ const sessionStore = await (async () => {
   if (env.NODE_ENV === "production") {
     const client = await waitForRedis();
     if (!client) {
-      console.error("CRITICAL: Redis is required in production. Set REDIS_URL in .env and ensure Redis is running.");
-      process.exit(1);
+      console.warn("Redis not available in production — falling back to MemoryStore. Set REDIS_URL for production.");
+      return new session.MemoryStore();
     }
     console.log("Production mode — using RedisStore");
     return new RedisStore({ client });
