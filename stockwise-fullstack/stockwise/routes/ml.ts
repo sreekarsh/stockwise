@@ -1,7 +1,7 @@
 import express from "express";
 import crypto from "crypto";
 import { spawn } from "child_process";
-import { trainSchema } from "../schemas/ml.js";
+import { trainSchema } from "../schemas/ml.ts";
 import mlService from "../services/mlService.js";
 import fs from "fs";
 import path from "path";

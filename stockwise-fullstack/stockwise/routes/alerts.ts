@@ -1,7 +1,7 @@
 import express from "express";
 import prisma from "../services/db.js";
 import logger from "../services/logger.js";
-import { alertCreateSchema, webhookSchema } from "../schemas/alerts.js";
+import { alertCreateSchema, webhookSchema } from "../schemas/alerts.ts";
 import { sendEmail } from "../services/mailService.js";
 
 const router = express.Router();

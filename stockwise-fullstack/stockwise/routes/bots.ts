@@ -14,7 +14,7 @@ import {
   botToggleSchema,
   botDeleteSchema,
   academyCompleteSchema,
-} from "../schemas/bots.js";
+} from "../schemas/bots.ts";
 import { BotStrategy, TradeSignal } from "../types/bots.js";
 import mlService from "../services/mlService.js";
 import logger from "../services/logger.js";
