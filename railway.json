@@ -2,12 +2,12 @@
   "version": "2",
   "builds": [
     {
-      "src": "stockwise-fullstack/stockwise/server.ts",
-      "use": "@railway/node"
+      "src": "Dockerfile",
+      "use": "railway:buildpack-docker"
     }
   ],
   "deploy": {
-    "startCommand": "npx tsx stockwise-fullstack/stockwise/server.ts",
+    "startCommand": "sh -c 'npx prisma migrate deploy && node dist/server.js'",
     "healthcheckPath": "/api/health",
     "healthcheckTimeout": 30,
     "restartPolicyType": "on_failure",
