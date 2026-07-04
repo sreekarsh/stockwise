@@ -1,0 +1,46 @@
+[tool.black]
+line-length = 120
+target-version = ["py311"]
+skip-magic-trailing-comma = true
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "S", "B", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"tests/*.py" = ["S101"]
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+strict_optional = true
+warn_unused_ignores = true
+warn_return_any = false
+disallow_untyped_defs = false
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["ml_engine/tests"]
+addopts = "-v --tb=short"
+
+[tool.coverage.run]
+source = ["ml_engine"]
+omit = ["ml_engine/tests/*", "ml_engine/__pycache__/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if 0:",
+    "pass",
+    "logger.debug",
+    "console.warn",
+    "console.error",
+]

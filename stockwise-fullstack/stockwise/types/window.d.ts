@@ -1,0 +1,46 @@
+declare const Chart: any;
+declare const io: any;
+
+interface Window {
+  COINGECKO_LOGO_MAP: Record<string, string>;
+  stockwiseAuthReady: boolean;
+  stockwise: Record<string, any>;
+  _refreshBotTip: () => void;
+  handleAssetLogoError: (img: HTMLImageElement, sym: string) => void;
+  handleStockLogoError: (img: HTMLImageElement) => void;
+  addToWatchlist: (sym: string, name: string) => void;
+  formatPrice: (v: number | string) => string;
+  makeAuthFresh: () => void;
+  $$sort: string;
+  $$switchType: string;
+  $$setCryptoCat: string;
+  $$setStockCat: string;
+  $$changeCurrency: string;
+  $$toggleFav: string;
+  $$filter: string;
+  $$renderTable: string;
+  loadPrices: () => void;
+  loadStocks: () => void;
+  openChartModal: (sym: string, name: string) => void;
+  closeChartModal: () => void;
+  loadChart: (sym: string) => void;
+  openAlertModal: (sym: string) => void;
+  closeAlertModal: () => void;
+  saveAlert: () => void;
+  toggleFav: (sym: string) => void;
+  toggleFavMode: () => void;
+  setSort: (s: string) => void;
+  switchType: (t: string) => void;
+  changeCryptoCategory: (c: string) => void;
+  changeStockCategory: (c: string) => void;
+  filterTable: () => void;
+  changeCurrency: (c: string) => void;
+  toggleIndicator: (i: string) => void;
+  forceFreshRefresh: () => void;
+  changeLayoutMode: (m: string) => void;
+  askAI: (prompt: string) => void;
+  onAuthChanged: ((detail: any) => void) | null;
+  togglePortfolioPw: () => void;
+  Chart: any;
+  io: any;
+}

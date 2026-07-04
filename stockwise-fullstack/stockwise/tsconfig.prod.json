@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "sourceMap": false,
+    "outDir": "dist"
+  },
+  "include": [
+    "types/**/*.d.ts",
+    "config/**/*.ts",
+    "middleware/**/*.ts",
+    "routes/**/*.ts",
+    "services/**/*.ts",
+    "server.ts",
+    "backup-db.ts"
+  ]
+}

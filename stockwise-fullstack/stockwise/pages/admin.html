@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel - StockWise</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    :root {
+      --sidebar-w: 240px;
+      --header-h: 60px;
+      --admin-bg: #0a0a12;
+      --admin-card: #12121e;
+      --admin-border: #1e1e32;
+      --admin-hover: #1a1a2e;
+      --admin-accent: #00e5a0;
+      --admin-red: #ff4757;
+      --admin-yellow: #f59e0b;
+      --admin-blue: #00bfff;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--admin-bg);
+      color: #e0e0e0;
+      font-family: 'DM Sans', sans-serif;
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ─── SIDEBAR ─── */
+    .admin-sidebar {
+      position: fixed;
+      top: 0; left: 0;
+      width: var(--sidebar-w);
+      height: 100vh;
+      background: var(--admin-card);
+      border-right: 1px solid var(--admin-border);
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      transition: transform .3s;
+    }
+
+    .sidebar-logo {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--admin-border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .sidebar-logo span { color: var(--admin-accent); }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 12px 0;
+      overflow-y: auto;
+    }
+
+    .nav-section {
+      padding: 8px 20px 4px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #555;
+      font-weight: 600;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 20px;
+      cursor: pointer;
+      color: #888;
+      font-size: 14px;
+      transition: all .2s;
+      border-left: 3px solid transparent;
+    }
+    .nav-item:hover { background: var(--admin-hover); color: #ccc; }
+    .nav-item.active {
+      background: rgba(0,229,160,0.08);
+      color: var(--admin-accent);
+      border-left-color: var(--admin-accent);
+    }
+    .nav-item .icon { width: 18px; text-align: center; font-size: 16px; }
+
+    .sidebar-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--admin-border);
+      font-size: 12px;
+      color: #555;
+    }
+    .sidebar-footer a { color: var(--admin-accent); text-decoration: none; }
+
+    /* ─── MAIN ─── */
+    .admin-main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      padding: 24px 32px;
+      max-width: calc(100vw - var(--sidebar-w));
+    }
+
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+    .admin-header h1 { font-family: 'Syne', sans-serif; font-size: 22px; color: #fff; }
+    .admin-header .sub { color: #888; font-size: 13px; }
+
+    .toggle-sidebar {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    /* ─── TABS ─── */
+    .admin-tab { display: none; }
+    .admin-tab.active { display: block; }
+
+    /* ─── STAT CARDS ─── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    .stat-card {
+      background: var(--admin-card);
+      border: 1px solid var(--admin-border);
+      border-radius: 10px;
+      padding: 16px 18px;
+      transition: border-color .2s;
+    }
+    .stat-card:hover { border-color: var(--admin-accent); }
+    .stat-card .label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin-bottom: 6px; }
+    .stat-card .value { font-size: 28px; font-weight: 700; color: #fff; font-family: 'Syne', sans-serif; }
+    .stat-card .value.green { color: var(--admin-accent); }
+    .stat-card .value.yellow { color: var(--admin-yellow); }
+    .stat-card .value.red { color: var(--admin-red); }
+    .stat-card .value.blue { color: var(--admin-blue); }
+
+    /* ─── TABLE ─── */
+    .table-wrap {
+      background: var(--admin-card);
+      border: 1px solid var(--admin-border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .table-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--admin-border);
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .table-toolbar h3 { font-size: 15px; color: #fff; }
+    .table-toolbar .right { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+    .table-toolbar input, .table-toolbar select {
+      background: var(--admin-bg);
+      border: 1px solid var(--admin-border);
+      color: #ccc;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      outline: none;
+    }
+    .table-toolbar input:focus, .table-toolbar select:focus { border-color: var(--admin-accent); }
+
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--admin-border); font-size: 13px; }
+    th { color: #666; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .8px; background: rgba(255,255,255,0.02); }
+    td { color: #ccc; }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .role-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .role-badge.admin { background: rgba(255,71,87,0.15); color: var(--admin-red); }
+    .role-badge.moderator { background: rgba(0,191,255,0.15); color: var(--admin-blue); }
+    .role-badge.vip { background: rgba(245,158,11,0.15); color: var(--admin-yellow); }
+    .role-badge.user { background: rgba(0,229,160,0.15); color: var(--admin-accent); }
+    .role-badge.supporter, .role-badge.member { background: rgba(100,100,100,0.15); color: #999; }
+
+    .badge-success { color: var(--admin-accent); }
+    .badge-fail { color: var(--admin-red); }
+
+    .action-btn {
+      background: none;
+      border: 1px solid var(--admin-border);
+      color: #999;
+      padding: 4px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all .2s;
+    }
+    .action-btn:hover { border-color: var(--admin-accent); color: var(--admin-accent); }
+    .action-btn.danger:hover { border-color: var(--admin-red); color: var(--admin-red); }
+    .action-btn.primary { border-color: var(--admin-accent); color: var(--admin-accent); }
+
+    /* ─── PAGINATION ─── */
+    .pagination {
+      display: flex;
+      gap: 6px;
+      padding: 12px 18px;
+      justify-content: center;
+      align-items: center;
+      border-top: 1px solid var(--admin-border);
+      font-size: 13px;
+    }
+    .pagination button {
+      background: var(--admin-bg);
+      border: 1px solid var(--admin-border);
+      color: #999;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .pagination button:hover { border-color: var(--admin-accent); color: var(--admin-accent); }
+    .pagination button:disabled { opacity: .4; cursor: default; }
+    .pagination .info { color: #666; margin: 0 8px; }
+
+    /* ─── ACTIVITY LOG ─── */
+    .activity-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 18px;
+      border-bottom: 1px solid var(--admin-border);
+      font-size: 13px;
+    }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-item .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+    .activity-item .dot.success { background: var(--admin-accent); }
+    .activity-item .dot.fail { background: var(--admin-red); }
+    .activity-item .act-info { flex: 1; }
+    .activity-item .act-info strong { color: #fff; }
+    .activity-item .act-time { color: #555; font-size: 12px; white-space: nowrap; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 768px) {
+      .admin-sidebar { transform: translateX(-100%); }
+      .admin-sidebar.open { transform: translateX(0); }
+      .admin-main { margin-left: 0; padding: 16px; max-width: 100vw; }
+      .toggle-sidebar { display: block; }
+      .stats-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+    }
+
+    .loading { text-align: center; padding: 40px; color: #555; }
+    .error-msg { text-align: center; padding: 40px; color: var(--admin-red); }
+    .empty-msg { text-align: center; padding: 30px; color: #555; }
+
+    .pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+    }
+    .pill.success { background: rgba(0,229,160,0.12); color: var(--admin-accent); }
+    .pill.fail { background: rgba(255,71,87,0.12); color: var(--admin-red); }
+
+    .toast {
+      position: fixed;
+      bottom: 20px; right: 20px;
+      background: var(--admin-card);
+      border: 1px solid var(--admin-accent);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all .3s;
+      z-index: 999;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+<div class="admin-sidebar" id="adminSidebar">
+  <div class="sidebar-logo">
+    <span>⚡</span> Stock<span>Wise</span>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Main</div>
+    <div class="nav-item active" data-tab="dashboard" onclick="switchTab('dashboard')">
+      <span class="icon">📊</span> Dashboard
+    </div>
+    <div class="nav-item" data-tab="users" onclick="switchTab('users')">
+      <span class="icon">👥</span> Users
+    </div>
+    <div class="nav-item" data-tab="resets" onclick="switchTab('resets')">
+      <span class="icon">🔐</span> Password Resets
+    </div>
+    <div class="nav-item" data-tab="activity" onclick="switchTab('activity')">
+      <span class="icon">📋</span> Activity Log
+    </div>
+    <div class="nav-item" data-tab="posts" onclick="switchTab('posts')">
+      <span class="icon">💬</span> Posts
+    </div>
+    <div class="nav-section">System</div>
+    <div class="nav-item" data-tab="health" onclick="switchTab('health')">
+      <span class="icon">🛡️</span> Health
+    </div>
+    <div class="nav-item" data-tab="logs" onclick="switchTab('logs')">
+      <span class="icon">📊</span> Logs
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="../index.html">← Back to App</a>
+  </div>
+</div>
+
+<div class="admin-main">
+  <div class="admin-header">
+    <div>
+      <button class="toggle-sidebar" onclick="document.getElementById('adminSidebar').classList.toggle('open')">☰</button>
+      <h1 id="pageTitle">Dashboard</h1>
+      <div class="sub" id="pageSub">System overview &amp; key metrics</div>
+    </div>
+    <div style="font-size:13px;color:#555">
+      <span id="currentTime"></span>
+    </div>
+  </div>
+
+  <!-- ════ DASHBOARD ════ -->
+  <div class="admin-tab active" id="tab-dashboard">
+    <div class="stats-grid" id="statGrid">
+      <div class="stat-card"><div class="label">Total Users</div><div class="value green" id="statUsers">--</div></div>
+      <div class="stat-card"><div class="label">Active Today</div><div class="value blue" id="statActive">--</div></div>
+      <div class="stat-card"><div class="label">Community Posts</div><div class="value" id="statPosts">--</div></div>
+      <div class="stat-card"><div class="label">Groups</div><div class="value" id="statGroups">--</div></div>
+      <div class="stat-card"><div class="label">Alerts</div><div class="value yellow" id="statAlerts">--</div></div>
+      <div class="stat-card"><div class="label">Portfolios</div><div class="value" id="statPortfolios">--</div></div>
+      <div class="stat-card"><div class="label">Pending Verifications</div><div class="value yellow" id="statPendingVer">--</div></div>
+      <div class="stat-card"><div class="label">Pending Resets</div><div class="value red" id="statPendingReset">--</div></div>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-toolbar"><h3>Recent Logins</h3></div>
+      <div id="recentLogins"><div class="loading">Loading...</div></div>
+    </div>
+  </div>
+
+  <!-- ════ USERS ════ -->
+  <div class="admin-tab" id="tab-users">
+    <div class="table-wrap">
+      <div class="table-toolbar">
+        <h3>All Users</h3>
+        <div class="right">
+          <input type="text" id="userSearch" placeholder="Search username or email..." oninput="debounceSearch()">
+          <select id="roleFilter" onchange="loadUsers()">
+            <option value="">All Roles</option>
+            <option value="admin">Admin</option>
+            <option value="moderator">Moderator</option>
+            <option value="vip">VIP</option>
+            <option value="user">User</option>
+            <option value="supporter">Supporter</option>
+            <option value="member">Member</option>
+          </select>
+        </div>
+      </div>
+      <table>
+        <thead><tr>
+          <th>ID</th><th>Username</th><th>Email</th><th>Role</th><th>Verified</th><th>Posts</th><th>Portfolios</th><th>Created</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="userBody"></tbody>
+      </table>
+      <div class="pagination" id="userPagination"></div>
+    </div>
+  </div>
+
+  <!-- ════ PASSWORD RESETS ════ -->
+  <div class="admin-tab" id="tab-resets">
+    <div class="table-wrap">
+      <div class="table-toolbar"><h3>Pending Password Reset Requests</h3></div>
+      <table>
+        <thead><tr><th>ID</th><th>Username</th><th>Email</th><th>Token</th><th>Expires</th><th>Status</th></tr></thead>
+        <tbody id="resetBody"></tbody>
+      </table>
+    </div>
+    <div class="table-wrap" style="margin-top:20px">
+      <div class="table-toolbar"><h3>Generate Reset Token</h3></div>
+      <div style="display:flex;gap:10px;align-items:center;padding:12px 16px;flex-wrap:wrap">
+        <input type="text" id="genIdentifier" placeholder="ID, email, or username" style="width:220px;padding:8px 12px;border:1px solid #30363d;border-radius:6px;background:#0d1117;color:#e6edf3">
+        <button class="action-btn primary" onclick="generateResetToken()">Generate Token</button>
+        <span id="genResult" style="font-size:13px;color:var(--admin-accent);word-break:break-all"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ ACTIVITY ════ -->
+  <div class="admin-tab" id="tab-activity">
+    <div class="table-wrap">
+      <div class="table-toolbar"><h3>Login Activity</h3></div>
+      <div id="activityBody"><div class="loading">Loading...</div></div>
+      <div class="pagination" id="activityPagination"></div>
+    </div>
+  </div>
+
+  <!-- ════ POSTS ════ -->
+  <div class="admin-tab" id="tab-posts">
+    <div class="table-wrap">
+      <div class="table-toolbar"><h3>Community Posts</h3></div>
+      <table>
+        <thead><tr><th>ID</th><th>User</th><th>Content</th><th>Likes</th><th>Created</th><th>Actions</th></tr></thead>
+        <tbody id="postBody"></tbody>
+      </table>
+      <div class="pagination" id="postPagination"></div>
+    </div>
+  </div>
+
+  <!-- ════ HEALTH ════ -->
+  <div class="admin-tab" id="tab-health">
+    <div class="stats-grid" id="healthGrid">
+      <div class="stat-card"><div class="label">Server Status</div><div class="value green" id="healthStatus">--</div></div>
+      <div class="stat-card"><div class="label">Uptime</div><div class="value" id="healthUptime">--</div></div>
+      <div class="stat-card"><div class="label">Database</div><div class="value" id="healthDb">--</div></div>
+      <div class="stat-card"><div class="label">Redis</div><div class="value" id="healthRedis">--</div></div>
+      <div class="stat-card"><div class="label">ML Engine</div><div class="value" id="healthMl">--</div></div>
+    </div>
+  </div>
+
+  <!-- ════ LOGS ANALYSIS ════ -->
+  <div class="admin-tab" id="tab-logs">
+    <div class="stats-grid" id="logSummaryGrid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-bottom:20px"></div>
+    <div class="table-wrap" style="margin-bottom:20px">
+      <div class="table-toolbar"><h3>Status Code Distribution</h3></div>
+      <div id="statusBarChart" style="display:flex;gap:8px;padding:12px 16px;align-items:flex-end;min-height:100px"></div>
+    </div>
+    <div class="table-wrap" style="margin-bottom:20px">
+      <div class="table-toolbar"><h3>Top Endpoints</h3></div>
+      <table>
+        <thead><tr><th>Path</th><th>Requests</th><th>Avg Duration (ms)</th></tr></thead>
+        <tbody id="topPathsBody"></tbody>
+      </table>
+    </div>
+    <div class="table-wrap" style="margin-bottom:20px">
+      <div class="table-toolbar"><h3>Recent Errors</h3></div>
+      <table>
+        <thead><tr><th>Time</th><th>Path</th><th>Message</th></tr></thead>
+        <tbody id="errorLogBody"></tbody>
+      </table>
+    </div>
+    <div class="table-wrap" style="margin-bottom:20px">
+      <div class="table-toolbar"><h3>Request Timeline (24h)</h3></div>
+      <div id="timelineChart" style="display:flex;gap:2px;padding:12px 16px;align-items:flex-end;min-height:120px;overflow-x:auto"></div>
+    </div>
+    <div class="table-wrap">
+      <div class="table-toolbar"><h3>System Events</h3></div>
+      <table>
+        <thead><tr><th>Time</th><th>Type</th><th>Message</th></tr></thead>
+        <tbody id="eventLogBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script defer src="../js/main.js"></script>
+<script nonce="__NONCE__">
+let currentUser = null;
+let userPage = 1, activityPage = 1, postPage = 1;
+let searchTimer = null;
+
+let adminCsrf = '';
+
+async function api(method, path, body) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' }, credentials: 'include' };
+  if (adminCsrf) opts.headers['X-CSRF-Token'] = adminCsrf;
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(path, opts);
+  const data = await res.json().catch(() => ({}));
+  if (data.csrfToken) adminCsrf = data.csrfToken;
+  return { status: res.status, data };
+}
+
+let toastTimer = null;
+function toast(msg, ok) {
+  const t = document.getElementById('toast');
+  if (toastTimer) clearTimeout(toastTimer);
+  t.textContent = (ok ? '✓ ' : '✕ ') + msg;
+  t.style.borderColor = ok ? 'var(--admin-accent)' : 'var(--admin-red)';
+  t.classList.add('show');
+  toastTimer = setTimeout(() => { t.classList.remove('show'); toastTimer = null; }, 2500);
+}
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+function timeAgo(ts) {
+  const diff = Date.now() - new Date(ts).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return mins + 'm ago';
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs + 'h ago';
+  return Math.floor(hrs / 24) + 'd ago';
+}
+
+function roleBadge(role) {
+  return `<span class="role-badge ${role}">${role}</span>`;
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.querySelector(`.nav-item[data-tab="${tab}"]`).classList.add('active');
+
+  const titles = { dashboard: ['Dashboard', 'System overview & key metrics'], users: ['Users', 'Manage registered users'], resets: ['Password Resets', 'Active tokens expire 10 min — generate new ones below'], activity: ['Activity Log', 'User login activity'], posts: ['Posts', 'Community post moderation'], health: ['Health', 'System health status'], logs: ['Logs', 'Request logs & error analysis'] };
+  const t = titles[tab] || ['Dashboard', ''];
+  document.getElementById('pageTitle').textContent = t[0];
+  document.getElementById('pageSub').textContent = t[1];
+
+  if (tab === 'users' && document.getElementById('userBody').children.length <= 1) loadUsers();
+  if (tab === 'resets') loadResets();
+  if (tab === 'activity') loadActivity();
+  if (tab === 'posts') loadPosts();
+  if (tab === 'health') loadHealth();
+  if (tab === 'logs') loadLogs();
+}
+
+function debounceSearch() {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => { userPage = 1; loadUsers(); }, 300);
+}
+
+// ════ DASHBOARD ════
+async function loadDashboard() {
+  const r = await api('GET', '/api/admin/stats');
+  if (r.status !== 200) return;
+  const d = r.data;
+  document.getElementById('statUsers').textContent = d.totalUsers || 0;
+  document.getElementById('statActive').textContent = d.activeToday || 0;
+  document.getElementById('statPosts').textContent = d.totalPosts || 0;
+  document.getElementById('statGroups').textContent = d.totalGroups || 0;
+  document.getElementById('statAlerts').textContent = d.totalAlerts || 0;
+  document.getElementById('statPortfolios').textContent = d.totalPortfolios || 0;
+  document.getElementById('statPendingVer').textContent = d.pendingVerifications || 0;
+  document.getElementById('statPendingReset').textContent = d.pendingResets || 0;
+
+  const recent = document.getElementById('recentLogins');
+  if (!d.recentLogins || !d.recentLogins.length) {
+    recent.innerHTML = '<div class="empty-msg">No recent logins</div>';
+    return;
+  }
+  recent.innerHTML = d.recentLogins.map(l => `
+    <div class="activity-item">
+      <div class="dot success"></div>
+      <div class="act-info">
+        <strong>${esc(l.username)}</strong> — ${esc(l.login_type || 'login')}
+        ${l.ip_address ? `<span style="color:#666"> from ${esc(l.ip_address)}</span>` : ''}
+      </div>
+      <div class="act-time">${timeAgo(l.login_at)}</div>
+    </div>
+  `).join('');
+}
+
+// ════ USERS ════
+async function loadUsers() {
+  const q = document.getElementById('userSearch').value;
+  const role = document.getElementById('roleFilter').value;
+  const r = await api('GET', `/api/admin/users?page=${userPage}&limit=30&q=${encodeURIComponent(q)}&role=${role}`);
+  if (r.status !== 200) { document.getElementById('userBody').innerHTML = `<tr><td colspan="9" class="error-msg">Failed to load users</td></tr>`; return; }
+  const d = r.data;
+  if (!d || !Array.isArray(d.users)) {
+    document.getElementById('userBody').innerHTML = `<tr><td colspan="9" class="empty-msg">No users found</td></tr>`;
+    document.getElementById('userPagination').innerHTML = '';
+    return;
+  }
+  if (!d.users.length) {
+    document.getElementById('userBody').innerHTML = `<tr><td colspan="9" class="empty-msg">No users found</td></tr>`;
+    document.getElementById('userPagination').innerHTML = '';
+    return;
+  }
+  document.getElementById('userBody').innerHTML = d.users.map(u => `
+    <tr>
+      <td style="color:#555">${u.id}</td>
+      <td><strong>${esc(u.username)}</strong></td>
+      <td style="color:#888">${esc(u.email)}</td>
+      <td>${roleBadge(u.role)}</td>
+      <td>${u.is_verified ? '<span class="badge-success">✓</span>' : '<span class="badge-fail">✕</span>'}</td>
+      <td>${u._count?.posts || 0}</td>
+      <td>${u._count?.portfolios || 0}</td>
+      <td style="color:#555;font-size:12px">${new Date(u.created_at).toLocaleDateString()}</td>
+      <td style="white-space:nowrap">
+        <button class="action-btn" onclick="setRole(${u.id}, '${u.role}')">🎭 Role</button>
+        <button class="action-btn" onclick="toggleVerify(${u.id})">${u.is_verified ? '🔓' : '🔒'}</button>
+        <button class="action-btn danger" onclick="deleteUser(${u.id}, '${esc(u.username)}')">🗑️</button>
+      </td>
+    </tr>
+  `).join('');
+
+  const p = document.getElementById('userPagination');
+  if (d.totalPages <= 1) { p.innerHTML = ''; return; }
+  p.innerHTML = `<button ${userPage <= 1 ? 'disabled' : ''} onclick="userPage--;loadUsers()">← Prev</button>
+    <span class="info">Page ${d.page} / ${d.totalPages}</span>
+    <button ${userPage >= d.totalPages ? 'disabled' : ''} onclick="userPage++;loadUsers()">Next →</button>`;
+}
+
+async function setRole(userId, currentRole) {
+  const role = prompt(`Enter new role for user #${userId} (current: ${currentRole}):\nadmin / moderator / vip / user / supporter / member`);
+  if (!role || !['admin','moderator','vip','user','supporter','member'].includes(role)) return toast('Invalid role', false);
+  const r = await api('POST', '/api/admin/set-role', { userId, role });
+  if (r.status === 200) { toast('Role updated', true); await loadUsers(); }
+  else toast(r.data?.error || 'Failed to update role', false);
+}
+
+async function toggleVerify(userId) {
+  const r = await api('POST', '/api/admin/verify-user', { userId });
+  if (r.status === 200) { toast('Verification toggled', true); await loadUsers(); }
+  else toast(r.data?.error || 'Failed', false);
+}
+
+async function deleteUser(userId, username) {
+  if (!confirm(`Delete user "${username}" (#${userId})? This cannot be undone.`)) return;
+  const r = await api('POST', '/api/admin/delete-user', { userId });
+  if (r.status === 200) { toast('User deleted', true); await loadUsers(); }
+  else toast(r.data?.error || 'Failed to delete', false);
+}
+
+// ════ RESETS ════
+async function loadResets() {
+  const r = await api('GET', '/api/admin/reset-requests');
+  const body = document.getElementById('resetBody');
+  if (r.status !== 200 || !r.data || !r.data.length) {
+    body.innerHTML = `<tr><td colspan="6" class="empty-msg">No pending password reset requests</td></tr>`;
+    return;
+  }
+  body.innerHTML = r.data.map(req => {
+    const exp = new Date(req.expires);
+    const isExpired = exp < Date.now();
+    return `<tr>
+      <td style="color:#555">${req.id}</td>
+      <td><strong>${esc(req.username)}</strong></td>
+      <td style="color:#888">${esc(req.email)}</td>
+      <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;font-family:monospace;font-size:11px;color:var(--admin-accent)" title="${esc(req.token)}">${esc(req.token)}</td>
+      <td style="color:#888;font-size:12px">${exp.toLocaleString()}</td>
+      <td>${isExpired ? '<span class="badge-fail">Expired</span>' : '<span class="badge-success">Active</span>'}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ════ ACTIVITY ════
+async function loadActivity() {
+  const r = await api('GET', `/api/admin/activity?page=${activityPage}&limit=30`);
+  const container = document.getElementById('activityBody');
+  if (r.status !== 200) { container.innerHTML = '<div class="error-msg">Failed to load activity</div>'; return; }
+  const d = r.data;
+  if (!d.logs || !d.logs.length) { container.innerHTML = '<div class="empty-msg">No activity logged</div>'; return; }
+
+  container.innerHTML = d.logs.map(l => `
+    <div class="activity-item">
+      <div class="dot ${l.success ? 'success' : 'fail'}"></div>
+      <div class="act-info">
+        <strong>${esc(l.username)}</strong>
+        <span style="color:#888">${esc(l.login_type || 'login')}</span>
+        ${l.ip_address ? `<span style="color:#555">· ${esc(l.ip_address)}</span>` : ''}
+        ${l.user_agent ? `<span style="color:#444;font-size:11px;display:block">${esc(l.user_agent.slice(0,60))}</span>` : ''}
+      </div>
+      <div class="act-time">${timeAgo(l.login_at)}</div>
+    </div>
+  `).join('');
+
+  const p = document.getElementById('activityPagination');
+  if (d.totalPages <= 1) { p.innerHTML = ''; return; }
+  p.innerHTML = `<button ${activityPage <= 1 ? 'disabled' : ''} onclick="activityPage--;loadActivity()">← Prev</button>
+    <span class="info">Page ${d.page} / ${d.totalPages}</span>
+    <button ${activityPage >= d.totalPages ? 'disabled' : ''} onclick="activityPage++;loadActivity()">Next →</button>`;
+}
+
+// ════ POSTS ════
+async function loadPosts() {
+  const r = await api('GET', `/api/admin/posts?page=${postPage}&limit=30`);
+  const body = document.getElementById('postBody');
+  if (r.status !== 200) { body.innerHTML = `<tr><td colspan="6" class="error-msg">Failed to load posts</td></tr>`; return; }
+  const d = r.data;
+  if (!d.posts || !d.posts.length) { body.innerHTML = `<tr><td colspan="6" class="empty-msg">No posts found</td></tr>`; return; }
+
+  body.innerHTML = d.posts.map(p => `
+    <tr>
+      <td style="color:#555">${p.id}</td>
+      <td><strong>${esc(p.username)}</strong></td>
+      <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#888">${esc(p.content)}</td>
+      <td>${p.likes}</td>
+      <td style="color:#555;font-size:12px">${new Date(p.created_at).toLocaleDateString()}</td>
+      <td><button class="action-btn danger" onclick="deletePost(${p.id})">🗑️</button></td>
+    </tr>
+  `).join('');
+
+  const pag = document.getElementById('postPagination');
+  if (d.totalPages <= 1) { pag.innerHTML = ''; return; }
+  pag.innerHTML = `<button ${postPage <= 1 ? 'disabled' : ''} onclick="postPage--;loadPosts()">← Prev</button>
+    <span class="info">Page ${d.page} / ${d.totalPages}</span>
+    <button ${postPage >= d.totalPages ? 'disabled' : ''} onclick="postPage++;loadPosts()">Next →</button>`;
+}
+
+async function deletePost(postId) {
+  if (!confirm(`Delete post #${postId}?`)) return;
+  const r = await api('DELETE', `/api/admin/posts/${postId}`);
+  if (r.status === 200) { toast('Post deleted', true); await loadPosts(); }
+  else toast(r.data?.error || 'Failed', false);
+}
+
+// ════ GENERATE RESET TOKEN ════
+async function generateResetToken() {
+  const identifier = document.getElementById('genIdentifier').value.trim();
+  const resultSpan = document.getElementById('genResult');
+  if (!identifier) { resultSpan.textContent = 'Enter a user ID, email, or username'; return; }
+  resultSpan.textContent = 'Generating...';
+  const r = await api('POST', '/api/admin/generate-reset-token', { identifier });
+  if (r.status !== 200) {
+    resultSpan.textContent = r.data?.error || 'Failed';
+    resultSpan.style.color = 'var(--admin-red)';
+    return;
+  }
+  const d = r.data;
+  resultSpan.style.color = 'var(--admin-accent)';
+  resultSpan.innerHTML = `Token for <strong>${esc(d.username)}</strong> (${esc(d.email)}): <code style="font-size:13px;user-select:all;background:#161b22;padding:4px 8px;border-radius:4px">${esc(d.token)}</code> <button class="action-btn" onclick="copyToken('${esc(d.token)}')" style="font-size:11px">Copy</button>`;
+  await loadResets();
+}
+
+function copyToken(token) {
+  navigator.clipboard.writeText(token).then(() => toast('Token copied', true)).catch(() => toast('Copy failed', false));
+}
+
+// ════ HEALTH ════
+async function loadHealth() {
+  const r = await api('GET', '/api/health');
+  if (r.status !== 200) return;
+  const d = r.data;
+  document.getElementById('healthStatus').textContent = d.status || 'unknown';
+  document.getElementById('healthDb').textContent = d.database || 'unknown';
+  document.getElementById('healthRedis').textContent = d.redis || 'unknown';
+  document.getElementById('healthMl').textContent = d.ml || 'unknown';
+  document.getElementById('healthUptime').textContent = d.uptime ? Math.floor(d.uptime / 3600) + 'h' : '--';
+  document.getElementById('healthStatus').style.color = d.status === 'ok' ? 'var(--admin-accent)' : 'var(--admin-red)';
+  document.getElementById('healthDb').style.color = d.database === 'ok' ? 'var(--admin-accent)' : 'var(--admin-red)';
+  document.getElementById('healthRedis').style.color = d.redis === 'ok' ? 'var(--admin-accent)' : 'var(--admin-red)';
+  document.getElementById('healthMl').style.color = d.ml === 'ok' ? 'var(--admin-accent)' : 'var(--admin-red)';
+}
+
+// ════ LOGS ════
+async function loadLogs() {
+  const r = await api('GET', '/api/admin/logs');
+  if (r.status !== 200) return;
+  const d = r.data;
+  const s = d.summary;
+
+  document.getElementById('logSummaryGrid').innerHTML = `
+    <div class="stat-card"><div class="label">Total Requests</div><div class="value">${s.totalRequests}</div></div>
+    <div class="stat-card"><div class="label">Requests (Last Hour)</div><div class="value">${s.requestsLastHour}</div></div>
+    <div class="stat-card"><div class="label">Error Rate</div><div class="value" style="color:${s.errorRate > 5 ? 'var(--admin-red)' : 'var(--admin-accent)'}">${s.errorRate}%</div></div>
+    <div class="stat-card"><div class="label">Avg Response</div><div class="value">${s.avgDuration}ms</div></div>
+    <div class="stat-card"><div class="label">P95 Latency</div><div class="value">${s.p95Duration}ms</div></div>
+    <div class="stat-card"><div class="label">Recent Errors</div><div class="value" style="color:${s.recentErrorCount > 20 ? 'var(--admin-red)' : '#e6edf3'}">${s.recentErrorCount}</div></div>
+  `;
+
+  const maxCount = Math.max(...Object.values(s.statusBreakdown), 1);
+  const colors = { '2xx': 'var(--admin-accent)', '3xx': '#58a6ff', '4xx': '#d29922', '5xx': 'var(--admin-red)' };
+  document.getElementById('statusBarChart').innerHTML = Object.entries(s.statusBreakdown).map(([k, v]) =>
+    `<div style="flex:1;display:flex;flex-direction:column;align-items:center"><div style="width:100%;background:#161b22;border-radius:4px;height:80px;position:relative;overflow:hidden"><div style="position:absolute;bottom:0;width:100%;height:${(v/maxCount)*100}%;background:${colors[k]||'#555'};border-radius:4px;transition:height .3s"></div></div><span style="font-size:11px;margin-top:4px;color:#888">${k}</span><span style="font-size:13px;font-weight:bold">${v}</span></div>`
+  ).join('');
+
+  const topBody = document.getElementById('topPathsBody');
+  if (!s.topPaths || !s.topPaths.length) {
+    topBody.innerHTML = '<tr><td colspan="3" class="empty-msg">No request data yet</td></tr>';
+  } else {
+    topBody.innerHTML = s.topPaths.map((p, i) => `<tr${i < 5 ? '' : ' class="extra-path" style="display:none"'}>
+      <td style="font-family:monospace;font-size:12px;max-width:400px;overflow:hidden;text-overflow:ellipsis">${esc(p.path)}</td>
+      <td>${p.count}</td>
+      <td>${p.avgDuration}ms</td>
+    </tr>`).join('') +
+    (s.topPaths.length > 5 ? `<tr id="showMorePathsRow"><td colspan="3"><button class="action-btn" onclick="document.querySelectorAll('.extra-path').forEach(e=>e.style.display='');document.getElementById('showMorePathsRow').style.display='none'">Show all ${s.topPaths.length} paths</button></td></tr>` : '');
+  }
+
+  const errBody = document.getElementById('errorLogBody');
+  if (!d.recentErrors || !d.recentErrors.length) {
+    errBody.innerHTML = '<tr><td colspan="3" class="empty-msg">No errors recorded</td></tr>';
+  } else {
+    errBody.innerHTML = d.recentErrors.slice(0, 50).map(e => {
+      const is5xx = e.statusCode && e.statusCode >= 500;
+      return `<tr>
+        <td style="color:#888;font-size:11px">${new Date(e.ts).toLocaleString()}</td>
+        <td style="font-family:monospace;font-size:11px;color:#888">${esc(e.path||'-')}</td>
+        <td style="color:${is5xx ? 'var(--admin-red)' : '#d29922'};font-size:12px">${esc(e.message)}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  const maxHr = Math.max(...s.requestsByHour.map(h => h.count), 1);
+  document.getElementById('timelineChart').innerHTML = s.requestsByHour.map(h => {
+    const hh = h.hour.slice(11, 16);
+    const barH = Math.max((h.count / maxHr) * 100, 1);
+    return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;min-width:40px">
+      <span style="font-size:10px;color:#888;margin-bottom:2px">${h.errors ? h.errors : ''}</span>
+      <div style="width:100%;background:#161b22;border-radius:3px;height:100px;position:relative;overflow:hidden">
+        <div style="position:absolute;bottom:0;width:100%;height:${barH}%;background:var(--admin-accent);border-radius:3px;opacity:0.8"></div>
+        ${h.errors ? `<div style="position:absolute;bottom:0;width:100%;height:${Math.min((h.errors/h.count)*100, 100)}%;background:var(--admin-red);border-radius:3px;opacity:0.6"></div>` : ''}
+      </div>
+      <span style="font-size:10px;color:#555;margin-top:2px">${hh}</span>
+    </div>`;
+  }).join('');
+
+  const evBody = document.getElementById('eventLogBody');
+  if (!d.events || !d.events.length) {
+    evBody.innerHTML = '<tr><td colspan="3" class="empty-msg">No system events</td></tr>';
+  } else {
+    evBody.innerHTML = d.events.map(e =>
+      `<tr>
+        <td style="color:#888;font-size:11px">${new Date(e.ts).toLocaleString()}</td>
+        <td><span class="role-badge" style="font-size:10px;padding:2px 6px">${esc(e.type)}</span></td>
+        <td style="color:#e6edf3;font-size:12px">${esc(e.message)}</td>
+      </tr>`
+    ).join('');
+  }
+}
+
+// ════ CLOCK ════
+function updateClock() {
+  document.getElementById('currentTime').textContent = new Date().toLocaleString();
+}
+
+// ════ INIT ════
+async function init() {
+  const me = await api('GET', '/api/me');
+  if (!me.data.loggedIn || (me.data.role !== 'admin' && me.data.role !== 'moderator')) {
+    document.body.innerHTML = `<div style="text-align:center;padding:80px;font-size:18px">⛔ Access denied. Admin or moderator role required.<br><br><a href="../index.html" style="color:var(--admin-accent)">← Back to app</a></div>`;
+    return;
+  }
+  currentUser = me.data;
+  await loadDashboard();
+  updateClock();
+  setInterval(updateClock, 10000);
+  loadUsers().catch(e => console.error('loadUsers init:', e));
+}
+
+init();
+</script>
+</body>
+</html>

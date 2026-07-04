@@ -1,0 +1,35 @@
+# StockWise Caddy Reverse Proxy Configuration
+# ============================================
+# Replace YOUR_DOMAIN with your actual domain (e.g., stockwise.example.com)
+# For local development, use: http://localhost:8080
+#
+# Environment variables supported:
+#   DOMAIN        — your domain (default: localhost)
+#   NODE_UPSTREAM — Node.js backend address (default: stockwise-server:3000)
+
+http://{$DOMAIN:localhost} {
+    # Security headers not covered by the Node app
+    header {
+        # Strict Transport Security — 1 year, include subdomains, preload
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "camera=(), microphone=(), geolocation=()"
+    }
+
+    # Reverse proxy to Node.js backend
+    reverse_proxy {$NODE_UPSTREAM:stockwise-server:3000} {
+        # Forward the original protocol so the app knows it's HTTPS
+        header_up X-Forwarded-Proto {scheme}
+        header_up X-Forwarded-Host {host}
+        header_up X-Forwarded-For {remote_host}
+    }
+
+    # Logs
+    log {
+        output file /data/caddy/access.log
+        format json
+    }
+}

@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Avatar Studio — StockWise</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --studio-bg: #070b14;
+      --studio-card: #0d1220;
+      --studio-border: #1e2940;
+      --studio-accent: #00e5a0;
+      --studio-accent-dim: rgba(0,229,160,0.15);
+      --studio-text: #e6edf3;
+      --studio-text2: #8b949e;
+      --studio-red: #f85149;
+      --studio-radius: 14px;
+    }
+    body { background: var(--studio-bg); color: var(--studio-text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+
+    .page-wrap { max-width: 1340px; margin: 0 auto; padding: 6rem 1.5rem 1.5rem; }
+    .page-header { margin-bottom: 1.5rem; }
+    .page-header h1 { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; letter-spacing: -0.5px; }
+    .page-header p { color: var(--studio-text2); font-size: 0.95rem; margin-top: 0.3rem; }
+
+    .studio-layout { display: grid; grid-template-columns: 1fr 380px; gap: 1.5rem; align-items: start; }
+
+    .preview-panel {
+      background: var(--studio-card);
+      border: 1px solid var(--studio-border);
+      border-radius: 20px;
+      padding: 2rem;
+      position: sticky; top: 1.5rem;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .preview-stage {
+      width: 100%; aspect-ratio: 3 / 4; max-height: 520px;
+      background: radial-gradient(ellipse at center, #111827 0%, #070b14 100%);
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
+      transition: transform 0.1s ease-out;
+      perspective: 800px;
+      cursor: grab;
+    }
+    .preview-stage:active { cursor: grabbing; }
+    .preview-stage-inner {
+      transition: transform 0.15s ease-out;
+      transform-style: preserve-3d;
+      display: flex; align-items: center; justify-content: center;
+      width: 240px; height: 300px;
+    }
+    .preview-stage-inner svg { width: 100%; height: 100%; }
+    .preview-name { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 700; margin-top: 1rem; }
+    .preview-sub { color: var(--studio-text2); font-size: 0.85rem; margin-top: 0.15rem; }
+
+    .preview-controls { display: flex; gap: 0.5rem; margin-top: 1.25rem; width: 100%; }
+    .preview-controls button {
+      flex: 1; padding: 0.6rem; border-radius: 10px; border: 1px solid var(--studio-border);
+      background: transparent; color: var(--studio-text); font-size: 0.82rem; cursor: pointer; transition: all 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .preview-controls button:hover { border-color: var(--studio-accent); color: var(--studio-accent); }
+    .preview-controls .primary { background: var(--studio-accent); color: #000; border-color: var(--studio-accent); font-weight: 600; }
+    .preview-controls .primary:hover { background: #00cc8f; }
+
+    .controls-panel { display: flex; flex-direction: column; gap: 0.9rem; }
+
+    .ctrl-card {
+      background: var(--studio-card);
+      border: 1px solid var(--studio-border);
+      border-radius: var(--studio-radius);
+      overflow: hidden;
+    }
+    .ctrl-header {
+      padding: 0.85rem 1.1rem;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      display: flex; align-items: center; gap: 0.5rem;
+      cursor: pointer; user-select: none;
+      transition: background 0.15s;
+    }
+    .ctrl-header:hover { background: rgba(255,255,255,0.03); }
+    .ctrl-header .arrow { margin-left: auto; transition: transform 0.2s; font-size: 0.7rem; color: var(--studio-text2); }
+    .ctrl-card.collapsed .ctrl-body { display: none; }
+    .ctrl-card.collapsed .arrow { transform: rotate(-90deg); }
+    .ctrl-body { padding: 0.1rem 1.1rem 1rem; }
+
+    .opt-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+    .opt-btn {
+      padding: 0.45rem 0.8rem; border-radius: 8px; border: 2px solid var(--studio-border);
+      background: rgba(255,255,255,0.03); color: var(--studio-text2); font-size: 0.78rem;
+      cursor: pointer; transition: all 0.15s; font-family: 'DM Sans', sans-serif;
+      display: flex; align-items: center; gap: 0.3rem;
+    }
+    .opt-btn:hover { border-color: var(--studio-accent); color: var(--studio-text); }
+    .opt-btn.active { border-color: var(--studio-accent); background: var(--studio-accent-dim); color: var(--studio-accent); }
+    .opt-btn.acc-btn { font-size: 1.1rem; padding: 0.5rem 0.65rem; }
+    .opt-btn.acc-btn .layer-badge { font-size: 0.55rem; background: var(--studio-accent-dim); color: var(--studio-accent); border-radius: 4px; padding: 0 4px; margin-left: 2px; }
+    .opt-btn.acc-btn.active { border-style: solid; }
+    .opt-btn input[type="checkbox"] { display: none; }
+
+    .swatch-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .swatch {
+      width: 32px; height: 32px; border-radius: 8px; border: 2px solid transparent;
+      cursor: pointer; transition: all 0.15s; flex-shrink: 0;
+    }
+    .swatch:hover { transform: scale(1.12); }
+    .swatch.active { border-color: #fff; transform: scale(1.12); box-shadow: 0 0 12px rgba(255,255,255,0.2); }
+
+    .color-wheel-wrap { position: relative; width: 200px; height: 200px; margin: 0 auto 0; }
+    .color-wheel-wrap canvas { width: 100%; height: 100%; border-radius: 50%; cursor: crosshair; }
+    .color-value { text-align: center; font-family: monospace; font-size: 0.85rem; color: var(--studio-text2); margin-top: 0.4rem; }
+    .color-finishes { display: flex; gap: 6px; margin-top: 0.6rem; justify-content: center; }
+
+    .bg-preview { width: 100%; height: 60px; border-radius: 8px; border: 2px solid var(--studio-border); cursor: pointer; transition: all 0.15s; }
+    .bg-preview:hover { transform: scale(1.03); }
+    .bg-preview.active { border-color: var(--studio-accent); box-shadow: 0 0 10px var(--studio-accent-dim); }
+
+    .loadout-bar { display: flex; gap: 6px; flex-wrap: wrap; }
+    .loadout-btn {
+      padding: 0.35rem 0.7rem; border-radius: 8px; border: 1px solid var(--studio-border);
+      background: transparent; color: var(--studio-text2); font-size: 0.72rem; cursor: pointer; transition: all 0.15s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .loadout-btn:hover { border-color: var(--studio-accent); color: var(--studio-text); }
+    .loadout-btn .del { margin-left: 4px; color: var(--studio-red); opacity: 0.6; }
+    .loadout-btn .del:hover { opacity: 1; }
+
+    .save-msg { text-align: center; font-size: 0.82rem; color: var(--studio-accent); min-height: 1.2rem; }
+
+    .studio-body { display: flex; gap: 1.5rem; align-items: flex-start; }
+    .studio-controls-wrap { flex: 1; min-width: 0; }
+    .studio-nav { position: sticky; top: 6rem; display: flex; flex-direction: column; gap: 6px; padding: 0.5rem 0; flex-shrink: 0; }
+    .studio-nav a {
+      display: flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 50%;
+      border: 2px solid var(--studio-border); background: transparent;
+      color: var(--studio-text2); font-size: 0.75rem; font-weight: 700;
+      text-decoration: none; transition: all 0.15s; font-family: 'Syne', sans-serif;
+    }
+    .studio-nav a:hover { border-color: var(--studio-accent); color: var(--studio-accent); }
+    .studio-nav a.active { border-color: var(--studio-accent); background: var(--studio-accent-dim); color: var(--studio-accent); }
+
+    @media (max-width: 900px) {
+      .studio-layout { grid-template-columns: 1fr; }
+      .studio-body { flex-direction: column; }
+      .studio-nav { display: none; }
+      .preview-panel { position: static; padding: 1.25rem; }
+      .preview-stage { max-height: 350px; }
+      .preview-stage-inner { width: 180px; height: 220px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-logo"><a href="../index.html" style="text-decoration:none;color:inherit">Stock<span>Wise</span></a></div>
+    <ul class="nav-links">
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="tracker.html">Tracker</a></li>
+      <li><a href="/signals" id="nav-signals">Signals</a></li>
+      <li><a href="portfolio.html">Portfolio</a></li>
+      <li><a href="community.html">Community</a></li>
+      <li><a href="avatar.html" class="active">✨ Avatar</a></li>
+      <li><a href="analyzer.html">Analyzer</a></li>
+      <li><a href="bot-trading.html">Bot Trading</a></li>
+      <li><a href="profile.html">Profile</a></li>
+      <li><a href="help.html">Help</a></li>
+    </ul>
+    <div class="nav-badge">BETA</div>
+    <div class="nav-right" id="navRight"></div>
+  </nav>
+
+  <div class="page-wrap">
+    <div class="page-header">
+      <h1>🎨 Avatar Studio</h1>
+      <p>Design your blocky character with layers, dynamic finishes, and custom loadouts.</p>
+    </div>
+
+    <div class="studio-layout">
+      <!-- ═══ PREVIEW ═══ -->
+      <div class="preview-panel">
+        <div class="preview-stage" id="previewStage">
+          <div class="preview-stage-inner" id="previewInner">
+            <div class="au-avatar" id="avatarPreview">
+              <svg viewBox="0 0 100 130"><rect x="10" y="10" width="80" height="110" rx="10" fill="#1a1a2e"/><text x="50" y="70" text-anchor="middle" fill="#555" font-size="12">Loading...</text></svg>
+            </div>
+          </div>
+        </div>
+        <div class="preview-name" id="previewName">—</div>
+        <div class="preview-sub" id="previewSub">Your brand, your style</div>
+        <div class="preview-controls">
+          <button onclick="saveAvatar()" class="primary">💾 Save</button>
+          <button onclick="exportPNG()">📥 Export</button>
+          <button onclick="resetAvatar()">↺ Reset</button>
+        </div>
+        <div class="save-msg" id="saveMsg"></div>
+      </div>
+
+      <div class="studio-body">
+      <nav class="studio-nav" id="sectionNav"></nav>
+      <!-- ═══ CONTROLS ═══ -->
+      <div class="controls-panel studio-controls-wrap">
+
+        <div class="ctrl-card" id="sec-name">
+          <div class="ctrl-header" onclick="toggleCard(this)">🏷 Display Name <span class="arrow">▼</span></div>
+          <div class="ctrl-body">
+            <input id="avName" type="text" placeholder="Your avatar name" maxlength="36"
+              style="width:100%;padding:0.6rem 0.9rem;border-radius:8px;border:1px solid var(--studio-border);background:rgba(0,0,0,0.3);color:var(--studio-text);font-size:0.9rem;outline:none;font-family:'DM Sans',sans-serif"
+              oninput="updatePreview()">
+          </div>
+        </div>
+
+        <div class="ctrl-card" id="sec-presets">
+          <div class="ctrl-header" onclick="toggleCard(this)">👾 Quick Presets <span class="arrow">▼</span></div>
+          <div class="ctrl-body">
+            <div class="opt-grid" id="presetGrid"></div>
+          </div>
+        </div>
+
+        <div class="ctrl-card" id="sec-face">
+          <div class="ctrl-header" onclick="toggleCard(this)">😊 Face <span class="arrow">▼</span></div>
+          <div class="ctrl-body">
+            <div class="opt-grid" id="faceGrid"></div>
+          </div>
+        </div>
+
+        <div class="ctrl-card" id="sec-color">
+          <div class="ctrl-header" onclick="toggleCard(this)">🎨 Color & Finish <span class="arrow">▼</span></div>
+          <div class="ctrl-body">
+            <div class="color-wheel-wrap">
+              <canvas id="colorWheel" width="200" height="200"></canvas>
+            </div>
+            <div class="color-value"><span id="colorHex">#00e5a0</span></div>
+            <div class="swatch-row" id="swatchGrid"></div>
+            <div class="color-finishes">
+              <button class="opt-btn active" data-finish="solid" onclick="pickFinish('solid')">Solid</button>
+              <button class="opt-btn" data-finish="gradient" onclick="pickFinish('gradient')">Gradient</button>
+              <button class="opt-btn" data-finish="metallic" onclick="pickFinish('metallic')">Metallic</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="ctrl-card" id="sec-texture">
+          <div class="ctrl-header" onclick="toggleCard(this)">🔣 Texture <span class="arrow">▼</span></div>
+          <div class="ctrl-body">
+            <div class="opt-grid" id="textureGrid"></div>
+          </div>
+        </div>
+
+        <div class="ctrl-card" id="sec-accessories">
+          <div class="ctrl-header" onclick="toggleCard(this)">👑 Accessories <span class="arrow">▼</span></div>
+          <div class="ctrl-body">
+            <p style="font-size:0.72rem;color:var(--studio-text2);margin-bottom:0.5rem">Click to toggle. Wear multiple at once.</p>
+            <div class="opt-grid" id="accessoryGrid"></div>
+          </div>
+        </div>
+
+        <div class="ctrl-card" id="sec-glow">
+          <div class="ctrl-header" onclick="toggleCard(this)">⚡ Glow <span class="arrow">▼</span></div>
+          <div class="ctrl-body">
+            <div class="opt-grid" id="energyGrid"></div>
+          </div>
+        </div>
+
+        <div class="ctrl-card" id="sec-bg">
+          <div class="ctrl-header" onclick="toggleCard(this)">🌌 Background <span class="arrow">▼</span></div>
+          <div class="ctrl-body">
+            <div class="opt-grid" id="bgGrid"></div>
+          </div>
+        </div>
+
+        <div class="ctrl-card" id="sec-loadouts">
+          <div class="ctrl-header" onclick="toggleCard(this)">💾 Loadouts <span class="arrow">▼</span></div>
+          <div class="ctrl-body">
+            <div class="loadout-bar" id="loadoutBar"></div>
+            <div style="display:flex;gap:6px;margin-top:0.5rem">
+              <input id="loadoutName" type="text" placeholder="Loadout name" maxlength="20"
+                style="flex:1;padding:0.4rem 0.7rem;border-radius:6px;border:1px solid var(--studio-border);background:rgba(0,0,0,0.3);color:var(--studio-text);font-size:0.8rem;outline:none">
+              <button class="opt-btn" onclick="saveLoadout()">Save</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      </div>
+    </div>
+  </div>
+
+  <script defer src="../js/main.js"></script>
+  <script nonce="__NONCE__">
+  /* ═══════════════════════════════════════════
+     AVATAR STATE
+  ═══════════════════════════════════════════ */
+  let _csrf = '';
+  let _avatar = {
+    name: '', bg_color: '#00e5a0', finish: 'solid',
+    texture: 'solid', accessories: [], energy: 'none', background: 'deep', face: 'happy'
+  };
+  const ALL_ACC_IDS = ['none','crown','halo','headband','glasses','cap','bow','emerald'];
+  const _ENERGIES = { neon:'0 0 18px VAR', glow:'0 0 30px VAR, 0 0 60px VAR', fire:'0 0 22px #ff6b35, 0 0 44px #ff4757', ice:'0 0 22px #00bfff, 0 0 44px #1e90ff', none:'transparent' };
+
+  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function auGlow(e,c) { return (_ENERGIES[e]||_ENERGIES.none).replace(/VAR/g,c); }
+  function dark(c,a) { var r=parseInt(c.slice(1),16),rr=r>>16&255,gg=r>>8&255,bb=r&255; return 'rgba('+rr+','+gg+','+bb+','+a+')'; }
+  function shade(c,f) {
+    var r=parseInt(c.slice(1),16),rr=r>>16&255,gg=r>>8&255,bb=r&255;
+    return 'rgb('+Math.round(rr*f)+','+Math.round(gg*f)+','+Math.round(bb*f)+')';
+  }
+  function tDefs(tx,c) {
+    if (tx === 'solid') return '';
+    var id = tx+c.replace(/#/g,''), dark = shade(c,0.45), mid = shade(c,0.7);
+    if (tx === 'radial') return '<radialGradient id="'+id+'"><stop offset="0%" stop-color="'+c+'"/><stop offset="70%" stop-color="'+mid+'"/><stop offset="100%" stop-color="'+dark+'"/></radialGradient>';
+    if (tx === 'diagonal') return '<pattern id="'+id+'" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="'+c+'"/><rect width="4" height="8" fill="'+dark+'"/></pattern>';
+    if (tx === 'stripes') return '<pattern id="'+id+'" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="6" height="6" fill="'+c+'"/><rect width="6" height="3" fill="'+dark+'"/></pattern>';
+    if (tx === 'dots') return '<pattern id="'+id+'" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="8" height="8" fill="'+c+'"/><circle cx="4" cy="4" r="1.5" fill="'+dark+'"/></pattern>';
+    return '';
+  }
+  function tFill(tx,c) { return tx === 'solid' ? c : 'url(#'+tx+c.replace(/#/g,'')+')'; }
+  function auxSvg(fn, id, c) { return '<'+fn+' id="'+id+'"><stop offset="0%" stop-color="'+c+'"/><stop offset="100%" stop-color="'+shade(c,0.5)+'"/></'+fn+'>'; }
+  function auSvg(u,a) {
+    var hc = a.bg_color && a.bg_color !== 'transparent' ? a.bg_color : '#f0d0a0', bc = '#3a7bd5', lc = '#4a4a6a';
+    var en = a.energy || 'none', tx = a.texture || 'solid', fn = a.finish || 'solid';
+    var ch = u ? (u[0]||'').toUpperCase() : '', fc = a.face || 'happy', fs = '';
+    if (fc === 'happy') fs = '<rect x="36" y="34" width="8" height="8" rx="2" fill="#222"/><rect x="56" y="34" width="8" height="8" rx="2" fill="#222"/><path d="M38 50 Q50 56 62 50" fill="none" stroke="#222" stroke-width="4" stroke-linecap="round"/>';
+    else if (fc === 'cool') fs = '<rect x="36" y="35" width="10" height="5" rx="1" fill="#222"/><rect x="54" y="35" width="10" height="5" rx="1" fill="#222"/><path d="M38 52 Q50 50 62 52" fill="none" stroke="#222" stroke-width="3" stroke-linecap="round"/>';
+    else if (fc === 'wink') fs = '<rect x="36" y="34" width="8" height="8" rx="2" fill="#222"/><path d="M56 35 Q62 38 56 41" fill="none" stroke="#222" stroke-width="3"/><path d="M38 50 Q50 56 62 50" fill="none" stroke="#222" stroke-width="4" stroke-linecap="round"/>';
+    else if (fc === 'serious') fs = '<rect x="36" y="36" width="8" height="6" rx="1" fill="#222"/><rect x="56" y="36" width="8" height="6" rx="1" fill="#222"/><rect x="40" y="52" width="20" height="3" rx="1" fill="#222"/>';
+    else if (fc === 'grin') fs = '<rect x="36" y="34" width="8" height="8" rx="2" fill="#222"/><rect x="56" y="34" width="8" height="8" rx="2" fill="#222"/><path d="M36 52 Q50 62 64 52" fill="none" stroke="#222" stroke-width="4" stroke-linecap="round"/>';
+    else fs = '<rect x="36" y="34" width="8" height="8" rx="2" fill="#222"/><rect x="56" y="34" width="8" height="8" rx="2" fill="#222"/><path d="M38 50 Q50 56 62 50" fill="none" stroke="#222" stroke-width="4" stroke-linecap="round"/>';
+    var defs = tDefs(tx, hc) + tDefs(tx, bc) + tDefs(tx, lc), hcf = tFill(tx, hc), bcf = tFill(tx, bc), lcf = tFill(tx, lc);
+    if (fn !== 'solid' && tx === 'solid') {
+      var gidH = 'g_'+fn+hc.replace(/#/g,''), gidB = 'g_'+fn+bc.replace(/#/g,''), gidL = 'g_'+fn+lc.replace(/#/g,'');
+      var tag = fn === 'gradient' ? 'linearGradient' : 'radialGradient';
+      defs += auxSvg(tag,gidH,hc)+auxSvg(tag,gidB,bc)+auxSvg(tag,gidL,lc);
+      hcf = 'url(#'+gidH+')'; bcf = 'url(#'+gidB+')'; lcf = 'url(#'+gidL+')';
+    }
+    var glf = '', glowStyle = '';
+    if (en !== 'none') {
+      var _ec = { neon:hc, glow:hc, fire:'#ff6b35', ice:'#00bfff' }, _sd = { neon:3, glow:6, fire:5, ice:5 };
+      var fc2 = _ec[en] || hc;
+      defs += '<filter id="gf" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur in="SourceAlpha" stdDeviation="'+(_sd[en]||4)+'" result="b"/><feFlood flood-color="'+fc2+'" flood-opacity="0.6" result="c"/><feComposite in="c" in2="b" operator="in" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>';
+      glf = ' filter="url(#gf)"';
+      glowStyle = ' style="--au-glow:' + auGlow(en, hc) + '"';
+    }
+    var accList = (a.accessory||'none').split(',').map(function(x){return x.trim();});
+    var accHtml = '';
+    var ACC_MAP = {
+      crown:'<polygon points="30,18 40,8 50,18 60,8 70,18" fill="#ffd700" stroke="#e6b800" stroke-width="3"/>',
+      cap:'<rect x="26" y="18" width="48" height="10" rx="3" fill="#e6392e"/><rect x="20" y="22" width="60" height="8" rx="2" fill="#e6392e"/>',
+      glasses:'<rect x="34" y="36" width="12" height="6" rx="2" fill="none" stroke="#222" stroke-width="3"/><rect x="54" y="36" width="12" height="6" rx="2" fill="none" stroke="#222" stroke-width="3"/><line x1="46" y1="39" x2="54" y2="39" stroke="#222" stroke-width="3"/>',
+      halo:'<ellipse cx="50" cy="16" rx="22" ry="5" fill="none" stroke="#fff" stroke-width="3" opacity="0.9"/>',
+      headband:'<rect x="26" y="20" width="48" height="8" rx="3" fill="#ff6b6b"/>',
+      bow:'<path d="M35 18 Q50 12 65 18 Q50 24 35 18" fill="#ff69b4"/>',
+      emerald:'<polygon points="50,10 58,20 42,20" fill="#00ff9d"/>'
+    };
+    for (var ai=0; ai<accList.length; ai++) { var aid = accList[ai]; if (ACC_MAP[aid]) accHtml += ACC_MAP[aid]; }
+    var meta = fn !== 'solid' && tx === 'solid' ? ' opacity="0.85"' : '';
+    return '<svg viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg"'+glowStyle+'><defs>'+defs+'</defs><g'+glf+meta+'><rect x="28" y="92" width="18" height="32" rx="3" fill="'+lcf+'" stroke="#555" stroke-width="3"/><rect x="54" y="92" width="18" height="32" rx="3" fill="'+lcf+'" stroke="#555" stroke-width="3"/><rect x="22" y="58" width="56" height="38" rx="5" fill="'+bcf+'" stroke="#111" stroke-width="4"/><rect x="10" y="60" width="14" height="32" rx="3" fill="'+hcf+'" stroke="#111" stroke-width="3" transform="rotate(-18 17 76)"/><rect x="76" y="60" width="14" height="32" rx="3" fill="'+hcf+'" stroke="#111" stroke-width="3" transform="rotate(18 83 76)"/><rect x="26" y="22" width="48" height="42" rx="6" fill="'+hcf+'" stroke="#111" stroke-width="4"/>'+fs+accHtml+(ch?'<text x="50" y="82" text-anchor="middle" font-size="22" font-weight="800" fill="#fff" font-family="system-ui,sans-serif">'+ch+'</text>':'')+'</g></svg>';
+  }
+
+  /* ═══════════════════════════════════════════
+     COLOR WHEEL (canvas-based)
+  ═══════════════════════════════════════════ */
+  function initColorWheel() {
+    const canvas = document.getElementById('colorWheel');
+    const ctx = canvas.getContext('2d');
+    const cx = 100, cy = 100, r = 96;
+    for (let y = 0; y < 200; y++) {
+      for (let x = 0; x < 200; x++) {
+        const dx = x - cx, dy = y - cy;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist > r) continue;
+        const hue = (Math.atan2(dy, dx) / Math.PI * 180 + 180) % 360;
+        const sat = Math.min(dist / r, 1);
+        const light = 50 + 30 * (1 - sat);
+        ctx.fillStyle = `hsl(${hue}, ${80 + sat * 20}%, ${light}%)`;
+        ctx.fillRect(x, y, 1, 1);
+      }
+    }
+    // Brightness overlay
+    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grad.addColorStop(0, 'rgba(255,255,255,0.25)');
+    grad.addColorStop(1, 'rgba(0,0,0,0.4)');
+    ctx.fillStyle = grad;
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+
+    canvas.addEventListener('click', e => {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const px = Math.round((e.clientX - rect.left) * scaleX);
+      const py = Math.round((e.clientY - rect.top) * scaleY);
+      if (px < 0 || px >= 200 || py < 0 || py >= 200) return;
+      const dx = px - cx, dy = py - cy;
+      if (Math.sqrt(dx*dx + dy*dy) > r) return;
+      const [r2, g2, b2] = ctx.getImageData(px, py, 1, 1).data;
+      const hex = '#' + [r2,g2,b2].map(v => v.toString(16).padStart(2,'0')).join('');
+      _avatar.bg_color = hex;
+      document.getElementById('colorHex').textContent = hex;
+      refreshSwatches();
+      updatePreview();
+    });
+  }
+
+  /* ═══════════════════════════════════════════
+     PRESET SWATCHES
+  ═══════════════════════════════════════════ */
+  const SWATCHES = [
+    '#00e5a0','#00bfff','#a855f7','#ff6b9d','#f59e0b','#ff4757',
+    '#22d3ee','#fb923c','#64748b','#f0d0a0','#ffd700','#ff69b4',
+    '#7b68ee','#1a1a2e','#e6392e','#00ff9d','#3a7bd5','#ffffff',
+  ];
+  function refreshSwatches() {
+    document.getElementById('swatchGrid').innerHTML = SWATCHES.map(h =>
+      `<div class="swatch ${_avatar.bg_color === h ? 'active' : ''}" style="background:${h}" onclick="pickSwatch('${h}')"></div>`
+    ).join('');
+  }
+  function pickSwatch(hex) {
+    _avatar.bg_color = hex;
+    document.getElementById('colorHex').textContent = hex;
+    refreshSwatches();
+    updatePreview();
+  }
+
+  /* ═══════════════════════════════════════════
+     FINISH (solid / gradient / metallic)
+  ═══════════════════════════════════════════ */
+  function pickFinish(f) {
+    _avatar.finish = f;
+    document.querySelectorAll('[data-finish]').forEach(b => b.classList.toggle('active', b.dataset.finish === f));
+    updatePreview();
+  }
+
+  /* ═══════════════════════════════════════════
+     ACCESSORY LAYERING
+  ═══════════════════════════════════════════ */
+  const ACC_DATA = [
+    { id: 'none', label: 'None', emoji: '—' },
+    { id: 'crown', label: 'Crown', emoji: '👑' },
+    { id: 'halo', label: 'Halo', emoji: '✨' },
+    { id: 'headband', label: 'Band', emoji: '🎧' },
+    { id: 'glasses', label: 'Glasses', emoji: '🕶️' },
+    { id: 'cap', label: 'Cap', emoji: '🧢' },
+    { id: 'bow', label: 'Bow', emoji: '🎀' },
+    { id: 'emerald', label: 'Gem', emoji: '💎' },
+  ];
+  const LAYER_ORDER = ['emerald','glasses','headband','cap','bow','crown','halo'];
+
+  function toggleAccessory(id) {
+    if (id === 'none') { _avatar.accessories = ['none']; refreshAccGrid(); updatePreview(); return; }
+    _avatar.accessories = _avatar.accessories.filter(a => a !== 'none');
+    const idx = _avatar.accessories.indexOf(id);
+    if (idx >= 0) _avatar.accessories.splice(idx, 1);
+    else _avatar.accessories.push(id);
+    if (!_avatar.accessories.length) _avatar.accessories = ['none'];
+    refreshAccGrid(); updatePreview();
+  }
+
+  function refreshAccGrid() {
+    const accSet = new Set(_avatar.accessories);
+    document.getElementById('accessoryGrid').innerHTML = ACC_DATA.map(a => {
+      const on = accSet.has(a.id);
+      const layerIdx = LAYER_ORDER.indexOf(a.id);
+      const layerLabel = layerIdx >= 0 ? `Z${layerIdx + 1}` : '';
+      return `<button class="opt-btn acc-btn ${on ? 'active' : ''}" onclick="toggleAccessory('${a.id}')">
+        ${a.emoji} ${layerLabel ? `<span class="layer-badge">${layerLabel}</span>` : ''}
+      </button>`;
+    }).join('');
+  }
+
+  /* ═══════════════════════════════════════════
+     PRESETS
+  ═══════════════════════════════════════════ */
+  const PRESETS = [
+    { name: 'Noob',    color: '#f0d0a0', acc: ['none'],       face: 'happy' },
+    { name: 'Cool Kid',color: '#00bfff', acc: ['cap'],        face: 'cool' },
+    { name: 'King',    color: '#ffd700', acc: ['crown'],      face: 'grin' },
+    { name: 'Ninja',   color: '#1a1a2e', acc: ['headband'],   face: 'serious' },
+    { name: 'Rich',    color: '#00e5a0', acc: ['emerald'],    face: 'wink' },
+    { name: 'Cute',    color: '#ff69b4', acc: ['bow'],        face: 'happy' },
+    { name: 'Skater',  color: '#ff6b6b', acc: ['cap','glasses'],face: 'wink' },
+    { name: 'Wizard',  color: '#7b68ee', acc: ['halo','glasses'],face: 'serious' },
+  ];
+  function buildPresetGrid() {
+    document.getElementById('presetGrid').innerHTML = PRESETS.map((p,i) =>
+      `<button class="opt-btn" onclick="loadPreset(${i})" style="font-size:0.75rem">${p.name}</button>`
+    ).join('');
+  }
+  function loadPreset(i) {
+    const p = PRESETS[i];
+    _avatar.bg_color = p.color;
+    _avatar.accessories = [...p.acc];
+    _avatar.face = p.face;
+    _avatar.finish = 'solid';
+    _avatar.texture = 'solid';
+    _avatar.energy = 'none';
+    _avatar.background = 'deep';
+    document.getElementById('colorHex').textContent = p.color;
+    refreshSwatches();
+    refreshAccGrid();
+    refreshFaceGrid();
+    refreshTextureGrid();
+    refreshEnergyGrid();
+    refreshBgGrid();
+    document.querySelectorAll('[data-finish]').forEach(b => b.classList.toggle('active', b.dataset.finish === 'solid'));
+    updatePreview();
+  }
+
+  /* ═══════════════════════════════════════════
+     FACE
+  ═══════════════════════════════════════════ */
+  const FACES = ['happy','cool','wink','serious','grin'];
+  const FACE_EMOJI = { happy:'😊', cool:'😎', wink:'😉', serious:'😐', grin:'😄' };
+  function buildFaceGrid() {
+    document.getElementById('faceGrid').innerHTML = FACES.map(f =>
+      `<button class="opt-btn ${_avatar.face === f ? 'active' : ''}" onclick="pickFace('${f}')" style="font-size:1.1rem">${FACE_EMOJI[f]}</button>`
+    ).join('');
+  }
+  function pickFace(f) { _avatar.face = f; refreshFaceGrid(); updatePreview(); }
+  function refreshFaceGrid() {
+    document.querySelectorAll('#faceGrid .opt-btn').forEach((b,i) => b.classList.toggle('active', FACES[i] === _avatar.face));
+  }
+
+  /* ═══════════════════════════════════════════
+     TEXTURE
+  ═══════════════════════════════════════════ */
+  const TEXTURES = ['solid','radial','diagonal','stripes','dots'];
+  function buildTextureGrid() {
+    document.getElementById('textureGrid').innerHTML = TEXTURES.map(t =>
+      `<button class="opt-btn ${_avatar.texture === t ? 'active' : ''}" onclick="pickTexture('${t}')">${t}</button>`
+    ).join('');
+  }
+  function pickTexture(t) { _avatar.texture = t; refreshTextureGrid(); updatePreview(); }
+  function refreshTextureGrid() {
+    document.querySelectorAll('#textureGrid .opt-btn').forEach((b,i) => b.classList.toggle('active', TEXTURES[i] === _avatar.texture));
+  }
+
+  /* ═══════════════════════════════════════════
+     ENERGY / GLOW
+  ═══════════════════════════════════════════ */
+  const ENERGIES = [
+    { id:'none', label:'None' }, { id:'neon', label:'Neon' }, { id:'glow', label:'Glow' },
+    { id:'fire', label:'Fire' }, { id:'ice', label:'Ice' },
+  ];
+  function buildEnergyGrid() {
+    document.getElementById('energyGrid').innerHTML = ENERGIES.map(e =>
+      `<button class="opt-btn ${_avatar.energy === e.id ? 'active' : ''}" onclick="pickEnergy('${e.id}')">${e.label}</button>`
+    ).join('');
+  }
+  function pickEnergy(id) { _avatar.energy = id; refreshEnergyGrid(); updatePreview(); }
+  function refreshEnergyGrid() {
+    document.querySelectorAll('#energyGrid .opt-btn').forEach((b,i) => b.classList.toggle('active', ENERGIES[i].id === _avatar.energy));
+  }
+
+  /* ═══════════════════════════════════════════
+     BACKGROUNDS (animated)
+  ═══════════════════════════════════════════ */
+  const BGS = [
+    { id:'deep',   name:'Deep Space',  css:'radial-gradient(ellipse at center, #1a1a2e 0%, #0d0d1a 100%)' },
+    { id:'ocean',  name:'Ocean',       css:'radial-gradient(ellipse at bottom, #0f2027 0%, #203a43 50%, #2c5364 100%)' },
+    { id:'sunset', name:'Sunset',      css:'radial-gradient(ellipse at top, #1a0a2e, #3d1a00)' },
+    { id:'forest', name:'Forest',      css:'radial-gradient(ellipse at bottom, #0d1f0d 0%, #0a1a0a 100%)' },
+    { id:'aurora', name:'Aurora',      css:'radial-gradient(ellipse at top, #0d1a2e 0%, #0a0f1e 100%)' },
+    { id:'matrix', name:'Matrix',      css:'linear-gradient(135deg, #003300, #000000)' },
+    { id:'cyber',  name:'Cyberpunk',   css:'linear-gradient(135deg, #ff0066 0%, #0d0d1a 50%, #00e5a0 100%)' },
+  ];
+  function buildBgGrid() {
+    document.getElementById('bgGrid').innerHTML = BGS.map(b =>
+      `<div class="bg-preview ${_avatar.background === b.id ? 'active' : ''}" style="background:${b.css}" onclick="pickBg('${b.id}')" title="${b.name}"></div>`
+    ).join('');
+  }
+  function pickBg(id) { _avatar.background = id; refreshBgGrid(); updatePreview(); }
+  function refreshBgGrid() {
+    document.querySelectorAll('#bgGrid .bg-preview').forEach((el,i) => el.classList.toggle('active', BGS[i].id === _avatar.background));
+  }
+
+  /* ═══════════════════════════════════════════
+     LIVE PREVIEW (3D tilt + SVG render)
+  ═══════════════════════════════════════════ */
+  function updatePreview() {
+    const name = document.getElementById('avName').value.trim();
+    _avatar.name = name;
+    const el = document.getElementById('avatarPreview');
+    const accStr = _avatar.accessories.includes('none') ? 'none' : _avatar.accessories.join(',');
+    const uname = name || (window.stockwise?.currentUser()?.username || 'A');
+    el.innerHTML = auSvg(uname, {
+      bg_color: _avatar.bg_color,
+      finish: _avatar.finish,
+      texture: _avatar.texture,
+      accessory: accStr,
+      energy: _avatar.energy,
+      face: _avatar.face,
+    });
+    document.getElementById('previewName').textContent = name || (window.stockwise?.currentUser()?.username || '—');
+    const stage = document.querySelector('.preview-stage');
+    stage.style.background = (BGS.find(b => b.id === _avatar.background) || BGS[0]).css;
+    document.getElementById('saveMsg').textContent = '';
+  }
+
+  /* ═══ 3D Tilt on Mouse Move ═══ */
+  (function initTilt() {
+    const stage = document.getElementById('previewStage');
+    const inner = document.getElementById('previewInner');
+    stage.addEventListener('mousemove', e => {
+      const rect = stage.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width - 0.5;
+      const y = (e.clientY - rect.top) / rect.height - 0.5;
+      inner.style.transform = `rotateY(${x * 20}deg) rotateX(${-y * 20}deg)`;
+    });
+    stage.addEventListener('mouseleave', () => {
+      inner.style.transform = 'rotateY(0deg) rotateX(0deg)';
+    });
+  })();
+
+  /* ═══════════════════════════════════════════
+     SAVE
+  ═══════════════════════════════════════════ */
+  async function saveAvatar() {
+    const msg = document.getElementById('saveMsg');
+    _avatar.name = document.getElementById('avName').value.trim();
+    const accStr = _avatar.accessories && _avatar.accessories.includes('none') ? 'none' : (_avatar.accessories||[]).join(',');
+    try {
+      const hdrs = { 'Content-Type': 'application/json' };
+      if (_csrf) hdrs['X-CSRF-Token'] = _csrf;
+      const res = await fetch('/api/avatar', {
+        method: 'PUT', credentials: 'include',
+        headers: hdrs,
+        body: JSON.stringify({
+          name: _avatar.name, bg_color: _avatar.bg_color,
+          texture: _avatar.texture, accessory: accStr, energy: _avatar.energy,
+          finish: _avatar.finish, face: _avatar.face, background: _avatar.background,
+        })
+      });
+      const d = await res.json();
+      msg.textContent = d.success ? '✓ Saved!' : (d.error || 'Error');
+      if (d.success && window.stockwise?.makeAuthFresh) window.stockwise.makeAuthFresh();
+    } catch(e) { msg.textContent = e.message ? 'Error: ' + e.message : 'Network error'; }
+  }
+
+  /* ═══════════════════════════════════════════
+     EXPORT PNG
+  ═══════════════════════════════════════════ */
+  function exportPNG() {
+    const svgEl = document.querySelector('#avatarPreview svg');
+    if (!svgEl) return;
+    const clone = svgEl.cloneNode(true);
+    clone.setAttribute('width', '400');
+    clone.setAttribute('height', '520');
+    const svgData = new XMLSerializer().serializeToString(clone);
+    const canvas = document.createElement('canvas');
+    canvas.width = 400; canvas.height = 520;
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    img.onload = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(url);
+      const link = document.createElement('a');
+      link.download = `avatar-${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    };
+    img.onerror = function() { URL.revokeObjectURL(url); };
+    img.src = url;
+  }
+
+  /* ═══════════════════════════════════════════
+     RESET
+  ═══════════════════════════════════════════ */
+  function resetAvatar() {
+    _avatar = { name:'', bg_color:'#00e5a0', finish:'solid', texture:'solid', accessories:['none'], energy:'none', background:'deep', face:'happy' };
+    document.getElementById('avName').value = '';
+    document.getElementById('colorHex').textContent = '#00e5a0';
+    refreshSwatches(); refreshAccGrid(); refreshFaceGrid(); refreshTextureGrid();
+    refreshEnergyGrid(); refreshBgGrid();
+    document.querySelectorAll('[data-finish]').forEach(b => b.classList.toggle('active', b.dataset.finish === 'solid'));
+    updatePreview();
+  }
+
+  /* ═══════════════════════════════════════════
+     LOADOUTS (localStorage)
+  ═══════════════════════════════════════════ */
+  function getLoadouts() {
+    try { return JSON.parse(localStorage.getItem('sw_avatar_loadouts') || '{}'); } catch { return {}; }
+  }
+  function setLoadouts(l) { localStorage.setItem('sw_avatar_loadouts', JSON.stringify(l)); }
+
+  function saveLoadout() {
+    const name = document.getElementById('loadoutName').value.trim();
+    if (!name) return;
+    const l = getLoadouts();
+    l[name] = { ..._avatar, savedAt: Date.now() };
+    setLoadouts(l);
+    document.getElementById('loadoutName').value = '';
+    renderLoadouts();
+    document.getElementById('saveMsg').textContent = '✓ Loadout saved';
+  }
+
+  function loadLoadout(name) {
+    const l = getLoadouts();
+    const data = l[name];
+    if (!data) return;
+    Object.assign(_avatar, data);
+    document.getElementById('avName').value = data.name || '';
+    document.getElementById('colorHex').textContent = data.bg_color;
+    refreshSwatches(); refreshAccGrid(); refreshFaceGrid(); refreshTextureGrid();
+    refreshEnergyGrid(); refreshBgGrid();
+    document.querySelectorAll('[data-finish]').forEach(b => b.classList.toggle('active', b.dataset.finish === data.finish || (!b.dataset.finish && data.finish === 'solid')));
+    updatePreview();
+  }
+
+  function deleteLoadout(name) {
+    const l = getLoadouts();
+    delete l[name];
+    setLoadouts(l);
+    renderLoadouts();
+  }
+
+  function renderLoadouts() {
+    const l = getLoadouts();
+    const keys = Object.keys(l);
+    document.getElementById('loadoutBar').innerHTML = keys.length
+      ? keys.map(k =>
+          `<span class="loadout-btn" onclick="loadLoadout('${esc(k)}')">
+            ${esc(k)}
+            <span class="del" onclick="event.stopPropagation();deleteLoadout('${esc(k)}')">✕</span>
+          </span>`
+        ).join('')
+      : '<span style="color:var(--studio-text2);font-size:0.78rem">No saved loadouts yet</span>';
+  }
+
+  /* ═══════════════════════════════════════════
+     CARD COLLAPSE
+  ═══════════════════════════════════════════ */
+  function toggleCard(header) {
+    header.parentElement.classList.toggle('collapsed');
+  }
+
+  /* ═══════════════════════════════════════════
+     SECTION NAV
+  ═══════════════════════════════════════════ */
+  function buildSectionNav() {
+    const nav = document.getElementById('sectionNav');
+    if (!nav) return;
+    const sections = document.querySelectorAll('.ctrl-card[id]');
+    nav.innerHTML = '';
+    sections.forEach((s, i) => {
+      const a = document.createElement('a');
+      a.href = '#' + s.id;
+      a.textContent = i + 1;
+      a.title = s.querySelector('.ctrl-header')?.textContent?.trim() || s.id;
+      a.onclick = function(e) {
+        e.preventDefault();
+        s.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        nav.querySelectorAll('a').forEach(x => x.classList.remove('active'));
+        a.classList.add('active');
+      };
+      nav.appendChild(a);
+    });
+    const onScroll = function() {
+      let active = sections[0];
+      sections.forEach(s => {
+        const r = s.getBoundingClientRect();
+        if (r.top <= 200) active = s;
+      });
+      nav.querySelectorAll('a').forEach(a => a.classList.toggle('active', a.hash === '#' + active.id));
+    };
+    window.addEventListener('scroll', onScroll);
+    onScroll();
+  }
+
+  /* ═══════════════════════════════════════════
+     INIT
+  ═══════════════════════════════════════════ */
+  async function init() {
+    initColorWheel();
+    refreshSwatches();
+    buildPresetGrid();
+    buildFaceGrid();
+    buildTextureGrid();
+    refreshAccGrid();
+    buildEnergyGrid();
+    buildBgGrid();
+    renderLoadouts();
+    buildSectionNav();
+
+    let user = window.stockwise?.currentUser();
+    try {
+      const res = await fetch('/api/me', { credentials: 'include' });
+      const data = await res.json();
+      if (data.csrfToken) _csrf = data.csrfToken;
+      if (!user && data.loggedIn && data.username) {
+        if (!window.stockwise) window.stockwise = {};
+        window.stockwise.currentUser = function() { return data; };
+        user = data;
+      }
+    } catch {}
+    if (!user) {
+      resetAvatar();
+      openAuth('login');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/avatar', { credentials: 'include' });
+      const d = await res.json();
+      if (d && typeof d.bg_color !== 'undefined') {
+        _avatar.bg_color = d.bg_color || '#00e5a0';
+        _avatar.texture = d.texture || 'solid';
+        _avatar.energy = d.energy || 'none';
+        _avatar.name = d.name || '';
+        _avatar.finish = d.finish || 'solid';
+        _avatar.face = d.face || 'happy';
+        _avatar.background = d.background || 'deep';
+        const accRaw = d.accessory || 'none';
+        _avatar.accessories = accRaw.includes(',') ? accRaw.split(',') : [accRaw];
+        document.getElementById('avName').value = _avatar.name;
+        document.getElementById('colorHex').textContent = _avatar.bg_color;
+        refreshSwatches();
+        refreshAccGrid();
+        refreshFaceGrid();
+        refreshTextureGrid();
+        refreshEnergyGrid();
+        refreshBgGrid();
+        document.querySelectorAll('[data-finish]').forEach(b => b.classList.toggle('active', b.dataset.finish === (_avatar.finish || 'solid')));
+        updatePreview();
+      }
+    } catch {}
+
+    updatePreview();
+  }
+
+  window.addEventListener('auth-changed', () => {
+    if (window.stockwise?.currentUser()) {
+      init();
+    }
+  });
+
+  /* ═══════════════════════════════════════════
+     AUTH HELPERS (from original)
+  ═══════════════════════════════════════════ */
+  function openAuth(tab) {
+    const m = document.getElementById('authModal');
+    if (!m) return;
+    m.classList.add('open');
+    switchTabModal(tab);
+  }
+  function closeAuth() { document.getElementById('authModal')?.classList.remove('open'); }
+  function switchTabModal(tab) {
+    document.querySelectorAll('#authModal .modal-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+    document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+    document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+    document.getElementById('authError').textContent = '';
+  }
+  async function doLogin(e) {
+    e.preventDefault();
+    const res = await fetch('/api/login', {method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('loginEmail').value,password:document.getElementById('loginPass').value})});
+    const d = await res.json();
+    if (d.error) { document.getElementById('authError').textContent = d.error; return; }
+    closeAuth();
+    await window.stockwise?.makeAuthFresh?.();
+    init();
+  }
+  async function doRegister(e) {
+    e.preventDefault();
+    const res = await fetch('/api/register', {method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:document.getElementById('regUsername').value,email:document.getElementById('regEmail').value,password:document.getElementById('regPass').value})});
+    const d = await res.json();
+    if (d.error) { document.getElementById('authError').textContent = d.error; return; }
+    closeAuth();
+    await window.stockwise?.makeAuthFresh?.();
+    init();
+  }
+
+  init();
+  </script>
+  <!-- AUTH MODAL -->
+  <div class="modal-backdrop" id="authModal" onclick="if(event.target===this)closeAuth()">
+    <div class="modal">
+      <button class="modal-close" onclick="closeAuth()">×</button>
+      <h2>Welcome to <span style="color:var(--accent)">StockWise</span></h2>
+      <p class="modal-sub">Create your avatar before you start.</p>
+      <div class="modal-tabs">
+        <button class="modal-tab active" data-tab="login" onclick="switchTabModal('login')">Login</button>
+        <button class="modal-tab" data-tab="register" onclick="switchTabModal('register')">Create Account</button>
+      </div>
+      <div id="loginForm">
+        <form onsubmit="doLogin(event)">
+          <div class="form-group"><label>Email</label><input type="email" id="loginEmail" placeholder="you@example.com" required></div>
+          <div class="form-group"><label>Password</label><div class="password-wrap"><input type="password" id="loginPass" placeholder="••••••••" required><button type="button" class="toggle-pw" onclick="toggleLoginPw(this)" tabindex="-1" title="Show/hide password">👁</button></div></div>
+          <div class="form-group" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.95rem">
+            <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.88rem;color:var(--text2)"><input type="checkbox" id="rememberLogin" onchange="toggleRemember(this)"> Remember me</label>
+            <button type="button" class="link-btn" onclick="openForgotPassword()" style="font-size:0.82rem">Forgot password?</button>
+          </div>
+          <button type="submit" class="btn-full">Login →</button>
+          <div class="auth-footer">Don't have an account? <button type="button" class="link-btn" onclick="switchTabModal('register')">Create account</button></div>
+        </form>
+      </div>
+      <div id="registerForm" style="display:none">
+        <form onsubmit="doRegister(event)">
+          <div class="form-group"><label>Username</label><input type="text" id="regUsername" placeholder="traderpro123" required></div>
+          <div class="form-group"><label>Email</label><input type="email" id="regEmail" placeholder="you@example.com" required></div>
+          <div class="form-group"><label>Password</label><div class="password-wrap"><input type="password" id="regPass" placeholder="Min 6 characters" minlength="6" required oninput="onPasswordInput()"><button type="button" class="toggle-pw" onclick="toggleRegPw(this)" tabindex="-1" title="Show/hide password">👁</button></div><div class="pw-strength-checklist" id="pwChecklist"><div class="pw-rule" data-rule="length"><span class="pw-icon">○</span> 8+ characters</div><div class="pw-rule" data-rule="upper"><span class="pw-icon">○</span> Uppercase letter</div><div class="pw-rule" data-rule="lower"><span class="pw-icon">○</span> Lowercase letter</div><div class="pw-rule" data-rule="number"><span class="pw-icon">○</span> Number (0-9)</div><div class="pw-rule" data-rule="special"><span class="pw-icon">○</span> Special character (!@#$%^&amp;*)</div></div><div class="pw-strength-bar-wrap"><div class="pw-strength-bar" id="pwStrengthBar"></div></div><div class="pw-suggest-wrap"><button type="button" class="pw-suggest-btn" onclick="suggestPassword()">✨ Suggest strong password</button></div></div>
+          <div class="form-group remember-row"><input type="checkbox" id="rememberRegister"><label for="rememberRegister">Remember me</label></div>
+          <button type="submit" class="btn-full">Create Account →</button>
+          <div class="auth-footer">Already have an account? <button type="button" class="link-btn" onclick="switchTabModal('login')">Login</button></div>
+        </form>
+      </div>
+      <p class="error-msg" id="authError"></p>
+    </div>
+  </div>
+</body>
+</html>

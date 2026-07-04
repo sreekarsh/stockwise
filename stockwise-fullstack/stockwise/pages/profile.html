@@ -1,0 +1,2124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Profile — StockWise</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    /* ─── PROFILE MODERN REDESIGN ─────────────────── */
+
+    .profile-layout {
+      display: flex;
+      min-height: 100vh;
+      background: var(--bg);
+    }
+
+    /* ── SIDEBAR ─────────────────────────────── */
+    .profile-sidebar {
+      width: 260px;
+      background: linear-gradient(180deg, var(--bg2) 0%, #0b1120 100%);
+      border-right: 1px solid rgba(255,255,255,0.06);
+      padding: 2rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 1100;
+      backdrop-filter: blur(24px);
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .sidebar-logo {
+      font-family: 'Syne',sans-serif; font-weight: 800; font-size: 1.35rem;
+      text-align: center; margin-bottom: 0.5rem;
+      letter-spacing: -0.5px;
+    }
+    .sidebar-logo span { color: var(--accent); }
+
+    /* User Card — Modern Glass Style */
+    .sidebar-user {
+      background: rgba(255,255,255,0.035);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px;
+      padding: 1.5rem 1.1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.85rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .sidebar-user::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 80px;
+      border-radius: 24px 24px 0 0;
+      background: linear-gradient(180deg, rgba(0,229,160,0.08) 0%, transparent 100%);
+      pointer-events: none;
+    }
+    .profile-av-wrap {
+      position: relative;
+      display: inline-flex;
+      flex-shrink: 0;
+    }
+    .profile-av-wrap::after {
+      content: '';
+      position: absolute; inset: -4px;
+      border-radius: 50%;
+      background: conic-gradient(from 220deg, var(--accent), var(--accent2), #a78bfa, var(--accent));
+      z-index: -1;
+      opacity: 0.6;
+      animation: ringPulse 4s ease-in-out infinite;
+    }
+    @keyframes ringPulse {
+      0%,100% { opacity: 0.3; transform: scale(1); }
+      50%      { opacity: 0.6; transform: scale(1.04); }
+    }
+    #profileAvatar {
+      display: block;
+      width: 80px; height: 80px;
+      border-radius: 50% !important;
+      border: 3px solid rgba(255,255,255,0.1);
+    }
+    .profile-badge {
+      position: absolute; bottom: -2px; right: -2px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #000;
+      font-size: 0.56rem; font-weight: 800; font-family: 'Syne',sans-serif;
+      padding: 0.18rem 0.5rem; border-radius: 20px; letter-spacing: 0.5px;
+      box-shadow: 0 2px 8px rgba(0,229,160,0.3);
+    }
+
+    .user-info { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 0.25rem; }
+    .user-info h2 {
+      font-family: 'Syne',sans-serif; font-size: 1rem; font-weight: 800;
+      margin: 0; letter-spacing: -0.3px; text-align: center;
+    }
+    .user-info p {
+      font-size: 0.74rem; color: var(--text2); margin: 0;
+      word-break: break-all;
+      max-width: none;
+    }
+
+    /* Status pills */
+    .status-pills {
+      display: flex; gap: 0.35rem; flex-wrap: wrap; justify-content: center; position: relative; z-index: 1;
+    }
+    .badge-verified, .badge-pro {
+      display: inline-flex; align-items: center; gap: 0.25rem;
+      font-size: 0.62rem; font-weight: 700;
+      padding: 0.18rem 0.55rem; border-radius: 20px;
+      letter-spacing: 0.4px;
+    }
+    .badge-verified {
+      background: rgba(0,229,160,0.12);
+      color: var(--accent);
+      border: 1px solid rgba(0,229,160,0.2);
+    }
+    .badge-pro {
+      background: rgba(168,85,247,0.12);
+      color: #a78bfa;
+      border: 1px solid rgba(168,85,247,0.2);
+    }
+
+    /* Navigation */
+    .sidebar-nav { display: flex; flex-direction: column; gap: 0.25rem; flex: 1; }
+    .sidebar-section-label {
+      font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1.3px;
+      color: var(--text2); font-weight: 700; margin: 0.75rem 0 0.25rem 0.75rem;
+      opacity: 0.6;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 0.7rem;
+      padding: 0.65rem 0.9rem;
+      border-radius: 14px;
+      background: transparent;
+      border: 1px solid transparent;
+      color: rgba(255,255,255,0.55);
+      font-family: 'DM Sans',sans-serif;
+      font-size: 0.87rem; font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+      text-align: left;
+      position: relative;
+    }
+    .nav-item .icon {
+      font-size: 1.05rem; flex-shrink: 0;
+      transition: transform 0.2s;
+    }
+    .nav-item:hover {
+      background: rgba(255,255,255,0.045);
+      color: var(--text);
+      border-color: rgba(255,255,255,0.06);
+    }
+    .nav-item:hover .icon { transform: scale(1.15); }
+    .nav-item.active {
+      background: rgba(0,229,160,0.09);
+      border-color: rgba(0,229,160,0.2);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .nav-item.active .icon { filter: drop-shadow(0 0 5px var(--accent)); }
+    .nav-item.logout { color: rgba(255,71,87,0.65); margin-top: auto; }
+    .nav-item.logout:hover {
+      background: rgba(255,71,87,0.08);
+      color: var(--red);
+      border-color: rgba(255,71,87,0.15);
+    }
+
+    /* ── MAIN ── */
+    .profile-main {
+      flex: 1;
+      margin-left: 290px;
+      margin-right: auto;
+      padding: 4rem 4rem 4rem;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      background:
+        radial-gradient(ellipse at top right, rgba(0,229,160,0.035) 0%, transparent 55%),
+        radial-gradient(ellipse at bottom left, rgba(0,191,255,0.02) 0%, transparent 55%);
+      max-width: 960px;
+    }
+    .profile-header-top { margin-bottom: 0.5rem; }
+    .profile-header-top h1 {
+      font-family: 'Syne',sans-serif; font-size: clamp(2rem,4vw,2.6rem);
+      font-weight: 800; letter-spacing: -1.5px; margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--text) 30%, var(--accent));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .profile-header-top p {
+      color: var(--text2); font-size: 0.95rem; line-height: 1.6; max-width: 560px;
+    }
+
+    /* Settings Card — Glassmorphism */
+    .settings-card {
+      display: none;
+      background: rgba(255,255,255,0.032);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 28px;
+      padding: 2.75rem 3rem;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.04) inset,
+        0 24px 64px rgba(0,0,0,0.18);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      animation: slideFadeIn 0.45s cubic-bezier(0.4,0,0.2,1) forwards;
+      max-width: 820px;
+      margin: 0 auto;
+    }
+    .settings-card.active { display: block; }
+    @keyframes slideFadeIn {
+      from { opacity: 0; transform: translateY(18px) scale(0.995); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .section-title h2 {
+      font-family: 'Syne',sans-serif; font-size: 1.2rem; font-weight: 700;
+      margin-bottom: 0.35rem;
+      letter-spacing: -0.3px;
+    }
+    .section-title p { color: var(--text2); font-size: 0.85rem; line-height: 1.55; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem; margin-top: 1.75rem;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-group label {
+      font-size: 0.77rem; color: var(--text2); font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.9px;
+    }
+    .form-group input, .form-group select {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      padding: 0.8rem 1rem;
+      color: var(--text);
+      font-family: 'DM Sans',sans-serif; font-size: 0.9rem;
+      transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+      outline: none;
+    }
+    .form-group input:hover, .form-group select:hover {
+      border-color: rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.05);
+    }
+    .form-group input:focus, .form-group select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0,229,160,0.1), 0 0 20px rgba(0,229,160,0.06);
+      background: rgba(255,255,255,0.055);
+    }
+    .form-group select { cursor: pointer; }
+    .form-group select option { background: var(--bg2); color: var(--text); }
+
+    .form-row { display: flex; gap: 1rem; align-items: center; margin-top: 0.85rem; }
+
+    .btn-save {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #000; border: none;
+      font-family: 'Syne',sans-serif; font-weight: 700; font-size: 0.9rem;
+      padding: 0.8rem 2rem; border-radius: 14px; cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+      display: inline-flex; align-items: center; gap: 0.55rem; margin-top: 2rem;
+      box-shadow: 0 4px 20px rgba(0,229,160,0.2);
+    }
+    .btn-save:hover  {
+      filter: brightness(1.1);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0,229,160,0.3);
+    }
+    .btn-save.saved  { background: var(--green); box-shadow: 0 4px 20px rgba(0,229,160,0.2); }
+    .btn-save .check { display: none; }
+    .btn-save.saved .check { display: inline; }
+    .btn-save.saved .label { display: none; }
+
+    /* API Warning — Softer style */
+    .api-warning {
+      display: flex; align-items: center; gap: 0.9rem;
+      background: rgba(255,211,42,0.05);
+      border: 1px solid rgba(255,211,42,0.14);
+      border-radius: 16px; padding: 1.1rem 1.3rem; margin-top: 1.5rem;
+    }
+    .api-warning p { font-size: 0.82rem; color: rgba(255,211,42,0.85); line-height: 1.55; }
+
+    /* Connection Status Pill */
+    .connection-status {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      padding: 0.6rem 1.2rem; border-radius: 24px;
+      background: rgba(255,107,107,0.06);
+      border: 1px solid rgba(255,107,107,0.18);
+      color: var(--red); font-size: 0.82rem; font-weight: 600;
+      margin-top: 1.5rem;
+      transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+    .connection-status.connected {
+      background: rgba(0,229,160,0.06);
+      border-color: rgba(0,229,160,0.2);
+      color: var(--green);
+    }
+    .connection-status.syncing {
+      background: rgba(123, 97, 255, 0.06);
+      border-color: rgba(123, 97, 255, 0.25);
+      color: #c084fc;
+    }
+    .connection-status.failed {
+      background: rgba(239, 68, 68, 0.06);
+      border-color: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+    }
+    .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: currentColor; flex-shrink: 0;
+    }
+    .dot-syncing {
+      width: 8px; height: 8px; border-radius: 50%;
+      border: 2px solid currentColor;
+      border-top-color: transparent;
+      animation: spin 1s linear infinite;
+      flex-shrink: 0;
+    }
+    .connection-status.connected .dot {
+      animation: livePulse 2.2s ease-in-out infinite;
+    }
+    @keyframes livePulse {
+      0%,100% { box-shadow: 0 0 0 0 currentColor; }
+      50%      { box-shadow: 0 0 0 6px transparent; }
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .password-wrap { position: relative; }
+    .password-wrap input { padding-right: 2.5rem; }
+    .toggle-pw {
+      position: absolute; right: 0.85rem; top: 50%; transform: translateY(-50%);
+      background: none; border: none; color: var(--text2); cursor: pointer;
+      font-size: 1rem; line-height: 1; padding: 0;
+      transition: color 0.2s;
+    }
+    .toggle-pw:hover { color: var(--text); }
+
+    /* Stats Mini-Grid */
+    .stats-mini-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem; margin-top: 2.5rem;
+    }
+    .mini-stat-card {
+      background: rgba(255,255,255,0.032);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 22px; padding: 1.5rem 1.25rem; text-align: center;
+      transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+      position: relative; overflow: hidden;
+    }
+    .mini-stat-card::after {
+      content: '';
+      position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 60%; height: 2px;
+      border-radius: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .mini-stat-card:hover {
+      background: rgba(255,255,255,0.055);
+      border-color: rgba(0,229,160,0.2);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    }
+    .mini-stat-card:hover::after { opacity: 1; }
+    .mini-stat-card .label {
+      display: block; font-size: 0.7rem; color: var(--text2);
+      text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 0.7rem;
+    }
+    .mini-stat-card .value {
+      font-family: 'Syne',sans-serif;
+      font-size: 2rem; font-weight: 800; color: var(--accent);
+      line-height: 1;
+      letter-spacing: -0.5px;
+    }
+    .mini-stat-card .sub {
+      font-size: 0.72rem; color: var(--text2); margin-top: 0.5rem;
+      opacity: 0.7;
+    }
+
+    /* Danger Zone */
+    .danger-zone {
+      border-color: rgba(255,71,87,0.18);
+      background: rgba(255,71,87,0.04);
+      margin-top: 2.5rem;
+    }
+    .danger-zone .btn-danger {
+      background: transparent;
+      border: 1px solid rgba(255,71,87,0.35);
+      color: var(--red);
+      padding: 0.65rem 1.6rem; border-radius: 12px;
+      cursor: pointer; font-family: 'DM Sans',sans-serif;
+      font-size: 0.88rem; font-weight: 600;
+      transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+      display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 1rem;
+    }
+    .danger-zone .btn-danger:hover {
+      background: var(--red); color: #fff;
+      box-shadow: 0 4px 20px rgba(255,71,87,0.3);
+    }
+
+    /* Preference Rows */
+    .pref-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.1rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      transition: background 0.15s;
+    }
+    .pref-row:last-child { border-bottom: none; }
+    .pref-row:hover { background: rgba(255,255,255,0.018); }
+
+    .pref-label strong {
+      display: block; font-size: 0.9rem; font-weight: 600;
+      letter-spacing: -0.2px;
+    }
+    .pref-label span { display: block; font-size: 0.78rem; color: var(--text2); margin-top: 0.25rem; }
+
+    /* Modern Toggle */
+    .toggle { position: relative; width: 50px; height: 28px; cursor: pointer; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; inset: 0;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 14px;
+      transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      height: 22px; width: 22px;
+      left: 2px; bottom: 2px;
+      background: var(--text2);
+      border-radius: 50%;
+      transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    }
+    .toggle input:checked + .toggle-slider {
+      background: rgba(0,229,160,0.15);
+      border-color: var(--accent);
+    }
+    .toggle input:checked + .toggle-slider::before {
+      transform: translateX(22px);
+      background: var(--accent);
+      box-shadow: 0 0 16px rgba(0,229,160,0.45);
+    }
+
+
+    /* ═══════════════════════════════════════════════
+       SESSIONS — Modern Redesign
+    ═══════════════════════════════════════════════ */
+
+    /* Security overview mini-stats bar */
+    .sec-stats-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.85rem;
+      margin-bottom: 1.75rem;
+    }
+    .sec-stat {
+      background: rgba(255,255,255,0.028);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 18px;
+      padding: 1.1rem 1rem;
+      display: flex; align-items: center; gap: 0.85rem;
+      transition: all 0.22s cubic-bezier(0.4,0,0.2,1);
+      position: relative; overflow: hidden;
+    }
+    .sec-stat::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, transparent 60%, rgba(0,229,160,0.04) 100%);
+      pointer-events: none;
+    }
+    .sec-stat:hover {
+      background: rgba(255,255,255,0.048);
+      border-color: rgba(0,229,160,0.18);
+      transform: translateY(-2px);
+    }
+    .sec-stat-icon {
+      width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.15rem;
+    }
+    .sec-stat-icon.green { background: rgba(0,229,160,0.12); }
+    .sec-stat-icon.blue  { background: rgba(0,191,255,0.12); }
+    .sec-stat-icon.purple{ background: rgba(168,85,247,0.12); }
+    .sec-stat-text { flex: 1; min-width: 0; }
+    .sec-stat-val {
+      font-family: 'Syne',sans-serif; font-size: 1.35rem; font-weight: 800;
+      line-height: 1; color: var(--text);
+    }
+    .sec-stat-lbl {
+      font-size: 0.72rem; color: var(--text2); margin-top: 0.25rem;
+      text-transform: uppercase; letter-spacing: 0.8px;
+    }
+
+    /* Sessions header row */
+    .sessions-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.1rem; gap: 0.75rem; flex-wrap: wrap;
+    }
+    .sessions-title-group { display: flex; flex-direction: column; gap: 0.25rem; }
+    .sessions-title-group h3 {
+      font-family: 'Syne',sans-serif; font-size: 1rem; font-weight: 700;
+      margin: 0; letter-spacing: -0.2px;
+    }
+    .sessions-title-group span { font-size: 0.78rem; color: var(--text2); }
+    .sessions-actions { display: flex; align-items: center; gap: 0.6rem; }
+    .btn-refresh-sessions {
+      display: inline-flex; align-items: center; gap: 0.45rem;
+      padding: 0.5rem 1.1rem; border-radius: 12px;
+      background: rgba(0,229,160,0.08);
+      border: 1px solid rgba(0,229,160,0.2);
+      color: var(--accent); font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; font-family: 'DM Sans',sans-serif;
+      transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+    }
+    .btn-refresh-sessions:hover {
+      background: rgba(0,229,160,0.16);
+      box-shadow: 0 0 16px rgba(0,229,160,0.15);
+    }
+    .btn-refresh-sessions.spinning svg {
+      animation: spin 0.7s linear infinite;
+    }
+
+    /* Session cards list */
+    .session-cards { display: flex; flex-direction: column; gap: 0.6rem; }
+
+    /* Individual session card */
+    .session-card {
+      display: flex; align-items: center; gap: 1rem;
+      background: rgba(255,255,255,0.026);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 18px;
+      padding: 1rem 1.2rem;
+      transition: all 0.22s cubic-bezier(0.4,0,0.2,1);
+      position: relative; overflow: hidden;
+      animation: sessCardIn 0.38s cubic-bezier(0.4,0,0.2,1) both;
+    }
+    @keyframes sessCardIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .session-card:hover {
+      background: rgba(255,255,255,0.045);
+      border-color: rgba(0,229,160,0.15);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+    }
+    .session-card.is-latest {
+      border-color: rgba(0,229,160,0.25);
+      background: rgba(0,229,160,0.04);
+    }
+    .session-card.is-latest::before {
+      content: '';
+      position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+      background: linear-gradient(180deg, var(--accent), var(--accent2));
+      border-radius: 3px 0 0 3px;
+    }
+
+    /* Device icon bubble */
+    .session-device-icon {
+      width: 44px; height: 44px; border-radius: 14px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      transition: transform 0.2s;
+    }
+    .session-card:hover .session-device-icon { transform: scale(1.08); }
+
+    /* Session info block */
+    .session-info { flex: 1; min-width: 0; }
+    .session-info-top {
+      display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+      margin-bottom: 0.3rem;
+    }
+    .session-ua {
+      font-size: 0.87rem; font-weight: 600; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      max-width: 320px;
+    }
+    .session-badge {
+      display: inline-flex; align-items: center; gap: 0.25rem;
+      padding: 0.15rem 0.55rem; border-radius: 20px;
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.4px;
+      flex-shrink: 0;
+    }
+    .session-badge.login {
+      background: rgba(0,229,160,0.1); color: var(--accent);
+      border: 1px solid rgba(0,229,160,0.2);
+    }
+    .session-badge.register {
+      background: rgba(168,85,247,0.1); color: #a78bfa;
+      border: 1px solid rgba(168,85,247,0.2);
+    }
+    .session-badge.failed {
+      background: rgba(255,71,87,0.1); color: #ff4757;
+      border: 1px solid rgba(255,71,87,0.25);
+    }
+    .session-badge.latest {
+      background: rgba(0,229,160,0.15); color: var(--accent);
+      border: 1px solid rgba(0,229,160,0.3);
+    }
+    .session-info-bottom {
+      display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+    }
+    .session-meta {
+      display: flex; align-items: center; gap: 0.3rem;
+      font-size: 0.76rem; color: var(--text2);
+    }
+    .session-meta svg { opacity: 0.55; }
+
+    /* IP — monospace, click-to-copy */
+    .session-ip {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.76rem;
+      color: var(--text2);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 6px;
+      padding: 0.15rem 0.5rem;
+      cursor: pointer;
+      transition: all 0.18s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .session-ip:hover {
+      background: rgba(0,229,160,0.08);
+      border-color: rgba(0,229,160,0.2);
+      color: var(--accent);
+    }
+    .session-time-right {
+      margin-left: auto; flex-shrink: 0; text-align: right;
+    }
+    .session-rel-time {
+      font-size: 0.78rem; color: var(--text2);
+      font-style: italic;
+    }
+    .session-abs-time {
+      font-size: 0.7rem; color: rgba(255,255,255,0.3); margin-top: 0.2rem;
+    }
+
+    /* Skeleton loaders */
+    .session-skeleton {
+      display: flex; align-items: center; gap: 1rem;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 18px; padding: 1rem 1.2rem;
+    }
+    .skel-circle {
+      width: 44px; height: 44px; border-radius: 14px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+      background-size: 200% 100%;
+      animation: shimmerSlide 1.4s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+    .skel-lines { flex: 1; display: flex; flex-direction: column; gap: 0.5rem; }
+    .skel-line {
+      height: 10px; border-radius: 6px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+      background-size: 200% 100%;
+      animation: shimmerSlide 1.4s ease-in-out infinite;
+    }
+    .skel-line.short { width: 45%; }
+    .skel-line.medium { width: 70%; }
+    @keyframes shimmerSlide {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* Empty state */
+    .sessions-empty-state {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 3rem 1rem; text-align: center;
+      color: var(--text2); gap: 0.75rem;
+    }
+    .sessions-empty-state .empty-icon { font-size: 2.5rem; opacity: 0.4; }
+    .sessions-empty-state p { font-size: 0.88rem; opacity: 0.7; }
+
+    /* ═══════════════════════════════════════════════
+       PREFERENCES — Modern Redesign
+    ═══════════════════════════════════════════════ */
+
+    /* Section group label */
+    .pref-section {
+      margin-bottom: 0.5rem;
+    }
+    .pref-section-header {
+      display: flex; align-items: center; gap: 0.6rem;
+      margin-bottom: 0.85rem;
+    }
+    .pref-section-icon {
+      width: 30px; height: 30px; border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem; flex-shrink: 0;
+    }
+    .pref-section-icon.cyan   { background: rgba(0,229,160,0.12); }
+    .pref-section-icon.blue   { background: rgba(0,191,255,0.12); }
+    .pref-section-icon.purple { background: rgba(168,85,247,0.12); }
+    .pref-section-icon.orange { background: rgba(251,146,60,0.12); }
+    .pref-section-title {
+      font-family: 'Syne',sans-serif;
+      font-size: 0.78rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1px;
+      color: var(--text2);
+    }
+    .pref-section-divider {
+      height: 1px;
+      background: rgba(255,255,255,0.06);
+      margin: 1.5rem 0;
+    }
+
+    /* Pref card — each individual toggle/selector */
+    .pref-card {
+      display: flex; align-items: center; gap: 1rem;
+      background: rgba(255,255,255,0.026);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 18px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 0.6rem;
+      transition: all 0.22s cubic-bezier(0.4,0,0.2,1);
+      cursor: default;
+    }
+    .pref-card:last-child { margin-bottom: 0; }
+    .pref-card:hover {
+      background: rgba(255,255,255,0.042);
+      border-color: rgba(255,255,255,0.12);
+    }
+    .pref-card.is-active {
+      border-color: rgba(0,229,160,0.18);
+      background: rgba(0,229,160,0.03);
+    }
+    .pref-card-icon {
+      width: 42px; height: 42px; border-radius: 13px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.15rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      transition: transform 0.2s;
+    }
+    .pref-card:hover .pref-card-icon { transform: scale(1.06); }
+    .pref-card-body { flex: 1; min-width: 0; }
+    .pref-card-title {
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--text); letter-spacing: -0.15px;
+      margin-bottom: 0.2rem;
+    }
+    .pref-card-desc {
+      font-size: 0.76rem; color: var(--text2); line-height: 1.45;
+    }
+    .pref-card-control { flex-shrink: 0; }
+
+    /* Toggle status label */
+    .toggle-status {
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.5px;
+      margin-top: 0.35rem; text-align: center;
+      transition: color 0.3s;
+    }
+    .toggle-status.on  { color: var(--accent); }
+    .toggle-status.off { color: var(--text2); opacity: 0.55; }
+
+    /* Currency selector — visual pills */
+    .currency-picker {
+      display: flex; gap: 0.5rem; flex-wrap: wrap;
+    }
+    .currency-option {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.5rem 0.9rem; border-radius: 14px;
+      border: 1.5px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.03);
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+      font-size: 0.85rem; font-weight: 600;
+      color: var(--text2);
+      user-select: none;
+    }
+    .currency-option .flag { font-size: 1.1rem; }
+    .currency-option .code { font-family:'Syne',sans-serif; font-size:0.8rem; font-weight:800; }
+    .currency-option .name { font-size:0.72rem; color:var(--text2); }
+    .currency-option:hover {
+      border-color: rgba(0,229,160,0.3);
+      background: rgba(0,229,160,0.06);
+      color: var(--text);
+    }
+    .currency-option.selected {
+      border-color: var(--accent);
+      background: rgba(0,229,160,0.1);
+      color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0,229,160,0.08);
+    }
+    .currency-option.selected .name { color: rgba(0,229,160,0.7); }
+
+    /* Unsaved changes indicator */
+    .prefs-unsaved-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #fb923c;
+      display: inline-block; margin-left: 0.4rem;
+      animation: pulseDot 1.5s ease-in-out infinite;
+    }
+    @keyframes pulseDot {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.5; transform: scale(1.3); }
+    }
+
+    /* Pref save footer */
+    .prefs-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 2rem; padding-top: 1.5rem;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      flex-wrap: wrap; gap: 0.75rem;
+    }
+    .prefs-footer-hint {
+      font-size: 0.78rem; color: var(--text2);
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+
+    @media (max-width: 600px) {
+      .pref-card { padding: 0.85rem 1rem; }
+      .currency-picker { gap: 0.35rem; }
+      .currency-option { padding: 0.45rem 0.7rem; }
+    }
+
+    @media (max-width: 680px) {
+      .sec-stats-bar { grid-template-columns: 1fr 1fr; }
+      .session-time-right { display: none; }
+      .session-ua { max-width: 180px; }
+    }
+
+    /* ── THEME / FONT PICKERS ── */
+    .theme-option, .font-option {
+      display:flex; align-items:center; gap:0.5rem;
+      padding:0.5rem 1rem; border-radius:10px;
+      border:1.5px solid var(--border);
+      background:var(--card);
+      cursor:pointer; transition:all .25s cubic-bezier(.21,.98,.35,1);
+      user-select:none;
+    }
+    .theme-option:hover, .font-option:hover {
+      border-color:rgba(0,229,160,.25);
+      background:var(--card-hover);
+    }
+    .theme-option.selected, .font-option.selected {
+      border-color:var(--accent);
+      background:rgba(0,229,160,.08);
+      box-shadow:0 0 16px rgba(0,229,160,.12);
+    }
+    .theme-swatch {
+      width:22px; height:22px; border-radius:6px;
+      border:1.5px solid var(--border); flex-shrink:0;
+    }
+    .theme-label, .font-option {
+      font-size:0.82rem; font-weight:600; color:var(--text);
+    }
+    .font-option { padding:0.5rem 0.9rem; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 980px) {
+      .settings-card { padding: 2rem 1.75rem; }
+    }
+    @media (max-width: 900px) {
+      .profile-sidebar { width: 220px; padding: 1.5rem 0.85rem; }
+      .profile-main { margin-left: 220px; padding: 3rem 2rem; }
+      .form-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 680px) {
+      .profile-sidebar { display: none; }
+      .profile-main { margin-left: 0; padding: 5.5rem 1.25rem 3rem; }
+      .settings-card { padding: 1.75rem; border-radius: 22px; }
+      .profile-header-top h1 { font-size: 1.75rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="profile-layout" id="profileLayout">
+
+    <!-- ══ SIDEBAR ══════════════════════════════════════════ -->
+    <aside class="profile-sidebar">
+      <div class="sidebar-logo">Stock<span>Wise</span></div>
+
+      <div class="sidebar-user">
+        <div class="profile-av-wrap">
+          <div id="profileAvatar" class="au-avatar au-md" style="padding:0;border-radius:22px;"></div>
+          <span id="tierBadge" class="profile-badge">PRO</span>
+        </div>
+        <div class="user-info" style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:0.25rem;">
+            <h2 id="profileName">Loading…</h2>
+            <p id="profileEmail" style="margin:0;max-width:none;">—</p>
+          </div>
+          <div style="display:flex;gap:0.4rem;flex-wrap:wrap;justify-content:center;">
+            <span id="badgeVerified" class="badge-verified">✓ Verified</span>
+            <span class="badge-pro">PRO</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="sidebar-section-label">Navigation</div>
+        <button class="nav-item" onclick="window.location.href='../index.html'">
+          <span class="icon">🏠</span> Home
+        </button>
+        <button class="nav-item" onclick="window.location.href='tracker.html'">
+          <span class="icon">📈</span> Live Tracker
+        </button>
+        <button class="nav-item" onclick="window.location.href='/signals'">
+          <span class="icon">🤖</span> AI Signals
+        </button>
+        <button class="nav-item" onclick="window.location.href='portfolio.html'">
+          <span class="icon">💼</span> Portfolio
+        </button>
+        <button class="nav-item" onclick="window.location.href='bot-trading.html'">
+          <span class="icon">🤖</span> Bot Trading
+        </button>
+
+        <div class="sidebar-section-label" style="margin-top:1.25rem">Account</div>
+        <button class="nav-item active" data-tab="account" onclick="switchTab('account')">
+          <span class="icon">👤</span> Details
+        </button>
+        <button class="nav-item" data-tab="api" onclick="switchTab('api')">
+          <span class="icon">🔑</span> API Keys
+        </button>
+      <button class="nav-item" data-tab="prefs" onclick="switchTab('prefs')">
+          <span class="icon">⚙️</span> Preferences
+        </button>
+
+        <button class="nav-item" data-tab="sessions" onclick="switchTab('sessions')">
+          <span class="icon">🔐</span> Sessions
+        </button>
+
+
+        <button class="nav-item logout" onclick="doLogout()">
+
+          <span class="icon">🚪</span> Logout
+        </button>
+      </nav>
+    </aside>
+
+    <!-- ══ MAIN CONTENT ══════════════════════════════════════ -->
+    <main class="profile-main">
+
+      <div class="profile-header-top">
+
+        <h1>Profile Management</h1>
+        <p>Manage your account details, exchange connections, and platform preferences</p>
+      </div>
+
+      <!-- ── ACCOUNT TAB ─────────────────────────────────── -->
+      <div id="tabAccount" class="settings-card active">
+        <div class="section-title">
+          <h2>Personal Details</h2>
+          <p>Update your identity information — changes are reflected immediately</p>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Full Username</label>
+            <input type="text" id="editUsername" placeholder="traderpro123" autocomplete="username"/>
+          </div>
+          <div class="form-group">
+            <label>Primary Email</label>
+            <input type="email" id="editEmail" placeholder="you@example.com" autocomplete="email"/>
+          </div>
+          <div class="form-group">
+            <label>Mobile Number</label>
+            <input type="tel" id="editPhone" placeholder="+91 98765 43210" autocomplete="tel"/>
+          </div>
+          <div class="form-group">
+            <label>Account Status</label>
+            <div style="display:flex;align-items:center;gap:0.6rem;">
+              <span id="statusDot" style="width:9px;height:9px;border-radius:50%;background:var(--green);display:inline-block;"></span>
+              <span id="statusText" style="font-size:0.88rem;color:var(--text2);">Active — connected to StockWise</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-save" id="btnSaveProfile" onclick="saveProfile()">
+          <span class="label">Save Changes</span>
+          <span class="check">✓ Saved</span>
+        </button>
+      </div>
+
+      <!-- ── API KEYS TAB ────────────────────────────────── -->
+      <div id="tabApi" class="settings-card">
+        <div class="section-title">
+          <h2>Exchange &amp; API Connectivity</h2>
+          <p>Connect your CoinDCX account for auto-sync, and add optional API keys</p>
+        </div>
+
+        <div id="connectionStatus" class="connection-status">
+          <span class="dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:currentColor;flex-shrink:0;"></span>
+          <span>Not connected — add your CoinDCX keys below</span>
+        </div>
+
+        <div class="api-warning">
+          <span>🔒</span>
+          <p>All keys are stored securely using AES-256 encryption. StockWise never has access to your funds — keys are only used to read balance data.</p>
+        </div>
+
+        <div class="form-grid" style="margin-top:1.5rem;">
+          <div class="form-group">
+            <label>CoinDCX API Key</label>
+            <div class="password-wrap">
+              <input type="password" id="apiKey" placeholder="e.g. cd5f1a—" autocomplete="off"/>
+              <button type="button" class="toggle-pw" onclick="togglePw('apiKey',this)" title="Show/hide">👁</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>CoinDCX API Secret</label>
+            <div class="password-wrap">
+              <input type="password" id="apiSecret" placeholder="••••••••••••••••" autocomplete="off"/>
+              <button type="button" class="toggle-pw" onclick="togglePw('apiSecret',this)" title="Show/hide">👁</button>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-save" id="btnSaveKeys" onclick="saveApiKeys()">
+          <span class="label">Save CoinDCX Keys</span>
+          <span class="check">✓ Connected</span>
+        </button>
+      </div>
+
+      <!-- ── PREFERENCES TAB ────────────────────────────── -->
+      <div id="tabPrefs" class="settings-card">
+
+        <!-- Header -->
+        <div style="margin-bottom:1.75rem;">
+          <h2 style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;margin:0 0 0.35rem;letter-spacing:-0.3px;">Platform Preferences</h2>
+          <p style="color:var(--text2);font-size:0.85rem;margin:0;">Customise how StockWise looks, feels, and behaves for you</p>
+        </div>
+
+        <!-- ── DISPLAY SECTION ── -->
+        <div class="pref-section">
+          <div class="pref-section-header">
+            <div class="pref-section-icon cyan">💱</div>
+            <span class="pref-section-title">Display &amp; Region</span>
+          </div>
+
+          <!-- Currency picker card -->
+          <div class="pref-card" id="prefCardCurrency">
+            <div class="pref-card-icon">🌍</div>
+            <div class="pref-card-body">
+              <div class="pref-card-title">Display Currency</div>
+              <div class="pref-card-desc">Fiat unit used across portfolio valuations and P&amp;L calculations</div>
+              <div class="currency-picker" style="margin-top:0.8rem;" id="currencyPicker">
+                <div class="currency-option" data-value="inr" onclick="selectCurrency('inr')">
+                  <span class="flag">🇮🇳</span>
+                  <div>
+                    <div class="code">INR</div>
+                    <div class="name">Indian Rupee</div>
+                  </div>
+                </div>
+                <div class="currency-option" data-value="usd" onclick="selectCurrency('usd')">
+                  <span class="flag">🇺🇸</span>
+                  <div>
+                    <div class="code">USD</div>
+                    <div class="name">US Dollar</div>
+                  </div>
+                </div>
+                <div class="currency-option" data-value="eur" onclick="selectCurrency('eur')">
+                  <span class="flag">🇪🇺</span>
+                  <div>
+                    <div class="code">EUR</div>
+                    <div class="name">Euro</div>
+                  </div>
+                </div>
+                <div class="currency-option" data-value="gbp" onclick="selectCurrency('gbp')">
+                  <span class="flag">🇬🇧</span>
+                  <div>
+                    <div class="code">GBP</div>
+                    <div class="name">British Pound</div>
+                  </div>
+                </div>
+              </div>
+              <!-- Hidden select for compatibility with existing savePrefs() logic -->
+              <select id="prefCurrency" style="display:none;">
+                <option value="inr">INR</option>
+                <option value="usd">USD</option>
+                <option value="eur">EUR</option>
+                <option value="gbp">GBP</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="pref-section-divider"></div>
+
+        <!-- ── APPEARANCE SECTION ── -->
+        <div class="pref-section">
+          <div class="pref-section-header">
+            <div class="pref-section-icon cyan">🎨</div>
+            <span class="pref-section-title">Appearance</span>
+          </div>
+
+          <!-- Theme picker -->
+          <div class="pref-card" id="prefCardTheme">
+            <div class="pref-card-icon">🖌️</div>
+            <div class="pref-card-body">
+              <div class="pref-card-title">Theme</div>
+              <div class="pref-card-desc">Choose your preferred colour scheme for the dashboard</div>
+              <div class="theme-picker" style="margin-top:0.8rem;display:flex;gap:0.6rem;flex-wrap:wrap;" id="themePicker">
+                <div class="theme-option selected" data-value="dark" onclick="selectTheme('dark')">
+                  <span class="theme-swatch" style="background:#080c14;border-color:rgba(255,255,255,0.12)"></span>
+                  <span class="theme-label">Dark</span>
+                </div>
+                <div class="theme-option" data-value="light" onclick="selectTheme('light')">
+                  <span class="theme-swatch" style="background:#f4f6fa;border-color:rgba(0,0,0,0.1)"></span>
+                  <span class="theme-label">Light</span>
+                </div>
+                <div class="theme-option" data-value="ocean" onclick="selectTheme('ocean')">
+                  <span class="theme-swatch" style="background:linear-gradient(135deg,#0a1628,#14294a);border-color:rgba(0,191,255,0.2)"></span>
+                  <span class="theme-label">Ocean</span>
+                </div>
+                <div class="theme-option" data-value="sunset" onclick="selectTheme('sunset')">
+                  <span class="theme-swatch" style="background:linear-gradient(135deg,#1a0f1a,#301b32);border-color:rgba(255,107,107,0.2)"></span>
+                  <span class="theme-label">Sunset</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Font style picker -->
+          <div class="pref-card" id="prefCardFont">
+            <div class="pref-card-icon">🔤</div>
+            <div class="pref-card-body">
+              <div class="pref-card-title">App Font</div>
+              <div class="pref-card-desc">Text style used across the dashboard and pages</div>
+              <div class="font-picker" style="margin-top:0.8rem;display:flex;gap:0.5rem;flex-wrap:wrap;" id="fontPicker">
+                <div class="font-option selected" data-value="dm-sans" onclick="selectFontStyle('dm-sans')" style="font-family:'DM Sans',sans-serif">DM Sans</div>
+                <div class="font-option" data-value="inter" onclick="selectFontStyle('inter')" style="font-family:'Inter',sans-serif">Inter</div>
+                <div class="font-option" data-value="jetbrains-mono" onclick="selectFontStyle('jetbrains-mono')" style="font-family:'JetBrains Mono',monospace">JetBrains</div>
+                <div class="font-option" data-value="syne" onclick="selectFontStyle('syne')" style="font-family:'Syne',sans-serif">Syne</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tracker font picker -->
+          <div class="pref-card" id="prefCardTrackerFont">
+            <div class="pref-card-icon">📊</div>
+            <div class="pref-card-body">
+              <div class="pref-card-title">Tracker Font</div>
+              <div class="pref-card-desc">Monospace or sans-serif font used in the live tracker table</div>
+              <div class="font-picker" style="margin-top:0.8rem;display:flex;gap:0.5rem;flex-wrap:wrap;" id="trackerFontPicker">
+                <div class="font-option selected" data-value="dm-sans" onclick="selectTrackerFont('dm-sans')" style="font-family:'DM Sans',sans-serif">DM Sans</div>
+                <div class="font-option" data-value="jetbrains-mono" onclick="selectTrackerFont('jetbrains-mono')" style="font-family:'JetBrains Mono',monospace">JetBrains Mono</div>
+                <div class="font-option" data-value="mono" onclick="selectTrackerFont('mono')" style="font-family:'Courier New',monospace">Monospace</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pref-section-divider"></div>
+
+        <!-- ── NOTIFICATIONS SECTION ── -->
+        <div class="pref-section">
+          <div class="pref-section-header">
+            <div class="pref-section-icon blue">🔔</div>
+            <span class="pref-section-title">Notifications</span>
+          </div>
+
+          <div class="pref-card" id="prefCardNotifs">
+            <div class="pref-card-icon">📡</div>
+            <div class="pref-card-body">
+              <div class="pref-card-title">Signal Notifications</div>
+              <div class="pref-card-desc">In-app nudge when the AI generates a new buy/sell/hold signal for tracked assets</div>
+            </div>
+            <div class="pref-card-control" style="display:flex;flex-direction:column;align-items:center;">
+              <label class="toggle">
+                <input type="checkbox" id="prefNotifications" checked onchange="markUnsaved();syncToggleCard('prefCardNotifs',this)"/>
+                <span class="toggle-slider"></span>
+              </label>
+              <span class="toggle-status on" id="statusNotifications">ON</span>
+            </div>
+          </div>
+
+          <div class="pref-card" id="prefCardSound">
+            <div class="pref-card-icon">🔔</div>
+            <div class="pref-card-body">
+              <div class="pref-card-title">Price Alert Sounds</div>
+              <div class="pref-card-desc">Play a subtle chime when a price alert threshold is triggered</div>
+            </div>
+            <div class="pref-card-control" style="display:flex;flex-direction:column;align-items:center;">
+              <label class="toggle">
+                <input type="checkbox" id="prefAlertSound" checked onchange="markUnsaved();syncToggleCard('prefCardSound',this)"/>
+                <span class="toggle-slider"></span>
+              </label>
+              <span class="toggle-status on" id="statusAlertSound">ON</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pref-section-divider"></div>
+
+        <!-- ── LAYOUT SECTION ── -->
+        <div class="pref-section">
+          <div class="pref-section-header">
+            <div class="pref-section-icon purple">🖼️</div>
+            <span class="pref-section-title">Layout &amp; Display</span>
+          </div>
+
+          <div class="pref-card" id="prefCardCompact">
+            <div class="pref-card-icon">≡</div>
+            <div class="pref-card-body">
+              <div class="pref-card-title">Compact Mode</div>
+              <div class="pref-card-desc">Reduce card padding and spacing for a denser, information-rich dashboard view</div>
+            </div>
+            <div class="pref-card-control" style="display:flex;flex-direction:column;align-items:center;">
+              <label class="toggle">
+                <input type="checkbox" id="prefCompact" onchange="markUnsaved();syncToggleCard('prefCardCompact',this)"/>
+                <span class="toggle-slider"></span>
+              </label>
+              <span class="toggle-status off" id="statusCompact">OFF</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SAVE FOOTER ── -->
+        <div class="prefs-footer">
+          <span class="prefs-footer-hint" id="prefsDirtyHint" style="opacity:0;transition:opacity 0.3s;">
+            <span class="prefs-unsaved-dot"></span> Unsaved changes
+          </span>
+          <button class="btn-save" id="btnSavePrefs" onclick="savePrefs()" style="margin-top:0;">
+            <span class="label">Save Preferences</span>
+            <span class="check">✓ Saved</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- ── SESSIONS TAB ────────────────────────────────── -->
+      <div id="tabSessions" class="settings-card">
+
+        <!-- Header -->
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem;">
+          <div>
+            <h2 style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;margin:0 0 0.3rem;letter-spacing:-0.3px;">Security &amp; Sessions</h2>
+            <p style="color:var(--text2);font-size:0.85rem;margin:0;">Your recent login activity and access history</p>
+          </div>
+          <button class="btn-refresh-sessions" id="btnRefreshSessions" onclick="loadSessions(true)" title="Refresh sessions">
+            <svg id="refreshIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+              <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+            </svg>
+            Refresh
+          </button>
+        </div>
+
+        <!-- Security overview bar -->
+        <div class="sec-stats-bar" id="secStatsBar">
+          <div class="sec-stat">
+            <div class="sec-stat-icon green">🔐</div>
+            <div class="sec-stat-text">
+              <div class="sec-stat-val" id="secStatTotal">—</div>
+              <div class="sec-stat-lbl">Total Logins</div>
+            </div>
+          </div>
+          <div class="sec-stat">
+            <div class="sec-stat-icon blue">🌐</div>
+            <div class="sec-stat-text">
+              <div class="sec-stat-val" id="secStatIPs">—</div>
+              <div class="sec-stat-lbl">Unique IPs</div>
+            </div>
+          </div>
+          <div class="sec-stat">
+            <div class="sec-stat-icon purple">⏱️</div>
+            <div class="sec-stat-text">
+              <div class="sec-stat-val" id="secStatLast" style="font-size:0.9rem;line-height:1.4;">—</div>
+              <div class="sec-stat-lbl">Last Login</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sessions header + count -->
+        <div class="sessions-header">
+          <div class="sessions-title-group">
+            <h3>Login History</h3>
+            <span id="sessionsCount">Loading…</span>
+          </div>
+        </div>
+
+        <!-- Cards container -->
+        <div class="session-cards" id="sessionCards">
+          <!-- Skeleton loaders -->
+          <div class="session-skeleton"><div class="skel-circle"></div><div class="skel-lines"><div class="skel-line medium"></div><div class="skel-line short"></div></div></div>
+          <div class="session-skeleton"><div class="skel-circle"></div><div class="skel-lines"><div class="skel-line medium"></div><div class="skel-line short"></div></div></div>
+          <div class="session-skeleton"><div class="skel-circle"></div><div class="skel-lines"><div class="skel-line medium"></div><div class="skel-line short"></div></div></div>
+        </div>
+
+      </div>
+
+      <!-- ── STATS STRIP ────────────────────────────────── -->
+      <div class="stats-mini-grid">
+        <div class="mini-stat-card">
+          <span class="label">Portfolio</span>
+          <span class="value" id="statPortfolio">0</span>
+          <span class="sub">Holdings</span>
+        </div>
+        <div class="mini-stat-card">
+          <span class="label">Active Alerts</span>
+          <span class="value" id="statAlerts">0</span>
+          <span class="sub">Watching</span>
+        </div>
+        <div class="mini-stat-card">
+          <span class="label">Posts</span>
+          <span class="value" id="statPosts">0</span>
+          <span class="sub">In community</span>
+        </div>
+        <div class="mini-stat-card">
+          <span class="label">Member Since</span>
+          <span class="value" id="statDays" style="font-size:1.2rem;line-height:1.9rem;">—</span>
+          <span class="sub" id="statDaysSub">days</span>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- AUTH MODAL — required on every page for Login / Create Account buttons -->
+    <div class="modal-backdrop" id="authModal" onclick="if(event.target===this)closeAuth()">
+      <div class="modal">
+        <button class="modal-close" onclick="closeAuth()">×</button>
+        <h2>Welcome to <span style="color:var(--accent)">StockWise</span></h2>
+        <p class="modal-sub">Login or create an account to unlock all features</p>
+        <div class="modal-tabs">
+          <button class="modal-tab active" data-tab="login" onclick="switchTabModal('login')">Login</button>
+          <button class="modal-tab" data-tab="register" onclick="switchTabModal('register')">Create Account</button>
+        </div>
+        <!-- Login Form -->
+        <div id="loginForm">
+          <form onsubmit="doLogin(event)">
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" id="loginEmail" placeholder="you@example.com" required>
+            </div>
+            <div class="form-group">
+              <label>Password</label>
+              <div class="password-wrap">
+                <input type="password" id="loginPass" placeholder="••••••••" required>
+                <button type="button" class="toggle-pw" onclick="toggleLoginPw(this)" tabindex="-1" title="Show/hide password">👁</button>
+              </div>
+            </div>
+            <div class="form-group" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.95rem">
+              <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.88rem;color:var(--text2)"><input type="checkbox" id="rememberLogin" onchange="toggleRemember(this)"> Remember me</label>
+              <button type="button" class="link-btn" onclick="openForgotPassword()" style="font-size:0.82rem">Forgot password?</button>
+            </div>
+            <button type="submit" class="btn-full">Login →</button>
+            <div class="auth-footer">Don't have an account? <button type="button" class="link-btn" onclick="switchTabModal('register')">Create account</button></div>
+          </form>
+        </div>
+        <!-- Register Form -->
+        <div id="registerForm" style="display:none">
+          <form onsubmit="doRegister(event)">
+            <div class="form-group">
+              <label>Username</label>
+              <input type="text" id="regUsername" placeholder="traderpro123" required>
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" id="regEmail" placeholder="you@example.com" required>
+            </div>
+            <div class="form-group">
+              <label>Password</label>
+              <div class="password-wrap">
+                <input type="password" id="regPass" placeholder="Min 6 characters" minlength="6" required oninput="onPasswordInput()">
+                <button type="button" class="toggle-pw" onclick="toggleRegPw(this)" tabindex="-1" title="Show/hide password">👁</button>
+              </div>
+              <div class="pw-strength-checklist" id="pwChecklist">
+                <div class="pw-rule" data-rule="length"><span class="pw-icon">○</span> 8+ characters</div>
+                <div class="pw-rule" data-rule="upper"><span class="pw-icon">○</span> Uppercase letter</div>
+                <div class="pw-rule" data-rule="lower"><span class="pw-icon">○</span> Lowercase letter</div>
+                <div class="pw-rule" data-rule="number"><span class="pw-icon">○</span> Number (0-9)</div>
+                <div class="pw-rule" data-rule="special"><span class="pw-icon">○</span> Special character (!@#$%^&amp;*)</div>
+              </div>
+              <div class="pw-strength-bar-wrap">
+                <div class="pw-strength-bar" id="pwStrengthBar"></div>
+              </div>
+              <div class="pw-suggest-wrap">
+                <button type="button" class="pw-suggest-btn" onclick="suggestPassword()">✨ Suggest strong password</button>
+              </div>
+            </div>
+            <div class="form-group remember-row">
+              <input type="checkbox" id="rememberRegister">
+              <label for="rememberRegister">Remember me</label>
+            </div>
+            <button type="submit" class="btn-full">Create Account →</button>
+            <div class="auth-footer">Already have an account? <button type="button" class="link-btn" onclick="switchTabModal('login')">Login</button></div>
+          </form>
+        </div>
+        <p class="error-msg" id="authError"></p>
+      </div>
+    </div>
+
+  </div><!-- /profile-layout -->
+
+  <script defer src="../js/main.js"></script>
+  <script nonce="__NONCE__">
+    // ── NAVBAR ─────────────────────────────────────
+    if (document.getElementById('profileLayout')) {
+      const nav = document.querySelector('.navbar');
+      if (nav) nav.style.display = 'none';
+    }
+
+    /* ── TAB SWITCHING ─────────────────────────────── */
+    function switchTab(tab) { // eslint-disable-line no-unused-vars
+      (document.querySelectorAll('.nav-item[data-tab]') || []).forEach(b =>
+        b.classList.toggle('active', b.dataset.tab === tab));
+      (document.querySelectorAll('.settings-card') || []).forEach(c =>
+        c.classList.remove('active'));
+      const card = document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1));
+      if (card) card.classList.add('active');
+    }
+
+    /* ── LOGOUT ─────────────────────────────────────── */
+    async function doLogout() {
+      await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+      window.location.href = '../index.html';
+    }
+
+    function openAuth(tab) {
+      document.getElementById('authModal').classList.add('open');
+      switchTabModal(tab);
+    }
+
+    function closeAuth() {
+      document.getElementById('authModal').classList.remove('open');
+    }
+
+    function switchTabModal(tab) {
+      document.querySelectorAll('.modal-tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.tab === tab);
+      });
+      document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+      document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+      document.getElementById('authError').textContent = '';
+    }
+
+    /* ── TOGGLE PASSWORD VISIBILITY ─────────────────── */
+    function togglePw(inputId, btn) { // eslint-disable-line no-unused-vars
+      const inp = document.getElementById(inputId);
+      if (!inp) return;
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+      btn.textContent = inp.type === 'password' ? '👁' : '🙈';
+    }
+
+    /* ── SAVE PROFILE ──────────────────────────────── */
+    async function saveProfile() {
+      const btn = document.getElementById('btnSaveProfile');
+      const username = (document.getElementById('editUsername') || {}).value?.trim() || '';
+      const email    = (document.getElementById('editEmail')    || {}).value?.trim() || '';
+      const phone    = (document.getElementById('editPhone')    || {}).value?.trim() || '';
+
+      if (!username || !email)
+        return window.stockwise?.toast('Username and email are required','error');
+
+      const inputs = ['editUsername','editEmail','editPhone'].map(id => document.getElementById(id)).filter(Boolean);
+      inputs.forEach(el => el.disabled = true);
+      btn.disabled = true;
+      btn.textContent = 'Saving…';
+
+      try {
+        const res  = await fetch('/api/profile', {
+          method: 'POST', credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, email, phone }),
+        });
+
+        if (!res.ok) {
+          let errMsg = 'Server error (' + res.status + ')';
+          try { const e = await res.json(); errMsg = e.error || errMsg; } catch(_) {}
+          inputs.forEach(el => el.disabled = false);
+          btn.disabled = false;
+          btn.textContent = 'Save Changes';
+          return window.stockwise?.toast(errMsg,'error');
+        }
+
+        const data = await res.json();
+        if (!data.success) {
+          inputs.forEach(el => el.disabled = false);
+          btn.disabled = false;
+          btn.textContent = 'Save Changes';
+          return window.stockwise?.toast((data && data.error) || 'Update failed','error');
+        }
+
+        btn.classList.add('saved');
+        btn.textContent = '';
+        window.stockwise?.toast(username + ' Profile updated ✓','success');
+        const nm = document.getElementById('profileName');
+        const ml = document.getElementById('profileEmail');
+        if (nm) nm.textContent = username;
+        if (ml) ml.textContent = email;
+        inputs.forEach(el => el.disabled = false);
+        btn.disabled = false;
+        setTimeout(() => btn.classList.remove('saved'), 2200);
+      } catch(e) {
+        inputs.forEach(el => el.disabled = false);
+        btn.disabled = false;
+        btn.textContent = 'Save Changes';
+        window.stockwise?.toast('Network error — please check your connection','error');
+      }
+    }
+
+/* ── SAVE API KEYS ─────────────────────────────── */
+     let syncPollInterval = null;
+
+     async function saveApiKeys() {
+       const btn = document.getElementById('btnSaveKeys');
+       const keyInput = document.getElementById('apiKey');
+       const secretInput = document.getElementById('apiSecret');
+       const originalKey = keyInput ? keyInput.dataset.original || '' : '';
+       
+       const key   = (keyInput || {}).value?.trim() || '';
+       const secret= (secretInput || {}).value?.trim() || '';
+
+       if (!key)
+         return window.stockwise?.toast('API key is required','error');
+
+       // Secret MUST be provided as real value - masked placeholder '••••••••••••••••' is never valid
+       if (!secret || secret === '••••••••••••••••') {
+         if (btn.dataset.hasCoindcx !== 'true') {
+           return window.stockwise?.toast('API secret is required','error');
+         }
+         // If we have existing keys and user didn't enter new secret, we need to require secret override
+         return window.stockwise?.toast('Re-enter your API secret to update','error');
+       }
+
+       const body = { coindcx_key: key, coindcx_secret: secret };
+
+       try {
+         const res = await fetch('/api/api-keys', {
+           method: 'POST', credentials: 'include',
+           headers: { 'Content-Type': 'application/json' },
+           body: JSON.stringify(body),
+         });
+
+         if (!res.ok) {
+           let errMsg = 'Server error (' + res.status + ')';
+           try { const e = await res.json(); errMsg = e.error || errMsg; } catch(_) {}
+           return window.stockwise?.toast(errMsg, 'error');
+         }
+
+         const data = await res.json();
+         if (!data.success)
+           return window.stockwise?.toast(data.error || 'Save failed','error');
+
+// Test connection before triggering sync when secret is newly provided
+          let shouldSync = true;
+          if (body.coindcx_secret) {
+            const testRes = await fetch('/api/coindcx/test', {
+              method: 'POST', credentials: 'include',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ key, secret: body.coindcx_secret })
+            });
+            const testData = await testRes.json();
+            if (!testData.ok) {
+              shouldSync = false;
+              return window.stockwise?.toast('Connection test failed: ' + testData.error, 'error');
+            }
+          }
+          
+          btn.classList.add('saved');
+          window.stockwise?.toast('CoinDCX connected ✓','success');
+          btn.dataset.hasCoindcx = 'true';
+          if (keyInput) keyInput.dataset.original = key;
+          
+          // Refresh user state after save
+          await loadProfile();
+          
+          setTimeout(() => btn.classList.remove('saved'), 2200);
+          
+          // Trigger sync in background immediately (only if connection test passed)
+          if (shouldSync) {
+            await triggerDCXSync();
+          }
+        } catch(e) {
+          window.stockwise?.toast('Network error — please retry','error');
+        }
+}
+
+      async function clearApiKeys() {
+        if (!confirm('Remove CoinDCX API keys? This will disconnect your exchange.')) return;
+        try {
+          const res = await fetch('/api/api-keys', {
+            method: 'POST', credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ coindcx_key: '', coindcx_secret: '' })
+          });
+          if (res.ok) {
+            document.getElementById('apiKey').value = '';
+            document.getElementById('apiSecret').value = '';
+            document.getElementById('btnSaveKeys').dataset.hasCoindcx = 'false';
+            if (document.getElementById('apiKey')) document.getElementById('apiKey').dataset.original = '';
+            window.stockwise?.toast('API keys cleared', 'success');
+            await loadProfile();
+          }
+        } catch (e) {
+          window.stockwise?.toast('Network error', 'error');
+        }
+      }
+
+      function updateConnectionStatus(user) {
+       const el = document.getElementById('connectionStatus');
+       if (!el) return;
+       if (user && user.loggedIn && user.has_coindcx) {
+         el.style.display = 'inline-flex';
+         if (user.coindcx_sync_status === 'syncing') {
+           el.className = 'connection-status syncing';
+           el.innerHTML = '<span class="dot-syncing"></span>'
+                        + '<span>CoinDCX connected — syncing balances...</span>';
+         } else if (user.coindcx_sync_status === 'success') {
+           el.className = 'connection-status connected';
+           const lastSyncedStr = user.coindcx_last_synced ? new Date(user.coindcx_last_synced).toLocaleString() : 'just now';
+           el.innerHTML = '<span class="dot"></span>'
+                        + `<span>CoinDCX connected & synced! (Last sync: ${lastSyncedStr})</span>`;
+         } else if (user.coindcx_sync_status === 'failed') {
+           el.className = 'connection-status failed';
+           el.innerHTML = '<span class="dot"></span>'
+                        + '<span>CoinDCX connected — last sync failed. Please check your keys or retry.</span>';
+         } else {
+           el.className = 'connection-status connected';
+           el.innerHTML = '<span class="dot"></span>'
+                        + '<span>CoinDCX connected — ready to sync</span>';
+         }
+       } else {
+         el.className = 'connection-status';
+         el.innerHTML = '<span class="dot" style="background:#64748b;"></span>'
+                      + '<span>Not connected — add your CoinDCX keys below</span>';
+       }
+     }
+
+      async function triggerDCXSync() {
+        try {
+          const syncRes = await fetch('/api/sync-coindcx', {
+            method: 'POST', credentials: 'include'
+          });
+          if (syncRes.ok) {
+            window.stockwise?.toast('Sync initiated in background...', 'info');
+            const syncUser = {
+              loggedIn: true,
+              has_coindcx: true,
+              coindcx_sync_status: 'syncing',
+              coindcx_last_synced: null
+            };
+            updateConnectionStatus(syncUser);
+            startSyncPolling();
+          } else {
+            const errData = await syncRes.json().catch(() => ({}));
+            console.warn('[DCX Sync] Request failed:', syncRes.status, errData);
+            window.stockwise?.toast(errData.error || 'Sync request failed.', 'warning');
+          }
+        } catch (e) {
+          console.error('[DCX Sync] Network error:', e);
+          window.stockwise?.toast('Network error — unable to reach server.', 'error');
+        }
+      }
+
+     function startSyncPolling() {
+       if (syncPollInterval) return;
+       syncPollInterval = setInterval(async () => {
+         try {
+           const res = await fetch('/api/me', { credentials: 'include' });
+           if (res.ok) {
+             const data = await res.json();
+             updateConnectionStatus(data);
+             if (data.coindcx_sync_status !== 'syncing') {
+               clearInterval(syncPollInterval);
+               syncPollInterval = null;
+               if (data.coindcx_sync_status === 'success') {
+                 window.stockwise?.toast('CoinDCX synced successfully!', 'success');
+                 loadStats();
+} else if (data.coindcx_sync_status === 'failed') {
+                  window.stockwise?.toast('CoinDCX sync failed: ' + (data.coindcx_sync_error || 'Unknown error'), 'error');
+                }
+             }
+           }
+         } catch (e) {
+           clearInterval(syncPollInterval);
+           syncPollInterval = null;
+         }
+       }, 2000);
+     }
+
+    /* ── LOAD PROFILE ──────────────────────────────── */
+    function setProfileFields(u) {
+      document.getElementById('profileName').textContent  = u.username || 'User';
+      document.getElementById('profileEmail').textContent = u.email    || '';
+      document.getElementById('editUsername').value        = u.username || '';
+      document.getElementById('editEmail').value           = u.email    || '';
+      document.getElementById('editPhone').value           = u.phone    || '';
+
+if (document.getElementById('apiKey')) {
+         const keyInput = document.getElementById('apiKey');
+         keyInput.value = u.has_coindcx ? '••••••••••••••••' : '';
+         keyInput.dataset.original = u.coindcx_key || '';
+       }
+       if (document.getElementById('apiSecret')) {
+         document.getElementById('apiSecret').value = u.has_coindcx_secret ? '••••••••••••••••' : '';
+       }
+const btnSaveKeys = document.getElementById('btnSaveKeys');
+       if (btnSaveKeys) {
+         btnSaveKeys.dataset.hasCoindcx = u.has_coindcx_secret ? 'true' : 'false';
+       }
+
+      const av = u.avatar || {};
+      const avEl = document.getElementById('profileAvatar');
+      avEl.innerHTML = window.auSvg(u.username || 'U', {
+        bg_color:   av.bg_color  || '#00e5a0',
+        texture:    av.texture   || 'solid',
+        accessory:  av.accessory || 'none',
+        energy:     av.energy    || 'none',
+      });
+      avEl.style.cssText = 'display:flex;align-items:center;justify-content:center;padding:0;border-radius:22px;background:transparent;box-shadow:0 8px 24px rgba(0,229,160,0.2);';
+
+      (document.getElementById('badgeVerified') || {}).style.display =
+        u.is_verified === 1 ? 'inline-flex' : 'none';
+
+      const sel = document.getElementById('prefCurrency');
+      if (sel) {
+        const supported = ['inr','usd','eur','gbp'];
+        const currencyVal = (u.currency && supported.includes(u.currency)) ? u.currency : 'inr';
+        sel.value = currencyVal;
+        selectCurrency(currencyVal, true);
+      }
+    }
+
+    async function loadProfile() {
+      // Always fetch afresh from the server — no dependency on in-memory currentUser
+      try {
+        const res  = await fetch('/api/me', { credentials:'include' });
+        const data = await res.json();
+        if (!res.ok || !data.loggedIn) {
+          openAuth('login'); return;
+        }
+        setProfileFields(data);
+      } catch(e) {
+        console.error('profile load error', e);
+        openAuth('login');
+      }
+    }
+
+/* ── LOAD CONNECTION STATUS ────────────────────── */
+     async function loadConnectionStatus() {
+       try {
+         const res  = await fetch('/api/me', { credentials: 'include' });
+         if (res.ok) {
+           const data = await res.json();
+           updateConnectionStatus(data);
+           if (data.loggedIn && data.has_coindcx && data.coindcx_sync_status === 'syncing') {
+             startSyncPolling();
+           }
+         }
+       } catch(_) {}
+     }
+
+    /* ── LOAD STATS ────────────────────────────────── */
+    async function loadStats() {
+      try {
+        const [pRes, aRes, meRes] = await Promise.all([
+          fetch('/api/portfolio',  { credentials: 'include' }),
+          fetch('/api/alerts',     { credentials: 'include' }),
+          fetch('/api/me',         { credentials: 'include' }),
+        ]);
+        const portfolios = pRes.ok ? await pRes.json() : [];
+        const alerts     = aRes.ok ? await aRes.json() : [];
+        const me         = meRes.ok ? await meRes.json() : {};
+        document.getElementById('statPortfolio').textContent = portfolios.length;
+        document.getElementById('statAlerts').textContent    = alerts.length;
+
+        // Populate member-since days from server-side created_at
+        if (me.created_at) {
+          const days = Math.max(1, Math.floor((Date.now() - new Date(me.created_at)) / 864e5));
+          const sd   = document.getElementById('statDays');
+          const ss   = document.getElementById('statDaysSub');
+          if (sd) sd.textContent = days;
+          if (ss) ss.textContent = days === 1 ? 'day' : 'days';
+        }
+      } catch(_) {}
+
+      // Fallback: try in-memory user if server didn't return created_at
+      const u = window.stockwise?.currentUser();
+      if (u?.created_at && document.getElementById('statDays')?.textContent === '—') {
+        const days = Math.max(1, Math.floor((Date.now() - new Date(u.created_at)) / 864e5));
+        const sd   = document.getElementById('statDays');
+        const ss   = document.getElementById('statDaysSub');
+        if (sd) sd.textContent = days;
+        if (ss) ss.textContent = days === 1 ? 'day' : 'days';
+      }
+    }
+
+/* ── PREFS ─────────────────────────────────────── */
+
+     /** Highlight the chosen currency pill and sync the hidden <select> */
+     function selectCurrency(val, silent = false) {
+       const sel = document.getElementById('prefCurrency');
+       if (sel) sel.value = val;
+       document.querySelectorAll('#currencyPicker .currency-option').forEach(el => {
+         el.classList.toggle('selected', el.dataset.value === val);
+       });
+       if (!silent) markUnsaved();
+     }
+
+     /** Highlight the chosen theme pill */
+     function selectTheme(val, silent = false) {
+       document.querySelectorAll('#themePicker .theme-option').forEach(el => {
+         el.classList.toggle('selected', el.dataset.value === val);
+       });
+       if (!silent) markUnsaved();
+     }
+
+     /** Highlight the chosen font-style pill */
+     function selectFontStyle(val, silent = false) {
+       document.querySelectorAll('#fontPicker .font-option').forEach(el => {
+         el.classList.toggle('selected', el.dataset.value === val);
+       });
+       if (!silent) markUnsaved();
+     }
+
+     /** Highlight the chosen tracker-font pill */
+     function selectTrackerFont(val, silent = false) {
+       document.querySelectorAll('#trackerFontPicker .font-option').forEach(el => {
+         el.classList.toggle('selected', el.dataset.value === val);
+       });
+       if (!silent) markUnsaved();
+     }
+
+     /** Sync the ON/OFF status label and is-active border for a pref card */
+     function syncToggleCard(cardId, inputId) {
+        const cb     = (typeof inputId === 'string') ? document.getElementById(inputId) : inputId;
+        if (!cb) return;
+        const card   = document.getElementById(cardId);
+        const idStr  = cb.id;
+        const status = document.getElementById('status' + idStr.replace('pref', ''));
+        const on     = cb.checked;
+        if (card)   card.classList.toggle('is-active', on);
+        if (status) {
+          status.textContent = on ? 'ON' : 'OFF';
+          status.className   = 'toggle-status ' + (on ? 'on' : 'off');
+        }
+      }
+
+     /** Show the orange unsaved-changes indicator */
+     function markUnsaved() {
+       const hint = document.getElementById('prefsDirtyHint');
+       if (hint) hint.style.opacity = '1';
+     }
+
+     async function loadPrefs() {
+        try {
+          const res  = await fetch('/api/prefs',  { credentials: 'include' });
+          if (!res.ok) return;
+          const data = await res.json();
+          const cv = data.currency || 'inr';
+          selectCurrency(['inr','usd','eur','gbp'].includes(cv) ? cv : 'inr', true);  // silent on load
+
+          // Theme / font pickers
+          selectTheme(['dark','light','ocean','sunset'].includes(data.profile_color) ? data.profile_color : 'dark', true);
+          selectFontStyle(['dm-sans','inter','jetbrains-mono','syne'].includes(data.font_style) ? data.font_style : 'dm-sans', true);
+          selectTrackerFont(['dm-sans','jetbrains-mono','mono'].includes(data.tracker_font) ? data.tracker_font : 'dm-sans', true);
+
+          // Sync visually toggle cards
+          syncToggleCard('prefCardNotifs', 'prefNotifications');
+          syncToggleCard('prefCardSound', 'prefAlertSound');
+          syncToggleCard('prefCardCompact', 'prefCompact');
+        } catch(_) {}
+      }
+
+     async function savePrefs() {
+       const btn  = document.getElementById('btnSavePrefs');
+       const curr = (document.getElementById('prefCurrency') || {}).value || '';
+       const themeEl = document.querySelector('#themePicker .theme-option.selected');
+       const fontEl = document.querySelector('#fontPicker .font-option.selected');
+       const trackerFontEl = document.querySelector('#trackerFontPicker .font-option.selected');
+       try {
+         const res  = await fetch('/api/prefs', {
+           method: 'POST', credentials: 'include',
+           headers: { 'Content-Type': 'application/json' },
+           body: JSON.stringify({
+             currency: curr,
+             profile_color: themeEl ? themeEl.dataset.value : 'dark',
+             font_style: fontEl ? fontEl.dataset.value : 'dm-sans',
+             tracker_font: trackerFontEl ? trackerFontEl.dataset.value : 'dm-sans',
+           }),
+         });
+
+         if (!res.ok) {
+           let errMsg = 'Server error (' + res.status + ')';
+           try { const e = await res.json(); errMsg = e.error || errMsg; } catch(_) {}
+           return window.stockwise?.toast(errMsg, 'error');
+         }
+
+         const data = await res.json();
+         if (!data.success)
+           return window.stockwise?.toast(data.error || 'Save failed','error');
+         btn.classList.add('saved');
+          const hint = document.getElementById('prefsDirtyHint');
+          if (hint) hint.style.opacity = '0';
+          if (window.refreshUserPrefs) window.refreshUserPrefs();
+          window.stockwise?.toast('Preferences saved ✓','success');
+         setTimeout(() => btn.classList.remove('saved'), 2200);
+       } catch(_) {
+         window.stockwise?.toast('Network error — please retry','error');
+       }
+     }
+
+    /* ──────────────────────────────────────────
+       SESSION HELPERS
+    ────────────────────────────────────────── */
+    function detectDevice(ua) {
+      if (!ua) return { icon: '🖥️', label: 'Unknown Device' };
+      const u = ua.toLowerCase();
+      if (u.includes('iphone') || (u.includes('mobile') && u.includes('safari') && !u.includes('chrome')))
+        return { icon: '📱', label: 'iPhone' };
+      if (u.includes('ipad'))
+        return { icon: '📱', label: 'iPad' };
+      if (u.includes('android') && u.includes('mobile'))
+        return { icon: '📱', label: 'Android Phone' };
+      if (u.includes('android'))
+        return { icon: '📱', label: 'Android Tablet' };
+      if (u.includes('macintosh') || u.includes('mac os'))
+        return { icon: '💻', label: 'Mac' };
+      if (u.includes('windows nt'))
+        return { icon: '🖥️', label: 'Windows PC' };
+      if (u.includes('linux'))
+        return { icon: '🖥️', label: 'Linux' };
+      return { icon: '🌐', label: 'Unknown Device' };
+    }
+
+    function detectBrowser(ua) {
+      if (!ua) return 'Unknown';
+      const u = ua.toLowerCase();
+      if (u.includes('edg/') || u.includes('edge/'))
+        return 'Edge';
+      if (u.includes('opr/') || u.includes('opera/'))
+        return 'Opera';
+      if (u.includes('chrome/') && !u.includes('chromium'))
+        return 'Chrome';
+      if (u.includes('firefox/'))
+        return 'Firefox';
+      if (u.includes('safari/') && !u.includes('chrome'))
+        return 'Safari';
+      if (u.includes('trident/') || u.includes('msie'))
+        return 'Internet Explorer';
+      return 'Browser';
+    }
+
+    function relativeTime(dateStr) {
+      if (!dateStr) return '';
+      const diff = Date.now() - new Date(dateStr).getTime();
+      const s = Math.floor(diff / 1000);
+      if (s < 60)  return 'just now';
+      const m = Math.floor(s / 60);
+      if (m < 60)  return m + 'm ago';
+      const h = Math.floor(m / 60);
+      if (h < 24)  return h + 'h ago';
+      const d = Math.floor(h / 24);
+      if (d < 7)   return d + 'd ago';
+      const w = Math.floor(d / 7);
+      if (w < 5)   return w + 'w ago';
+      return Math.floor(d / 30) + 'mo ago';
+    }
+
+    function copyIP(ip, el) {
+      navigator.clipboard.writeText(ip).then(() => {
+        const orig = el.textContent;
+        el.textContent = '✓ copied';
+        el.style.color = 'var(--accent)';
+        setTimeout(() => { el.textContent = orig; el.style.color = ''; }, 1400);
+      }).catch(() => {});
+    }
+
+    /* ── LOAD SESSIONS ─────────────────────────── */
+    async function loadSessions(isManualRefresh = false) {
+      const cardsEl   = document.getElementById('sessionCards');
+      const countEl   = document.getElementById('sessionsCount');
+      const refreshBtn = document.getElementById('btnRefreshSessions');
+      const refreshIcon = document.getElementById('refreshIcon');
+
+      // Show spinning on refresh button
+      if (refreshBtn) refreshBtn.classList.add('spinning');
+
+      // Show skeletons while loading
+      if (cardsEl) {
+        cardsEl.innerHTML = [
+          '<div class="session-skeleton"><div class="skel-circle"></div><div class="skel-lines"><div class="skel-line medium"></div><div class="skel-line short"></div></div></div>',
+          '<div class="session-skeleton"><div class="skel-circle"></div><div class="skel-lines"><div class="skel-line medium"></div><div class="skel-line short"></div></div></div>',
+          '<div class="session-skeleton"><div class="skel-circle"></div><div class="skel-lines"><div class="skel-line medium"></div><div class="skel-line short"></div></div></div>',
+        ].join('');
+      }
+
+      try {
+        const res = await fetch('/api/login-logs', { credentials: 'include' });
+
+        if (refreshBtn) refreshBtn.classList.remove('spinning');
+
+        if (!res.ok) {
+          if (cardsEl) cardsEl.innerHTML = `<div class="sessions-empty-state"><div class="empty-icon">⚠️</div><p>Unable to load login history. Please try again.</p></div>`;
+          if (countEl) countEl.textContent = '';
+          return;
+        }
+
+        const logs = await res.json();
+
+        if (!Array.isArray(logs) || logs.length === 0) {
+          if (cardsEl) cardsEl.innerHTML = `<div class="sessions-empty-state"><div class="empty-icon">🔒</div><p>No login history found for your account.</p></div>`;
+          if (countEl) countEl.textContent = '0 events';
+          return;
+        }
+
+        // ── Security stats ──
+        const successLogs  = logs.filter(l => l.success !== 0);
+        const failedCount  = logs.filter(l => l.success === 0).length;
+        const uniqueIPs    = new Set(logs.map(l => l.ip_address).filter(Boolean));
+        // Latest SUCCESSFUL login (not a failed attempt)
+        const latestOkLog  = successLogs[0] || logs[0];
+        const secTotal  = document.getElementById('secStatTotal');
+        const secIPs    = document.getElementById('secStatIPs');
+        const secLast   = document.getElementById('secStatLast');
+        if (secTotal) {
+          secTotal.innerHTML = failedCount > 0
+            ? `${logs.length} <span style="font-size:0.7rem;color:#ff4757;font-weight:600;font-family:'DM Sans',sans-serif;">(${failedCount} failed)</span>`
+            : String(logs.length);
+        }
+        if (secIPs)  secIPs.textContent  = uniqueIPs.size;
+        if (secLast && latestOkLog?.login_at) {
+          secLast.textContent = relativeTime(latestOkLog.login_at);
+        }
+
+        if (countEl) countEl.textContent = `${Math.min(logs.length, 20)} of ${logs.length} events`;
+
+        // Track which index is the first successful login
+        let firstSuccessIdx = -1;
+        const cards = logs.slice(0, 20).map((log, idx) => {
+          const ua        = log.user_agent || '';
+          const device    = detectDevice(ua);
+          const browser   = detectBrowser(ua);
+          const ip        = log.ip_address || 'unknown';
+          const type      = log.login_type || 'login';
+          const isFailed  = log.success === 0;
+          const relTime   = relativeTime(log.login_at);
+          const absTime   = log.login_at ? new Date(log.login_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : '';
+
+          // Only the first successful login gets the 'Current' badge
+          if (!isFailed && firstSuccessIdx === -1) firstSuccessIdx = idx;
+          const isLatest = !isFailed && idx === firstSuccessIdx;
+
+          // Badge: failed overrides everything
+          const badgeCls = isFailed ? 'failed'
+                         : type === 'register' ? 'register'
+                         : 'login';
+          const badgeTxt = isFailed ? '✕ Failed'
+                         : type === 'register' ? '✦ Register'
+                         : '✓ Login';
+
+          // Card modifier classes
+          const cardMods = [
+            isLatest ? 'is-latest' : '',
+            isFailed ? 'is-failed' : '',
+          ].filter(Boolean).join(' ');
+
+          const delay = idx * 45;
+
+          return `
+            <div class="session-card ${cardMods}" style="animation-delay:${delay}ms${isFailed ? ';opacity:0.7' : ''}">
+              <div class="session-device-icon" title="${device.label}">${device.icon}</div>
+              <div class="session-info">
+                <div class="session-info-top">
+                  <span class="session-ua">${browser} on ${device.label}</span>
+                  <span class="session-badge ${badgeCls}">${badgeTxt}</span>
+                  ${isLatest ? '<span class="session-badge latest">&bull; Current</span>' : ''}
+                </div>
+                <div class="session-info-bottom">
+                  <span class="session-meta">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    ${absTime}
+                  </span>
+                  <span class="session-ip" onclick="copyIP('${ip}', this)" title="Click to copy IP">${ip}</span>
+                </div>
+              </div>
+              <div class="session-time-right">
+                <div class="session-rel-time">${relTime}</div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        if (cardsEl) cardsEl.innerHTML = cards;
+
+      } catch (e) {
+        if (refreshBtn) refreshBtn.classList.remove('spinning');
+        if (cardsEl) cardsEl.innerHTML = `<div class="sessions-empty-state"><div class="empty-icon">⚠️</div><p>Network error — check your connection and try again.</p></div>`;
+        if (countEl) countEl.textContent = '';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadProfile();
+      loadStats();
+      loadConnectionStatus();
+      loadPrefs();
+      // Auto-load sessions if user opens the tab later they can refresh
+      // but loading once on page init is quick and matches your UI expectation.
+      loadSessions();
+
+      // Initial sync of preference toggle cards visual styles
+      syncToggleCard('prefCardNotifs', 'prefNotifications');
+      syncToggleCard('prefCardSound', 'prefAlertSound');
+      syncToggleCard('prefCardCompact', 'prefCompact');
+    });
+
+
+  </script>
+</html>

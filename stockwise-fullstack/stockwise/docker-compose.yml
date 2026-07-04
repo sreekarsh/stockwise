@@ -1,0 +1,200 @@
+version: '3.8'
+
+services:
+  stockwise-db:
+    image: timescale/timescaledb:latest-pg15
+    container_name: stockwise-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=stockwise
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  stockwise-pgbouncer:
+    image: edoburu/pgbouncer:latest
+    container_name: stockwise-pgbouncer
+    restart: unless-stopped
+    environment:
+      - DB_USER=postgres
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - DB_HOST=stockwise-db
+      - DB_PORT=5432
+      - DB_NAME=stockwise
+      - POOL_MODE=transaction
+      - MAX_CLIENT_CONN=200
+      - DEFAULT_POOL_SIZE=20
+      - AUTH_TYPE=scram-sha-256
+    ports:
+      - "6432:5432"
+    depends_on:
+      stockwise-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h localhost -p 5432 -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  stockwise-redis:
+    image: redis:7-alpine
+    container_name: stockwise-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Migration init container — runs before server starts
+  stockwise-migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: stockwise-migrate
+    command: sh -c "npx prisma migrate deploy && npx prisma validate"
+    env_file: .env
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@stockwise-db:5432/stockwise?schema=public
+      - NODE_ENV=production
+    depends_on:
+      stockwise-db:
+        condition: service_healthy
+      stockwise-pgbouncer:
+        condition: service_healthy
+
+  stockwise-ml:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: stockwise-ml
+    restart: unless-stopped
+    command: python3.11 ml_engine/server.py
+    env_file: .env
+    environment:
+      - ML_PORT=8100
+      - DATABASE_URL=postgresql://postgres:postgres@stockwise-pgbouncer:5432/stockwise?schema=public
+      - MLFLOW_TRACKING_URI=${MLFLOW_TRACKING_URI:-http://stockwise-mlflow:5000}
+    ports:
+      - "8100:8100"
+    healthcheck:
+      test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://localhost:8100/health', timeout=5)\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    depends_on:
+      stockwise-db:
+        condition: service_healthy
+      stockwise-pgbouncer:
+        condition: service_healthy
+
+  stockwise-ml-gpu:
+    profiles: ["gpu"]
+    build:
+      context: .
+      dockerfile: Dockerfile.gpu
+    container_name: stockwise-ml-gpu
+    command: python ml_engine/server.py
+    environment:
+      - ML_PORT=8100
+      - DATABASE_URL=postgresql://postgres:postgres@stockwise-db:5432/stockwise?schema=public
+    ports:
+      - "8100:8100"
+    depends_on:
+      stockwise-db:
+        condition: service_healthy
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  # MLflow model registry for advanced ML pipeline
+  stockwise-mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.20.3
+    container_name: stockwise-mlflow
+    command: >
+      mlflow server
+      --host 0.0.0.0
+      --port 5000
+      --backend-store-uri sqlite:///mlflow/mlflow.db
+      --default-artifact-root /mlflow/artifacts
+    ports:
+      - "5000:5000"
+    volumes:
+      - mlflow_data:/mlflow
+    profiles: ["mlflow"]
+
+  stockwise-caddy:
+    image: caddy:alpine
+    container_name: stockwise-caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - DOMAIN=${DOMAIN:-localhost}
+      - NODE_UPSTREAM=stockwise-server:3000
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - stockwise-server
+    restart: unless-stopped
+
+  stockwise-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: stockwise-server
+    restart: unless-stopped
+    # Start compiled JS — migration runs separately via stockwise-migrate
+    command: node dist/server.js
+    env_file: .env
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=postgresql://postgres:postgres@stockwise-pgbouncer:5432/stockwise?schema=public&pgbouncer=true&connection_limit=20
+      - REDIS_URL=redis://stockwise-redis:6379
+      - ML_PORT=8100
+      - ML_BASE_URL=http://stockwise-ml:8100
+      - SESSION_SECRET=${SESSION_SECRET}
+      - ENCRYPTION_MASTER_KEY=${ENCRYPTION_MASTER_KEY}
+      - DOMAIN=${DOMAIN:-localhost}
+      - VAULT_ADDR=${VAULT_ADDR:-}
+      - VAULT_TOKEN=${VAULT_TOKEN:-}
+    expose:
+      - "3000"
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:3000/api/health',r=>{let b='';r.on('data',c=>b+=c);r.on('end',()=>{try{const j=JSON.parse(b);process.exit(j.database==='connected'?0:1)}catch{process.exit(1)}})}).on('error',()=>process.exit(1))\""]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+    depends_on:
+      stockwise-migrate:
+        condition: service_completed_successfully
+      stockwise-redis:
+        condition: service_healthy
+      stockwise-ml:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:
+  mlflow_data:

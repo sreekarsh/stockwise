@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Wealth Portfolio - StockWise</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/portfolio.css">
+  
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-logo"><a href="../index.html" style="text-decoration:none;color:inherit">Stock<span>Wise</span></a></div>
+    <ul class="nav-links">
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="tracker.html">Live Tracker</a></li>
+      <li><a href="/signals" id="nav-signals">Signals</a></li>
+      <li><a href="portfolio.html" class="active">Portfolio</a></li>
+      <li><a href="community.html">Community</a></li>
+      <li><a href="avatar.html">✨ Avatar</a></li>
+      <li><a href="analyzer.html">Analyzer</a></li>
+      <li><a href="bot-trading.html">Bot Trading</a></li>
+      <li><a href="profile.html">Profile</a></li>
+      <li><a href="help.html">Help</a></li>
+    </ul>
+    <div class="nav-badge">BETA</div>
+    <div class="nav-right" id="navRight"></div>
+  </nav>
+
+  <div class="page-wrap">
+    <!-- Header -->
+    <div class="portfolio-header">
+      <div>
+        <h1 class="portfolio-title">
+          💼 Wealth Portfolio
+        </h1>
+        <p class="portfolio-subtitle">Real-time valuations, manual asset tracking, and exchange connectivity.</p>
+      </div>
+      <div class="header-actions">
+        <div id="syncStatusIndicator" class="sync-status-indicator" style="display: none;">
+          <span class="sync-dot"></span>
+          <span class="sync-text">Syncing...</span>
+        </div>
+        <button class="btn btn-add" id="btnAddHolding">
+          <span class="btn-icon">+</span> Add Holding
+        </button>
+        <button class="btn btn-keys" id="btnExchangeKeys">
+          <span class="btn-icon">🔑</span> Exchange Keys
+        </button>
+      </div>
+    </div>
+
+    <!-- API Keys Modal -->
+    <div id="keysModal" class="modal-overlay">
+      <div class="modal-box coindcx-modal">
+        <div class="modal-header">
+          <div class="modal-badge-icon">🔑</div>
+          <div>
+            <h2>CoinDCX Integration</h2>
+            <p class="modal-description">Connect your exchange to automatically sync balances and track real-time P&L.</p>
+          </div>
+        </div>
+        
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">CoinDCX API Key</label>
+            <div class="password-wrap">
+              <input type="password" id="dcxKey" class="modal-input" placeholder="Enter API Key" autocomplete="off">
+              <button type="button" class="toggle-pw" onclick="togglePortfolioPw('dcxKey', this)" title="Show/hide">👁</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">CoinDCX API Secret</label>
+            <div class="password-wrap">
+              <input type="password" id="dcxSecret" class="modal-input" placeholder="Enter API Secret" autocomplete="off">
+              <button type="button" class="toggle-pw" onclick="togglePortfolioPw('dcxSecret', this)" title="Show/hide">👁</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-secondary" id="btnCancelKeys">Cancel</button>
+          <button class="btn-secondary" id="btnTriggerSync" style="display:none; padding:12px 24px; border-radius:30px;">Sync Now</button>
+          <button class="btn btn-primary" id="btnSaveKeys">Save & Sync</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add/Edit Holding Modal -->
+    <div id="holdingModal" class="modal-overlay">
+      <div class="modal-box">
+        <h2 id="holdingModalTitle">Add Asset Holding</h2>
+        <p style="font-size:12px;color:#94a3b8;margin-bottom:15px;line-height:1.5;">Enter asset details to track your holding valuation manually.</p>
+        
+        <input type="hidden" id="holdingId">
+        
+        <div class="form-group">
+          <label class="form-label">Coin Symbol</label>
+          <input type="text" id="holdingSymbol" class="modal-input" placeholder="e.g. BTC">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Asset Name</label>
+          <input type="text" id="holdingName" class="modal-input" placeholder="e.g. Bitcoin">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Quantity</label>
+          <input type="number" step="any" id="holdingQuantity" class="modal-input" placeholder="e.g. 0.05">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Avg Buy Price (₹) <span style="font-size:10px;color:#64748b;font-weight:400;">— optional, leave blank to set later</span></label>
+          <input type="number" step="any" id="holdingBuyPrice" class="modal-input" placeholder="Leave blank to show — in table"></div>
+        
+        <div class="modal-actions">
+          <button class="btn-secondary" id="btnCancelHolding">Cancel</button>
+          <button class="btn btn-primary" id="btnSaveHolding">Save Asset</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Missing Buy Price Alert -->
+    <div id="missingAlert" class="err-box alert-banner">
+      <div class="alert-content">
+        <span class="alert-icon">⚠️</span>
+        <div>
+<strong class="alert-title">P&L Partial — <span id="missingCount">0</span> assets missing buy price</strong>
+                          <p class="alert-desc"><span id="missingNames" class="highlight-coins"></span> had no buy price set. <span class="action-link" onclick="openAddEditHoldingForMissing()">Edit holdings ✏️</span> to add buy prices manually for accurate P&L.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Ticker Carousel -->
+    <div class="ticker-section">
+      <div class="ticker-header">
+        <div class="ticker-title">⚡ LIVE CRYPTO TICKERS</div>
+        <div class="ticker-meta">
+          <span class="live-badge">
+            <span class="live-dot"></span>
+            <span class="live-label">LIVE</span>
+          </span>
+          <span class="price-update-info">Updated <span id="priceLastUpdated">—</span></span>
+          <button id="btnRefreshPrices" class="refresh-btn" title="Refresh prices now">
+            <span class="refresh-icon">↻</span>
+          </button>
+        </div>
+      </div>
+      <div class="ticker-container">
+        <div id="tickerTrack" class="ticker-track">
+           <!-- JS will populate live tickers here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="panels">
+      <!-- Left Panel: Table -->
+      <div class="panel table-panel">
+        <div class="tab-row">
+          <div class="tab active" id="tabHoldings">HOLDINGS</div>
+          <div class="tab" id="tabTrades">TRADE LOGS</div>
+          <div class="tab" id="tabDist">DISTRIBUTIONS</div>
+        </div>
+
+        <div class="filter-row">
+          <div class="search-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="Search coin symbol or name...">
+          </div>
+          <div class="filter-actions">
+            <button class="sort-btn active" data-sort="value">By Value</button>
+            <button class="sort-btn" data-sort="pnl">By P&L %</button>
+            <button class="sort-btn" data-sort="24h">By 24h</button>
+            <button class="sort-btn" id="btnExport">Export CSV</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table id="dataTable">
+            <thead>
+              <tr id="tableHeader">
+                <!-- Dynamically populated headers -->
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <!-- Dynamically populated rows -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Right Panel: Chart & Analytics -->
+      <div class="side-panels">
+        <div class="panel chart-panel">
+          <div class="panel-head" style="justify-content: space-between; align-items: center; display: flex; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 12px; margin-bottom: 12px;">
+            <div class="chart-tabs" style="display: flex; gap: 8px;">
+              <button class="chart-tab active" id="chartTabAlloc">ALLOCATION</button>
+              <button class="chart-tab" id="chartTabPerf">PERFORMANCE (7D)</button>
+            </div>
+          </div>
+          
+          <!-- Allocation Cutout Doughnut -->
+          <div id="allocChartSection">
+            <div class="donut-area">
+              <div class="chart-container">
+                <canvas id="weightingsChart"></canvas>
+              </div>
+              <div id="chartLegend" class="chart-legend">
+                 <!-- Legend rendered by JS -->
+              </div>
+            </div>
+          </div>
+          
+          <!-- Performance Compounded Area Chart -->
+          <div id="perfChartSection" style="display: none; padding: 0 20px 20px;">
+            <div id="perfChartReturn" style="font-size: 1.4rem; font-weight: 700; font-family: 'Outfit', sans-serif; padding: 8px 0 4px; text-align: center;"></div>
+            <div style="height: 220px; position: relative; width: 100%;">
+              <canvas id="performanceChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Risk Profile & Advanced Analytics Sidebar -->
+        <div class="panel analytics-panel" style="margin-top: 20px;">
+          <div class="panel-head" style="border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 12px; margin-bottom: 12px;">
+            <span class="panel-title">PORTFOLIO RISK & ANALYTICS</span>
+          </div>
+          <div class="analytics-list" style="display: flex; flex-direction: column; gap: 14px; padding: 0 20px 20px;">
+            <div class="analytics-item" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.03);">
+              <span class="analytics-label" style="font-size: 12px; color: var(--muted2);">Portfolio Health</span>
+              <span class="analytics-val" id="analyticHealth" style="font-size: 13px; font-weight: 700; color: #ffffff;">—</span>
+            </div>
+            <div class="analytics-item" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.03);">
+              <span class="analytics-label" style="font-size: 12px; color: var(--muted2);">Diversification Quality</span>
+              <span class="analytics-val" id="analyticDiversification" style="font-size: 13px; font-weight: 700; color: #ffffff;">—</span>
+            </div>
+            <div class="analytics-item" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.03);">
+              <span class="analytics-label" style="font-size: 12px; color: var(--muted2);">24h Absolute Delta</span>
+              <span class="analytics-val" id="analyticDelta" style="font-size: 13px; font-weight: 700; color: #ffffff;">—</span>
+            </div>
+            <div class="analytics-item" style="display: flex; justify-content: space-between; align-items: center;">
+              <span class="analytics-label" style="font-size: 12px; color: var(--muted2);">Primary Exposure</span>
+              <span class="analytics-val" id="analyticLargestAsset" style="font-size: 13px; font-weight: 700; color: #ffffff;">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <!-- AUTH MODAL — required on every page for Login / Create Account buttons -->
+  <div class="modal-backdrop" id="authModal" onclick="if(event.target===this)closeAuth()">
+    <div class="modal">
+      <button class="modal-close" onclick="closeAuth()">×</button>
+      <h2>Welcome to <span style="color:var(--accent)">StockWise</span></h2>
+      <p class="modal-sub">Login or create an account to unlock all features</p>
+      <div class="modal-tabs">
+        <button class="modal-tab active" data-tab="login" onclick="switchAuthTab('login')">Login</button>
+        <button class="modal-tab" data-tab="register" onclick="switchAuthTab('register')">Create Account</button>
+      </div>
+      <!-- Login Form -->
+      <div id="loginForm">
+        <form onsubmit="doLogin(event)">
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="loginEmail" placeholder="you@example.com" required>
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <div class="password-wrap">
+              <input type="password" id="loginPass" placeholder="••••••••" required>
+              <button type="button" class="toggle-pw" onclick="toggleLoginPw(this)" tabindex="-1" title="Show/hide password">👁</button>
+            </div>
+          </div>
+          <div class="form-group" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.95rem">
+            <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.88rem;color:var(--text2)"><input type="checkbox" id="rememberLogin" onchange="toggleRemember(this)"> Remember me</label>
+            <button type="button" class="link-btn" onclick="openForgotPassword()" style="font-size:0.82rem">Forgot password?</button>
+          </div>
+          <button type="submit" class="btn-full">Login →</button>
+          <div class="auth-footer">Don't have an account? <button type="button" class="link-btn" onclick="switchAuthTab('register')">Create account</button></div>
+        </form>
+      </div>
+      <!-- Register Form -->
+      <div id="registerForm" style="display:none">
+        <form onsubmit="doRegister(event)">
+          <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="regUsername" placeholder="traderpro123" required>
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="regEmail" placeholder="you@example.com" required>
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <div class="password-wrap">
+              <input type="password" id="regPass" placeholder="Min 6 characters" minlength="6" required oninput="onPasswordInput()">
+              <button type="button" class="toggle-pw" onclick="toggleRegPw(this)" tabindex="-1" title="Show/hide password">👁</button>
+            </div>
+            <div class="pw-strength-checklist" id="pwChecklist">
+              <div class="pw-rule" data-rule="length"><span class="pw-icon">○</span> 8+ characters</div>
+              <div class="pw-rule" data-rule="upper"><span class="pw-icon">○</span> Uppercase letter</div>
+              <div class="pw-rule" data-rule="lower"><span class="pw-icon">○</span> Lowercase letter</div>
+              <div class="pw-rule" data-rule="number"><span class="pw-icon">○</span> Number (0-9)</div>
+              <div class="pw-rule" data-rule="special"><span class="pw-icon">○</span> Special character (!@#$%^&amp;*)</div>
+            </div>
+            <div class="pw-strength-bar-wrap">
+              <div class="pw-strength-bar" id="pwStrengthBar"></div>
+            </div>
+            <div class="pw-suggest-wrap">
+              <button type="button" class="pw-suggest-btn" onclick="suggestPassword()">✨ Suggest strong password</button>
+            </div>
+          </div>
+          <div class="form-group remember-row">
+            <input type="checkbox" id="rememberRegister">
+            <label for="rememberRegister">Remember me</label>
+          </div>
+          <button type="submit" class="btn-full">Create Account →</button>
+          <div class="auth-footer">Already have an account? <button type="button" class="link-btn" onclick="switchAuthTab('login')">Login</button></div>
+        </form>
+      </div>
+      <p class="error-msg" id="authError"></p>
+    </div>
+  </div>
+
+  <script defer src="/socket.io/socket.io.js"></script>
+  <script defer src="../js/main.js?v=1.0.1"></script>
+  <script defer src="../js/portfolio.js?v=1.0.2"></script>
+</body>
+</html>

@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Help Center — StockWise</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    /* ══ BASE AMBIENT ═══════════════════════════ */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.07); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.14); }
+
+    /* floating orb background */
+    .help-page::before {
+      content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
+      background:
+        radial-gradient(ellipse 600px 400px at 15% 20%, rgba(0,229,160,.04), transparent 70%),
+        radial-gradient(ellipse 500px 500px at 85% 30%, rgba(0,191,255,.03), transparent 70%),
+        radial-gradient(ellipse 400px 300px at 50% 80%, rgba(139,92,246,.025), transparent 70%);
+    }
+
+    /* ══ SECTION ANIMATION ══════════════════════ */
+    .help-section {
+      margin-bottom: 3.5rem;
+      animation: helpFade 0.6s cubic-bezier(.21,.98,.35,1) both;
+    }
+    .help-section:nth-child(1) { animation-delay: .06s; }
+    .help-section:nth-child(2) { animation-delay: .12s; }
+    .help-section:nth-child(3) { animation-delay: .18s; }
+    @keyframes helpFade {
+      0% { opacity:0; transform:translateY(22px) scale(.98); }
+      100% { opacity:1; transform:translateY(0) scale(1); }
+    }
+
+    .help-section-title {
+      font-family:'Syne',sans-serif; font-weight:800; font-size:1.4rem;
+      margin-bottom:1.25rem; display:flex; align-items:center; gap:.65rem;
+      letter-spacing:-.3px;
+      color:var(--accent);
+      text-shadow:0 0 20px rgba(0,229,160,.3);
+      position:relative;
+    }
+    .help-section-title::after {
+      content:''; flex:1; height:1px;
+      background:linear-gradient(90deg, rgba(0,229,160,.2), transparent);
+    }
+
+    /* ══ QUICK NAV ══════════════════════════════ */
+    .quick-nav {
+      display:flex; flex-wrap:wrap; gap:8px; margin-bottom:2.5rem;
+    }
+    .quick-nav a {
+      padding:.55rem 1.3rem; border-radius:100px;
+      border:1px solid var(--border);
+      background:linear-gradient(135deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+      color:var(--text2); font-size:.8rem; text-decoration:none;
+      transition:all .3s cubic-bezier(.21,.98,.35,1);
+      backdrop-filter:blur(6px); position:relative; overflow:hidden;
+    }
+    .quick-nav a::before {
+      content:''; position:absolute; inset:0; border-radius:100px;
+      background:linear-gradient(135deg, var(--accent), transparent 70%);
+      opacity:0; transition:opacity .35s; pointer-events:none;
+    }
+    .quick-nav a:hover {
+      border-color:var(--accent); color:var(--accent);
+      transform:translateY(-3px);
+      box-shadow:0 8px 28px rgba(0,229,160,.12);
+    }
+    .quick-nav a:hover::before { opacity:.08; }
+
+    /* ══ BANNER ═════════════════════════════════ */
+    .help-banner {
+      background:linear-gradient(135deg, rgba(0,229,160,.08), rgba(0,191,255,.05), rgba(139,92,246,.03));
+      border:1px solid rgba(0,229,160,.15);
+      border-radius:18px; padding:2rem 2.5rem; margin-bottom:2rem; text-align:center;
+      position:relative; overflow:hidden; isolation:isolate;
+    }
+    .help-banner::before {
+      content:''; position:absolute; top:-60%; left:-60%; width:220%; height:220%;
+      background:
+        radial-gradient(circle at 25% 35%, rgba(0,229,160,.06), transparent 50%),
+        radial-gradient(circle at 75% 65%, rgba(0,191,255,.04), transparent 50%);
+      pointer-events:none; animation:orbFloat 12s ease-in-out infinite alternate;
+    }
+    .help-banner::after {
+      content:''; position:absolute; inset:0; border-radius:18px;
+      background:radial-gradient(ellipse 300px 150px at 50% 0%, rgba(0,229,160,.03), transparent);
+      pointer-events:none;
+    }
+    @keyframes orbFloat {
+      0% { transform:translate(0,0) rotate(0deg); }
+      100% { transform:translate(-5%,5%) rotate(5deg); }
+    }
+    .help-banner h2 { font-family:'Syne',sans-serif; font-weight:800; font-size:1.2rem; letter-spacing:-.3px; position:relative; z-index:1; }
+    .help-banner p { color:var(--text2); font-size:.88rem; margin-top:.35rem; line-height:1.7; position:relative; z-index:1; }
+
+    /* ══ CARDS ══════════════════════════════════ */
+    .help-page .card {
+      position:relative; overflow:hidden;
+      transition:border-color .35s, box-shadow .35s, transform .3s cubic-bezier(.21,.98,.35,1);
+      backdrop-filter:blur(2px);
+    }
+    .help-page .card::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:1px;
+      background:linear-gradient(90deg, transparent, rgba(0,229,160,.12), transparent);
+      opacity:0; transition:opacity .5s;
+    }
+    .help-page .card:hover {
+      border-color:rgba(0,229,160,.18);
+      box-shadow:
+        0 12px 48px rgba(0,0,0,.25),
+        0 0 0 1px rgba(0,229,160,.04) inset,
+        0 0 40px rgba(0,229,160,.02);
+      transform:translateY(-3px);
+    }
+    .help-page .card:hover::before { opacity:1; }
+
+    /* ══ FEATURE GRID (help-grid) ═══════════════ */
+    .help-grid {
+      display:grid; grid-template-columns:repeat(auto-fill, minmax(270px, 1fr)); gap:1rem;
+    }
+    .help-card {
+      background:linear-gradient(145deg, rgba(255,255,255,.025), rgba(255,255,255,.008));
+      border:1px solid var(--border);
+      border-radius:16px; padding:1.4rem;
+      transition:all .35s cubic-bezier(.21,.98,.35,1);
+      position:relative; overflow:hidden;
+    }
+    .help-card::before {
+      content:''; position:absolute; inset:0; border-radius:16px;
+      background:linear-gradient(145deg, rgba(0,229,160,.04), transparent 60%);
+      opacity:0; transition:opacity .45s; pointer-events:none;
+    }
+    .help-card::after {
+      content:''; position:absolute; top:0; left:0; right:0; height:1px;
+      background:linear-gradient(90deg, transparent, rgba(0,229,160,.08), transparent);
+      opacity:0; transition:opacity .45s;
+    }
+    .help-card:hover {
+      border-color:rgba(0,229,160,.22);
+      transform:translateY(-5px) scale(1.005);
+      box-shadow:
+        0 16px 48px rgba(0,0,0,.2),
+        0 0 0 1px rgba(0,229,160,.05) inset,
+        0 0 30px rgba(0,229,160,.02);
+    }
+    .help-card:hover::before { opacity:1; }
+    .help-card:hover::after { opacity:1; }
+    .help-card h4 {
+      font-family:'Syne',sans-serif; font-weight:700; font-size:.88rem;
+      margin-bottom:.4rem; display:flex; align-items:center; gap:.45rem;
+      position:relative; z-index:1; color:var(--accent);
+      text-shadow:0 0 12px rgba(0,229,160,.2);
+    }
+    .help-card h4::before {
+      content:''; width:7px; height:7px; border-radius:50%;
+      background:linear-gradient(135deg, var(--accent), #00b894);
+      flex-shrink:0;
+      box-shadow:0 0 10px rgba(0,229,160,.5);
+    }
+    .help-card p {
+      font-size:.8rem; color:var(--text2); line-height:1.65;
+      position:relative; z-index:1;
+    }
+
+    /* ══ INLINE CALLOUTS ════════════════════════ */
+    .help-note, .help-warn, .help-tip {
+      padding:.8rem 1.1rem; border-radius:10px; margin-top:.7rem;
+      font-size:.82rem; color:var(--text2); line-height:1.65;
+      position:relative; overflow:hidden;
+    }
+    .help-note {
+      background:linear-gradient(135deg, rgba(0,229,160,.07), rgba(0,229,160,.02));
+      border-left:3px solid var(--accent);
+    }
+    .help-note::after {
+      content:''; position:absolute; top:0; bottom:0; left:0; width:3px;
+      background:linear-gradient(to bottom, var(--accent), transparent);
+    }
+    .help-warn {
+      background:linear-gradient(135deg, rgba(245,158,11,.07), rgba(245,158,11,.02));
+      border-left:3px solid #f59e0b;
+    }
+    .help-warn::after {
+      content:''; position:absolute; top:0; bottom:0; left:0; width:3px;
+      background:linear-gradient(to bottom, #f59e0b, transparent);
+    }
+    .help-tip {
+      background:linear-gradient(135deg, rgba(0,191,255,.06), rgba(0,191,255,.02));
+      border-left:3px solid var(--accent2);
+    }
+    .help-tip::after {
+      content:''; position:absolute; top:0; bottom:0; left:0; width:3px;
+      background:linear-gradient(to bottom, var(--accent2), transparent);
+    }
+
+    /* ══ NUMBERED STEPS ═════════════════════════ */
+    .help-steps {
+      list-style:none; padding:0; margin:0; counter-reset:step;
+    }
+    .help-steps li {
+      counter-increment:step;
+      padding:.6rem 0 .6rem 2.4rem;
+      position:relative; font-size:.88rem; color:var(--text2); line-height:1.65;
+    }
+    .help-steps li::before {
+      content:counter(step);
+      position:absolute; left:0; top:.6rem;
+      width:26px; height:26px; border-radius:50%;
+      background:linear-gradient(135deg, var(--accent), #00b894);
+      color:#000; font-size:.7rem; font-weight:800;
+      display:flex; align-items:center; justify-content:center;
+      box-shadow:0 0 16px rgba(0,229,160,.3);
+    }
+    .help-steps li strong { color:var(--text); }
+
+    /* ══ API STEPS ══════════════════════════════ */
+    .help-api-step {
+      display:flex; gap:1rem; align-items:flex-start;
+      margin-bottom:1.25rem; position:relative;
+    }
+    .help-api-step:last-child { margin-bottom:0; }
+    .help-api-step:not(:last-child)::after {
+      content:''; position:absolute; left:13px; top:32px; bottom:-10px;
+      width:2px;
+      background:linear-gradient(to bottom, rgba(0,229,160,.35), transparent);
+    }
+    .help-api-num {
+      width:30px; height:30px; border-radius:50%;
+      background:linear-gradient(135deg, var(--accent), #00b894);
+      color:#000; font-size:.78rem; font-weight:800;
+      display:flex; align-items:center; justify-content:center;
+      flex-shrink:0; margin-top:2px;
+      box-shadow:0 0 16px rgba(0,229,160,.3);
+      position:relative; z-index:1;
+    }
+    .help-api-content { flex:1; }
+    .help-api-content h4 { font-size:.88rem; font-weight:600; margin-bottom:.25rem; color:var(--accent); text-shadow:0 0 12px rgba(0,229,160,.2); }
+    .help-api-content p { font-size:.82rem; color:var(--text2); line-height:1.65; margin:0; }
+    .help-api-content ul { margin:.35rem 0 0; padding-left:1.2rem; }
+    .help-api-content li { font-size:.82rem; color:var(--text2); line-height:1.65; margin-bottom:.15rem; }
+    .help-api-content kbd {
+      background:rgba(255,255,255,.06);
+      border:1px solid var(--border);
+      padding:2px 7px; border-radius:5px;
+      font-size:.75rem; font-family:'DM Sans',sans-serif; color:var(--accent);
+    }
+
+    /* ══ TOUR SUB-NAVIGATION ════════════════════ */
+    .tour-nav {
+      display:flex; flex-wrap:wrap; gap:6px; margin-bottom:1.5rem;
+      background:linear-gradient(135deg, rgba(255,255,255,.02), rgba(255,255,255,.005));
+      border:1px solid var(--border);
+      border-radius:16px; padding:.4rem;
+      backdrop-filter:blur(4px);
+    }
+    .tour-nav-btn {
+      padding:.5rem 1.1rem; border-radius:11px; border:none;
+      background:transparent; color:var(--text2);
+      font-size:.78rem; font-weight:500; cursor:pointer;
+      font-family:'DM Sans',sans-serif;
+      transition:all .3s cubic-bezier(.21,.98,.35,1);
+      white-space:nowrap; position:relative;
+    }
+    .tour-nav-btn::before {
+      content:''; position:absolute; inset:0; border-radius:11px;
+      background:linear-gradient(135deg, rgba(0,229,160,.05), transparent);
+      opacity:0; transition:opacity .3s;
+    }
+    .tour-nav-btn:hover { color:var(--text); }
+    .tour-nav-btn:hover::before { opacity:1; }
+    .tour-nav-btn.active {
+      background:linear-gradient(135deg, var(--accent), #00b894);
+      color:#000; font-weight:700;
+      box-shadow:0 4px 20px rgba(0,229,160,.3);
+      transform:translateY(-1px);
+    }
+    .tour-panel { display:none; }
+    .tour-panel.active { display:block; animation:tourFade .4s cubic-bezier(.21,.98,.35,1) both; }
+    @keyframes tourFade {
+      0% { opacity:0; transform:translateY(14px) scale(.98); }
+      100% { opacity:1; transform:translateY(0) scale(1); }
+    }
+
+    .tour-panel .panel-header {
+      display:flex; align-items:center; gap:.75rem;
+      margin-bottom:1rem; padding-bottom:.85rem;
+      border-bottom:1px solid var(--border);
+    }
+    .tour-panel .panel-header h3 {
+      font-family:'Syne',sans-serif; font-weight:700; font-size:1.1rem;
+      color:var(--accent); text-shadow:0 0 16px rgba(0,229,160,.25);
+    }
+    .tour-panel .panel-header .panel-badge {
+      font-size:.6rem; text-transform:uppercase; letter-spacing:.5px;
+      padding:3px 10px; border-radius:6px; font-weight:600;
+    }
+    .badge-core {
+      background:linear-gradient(135deg, rgba(0,229,160,.15), rgba(0,229,160,.05));
+      color:var(--accent); box-shadow:0 0 12px rgba(0,229,160,.08);
+    }
+    .badge-social {
+      background:linear-gradient(135deg, rgba(0,191,255,.15), rgba(0,191,255,.05));
+      color:var(--accent2); box-shadow:0 0 12px rgba(0,191,255,.08);
+    }
+    .badge-trade {
+      background:linear-gradient(135deg, rgba(245,158,11,.15), rgba(245,158,11,.05));
+      color:#f59e0b; box-shadow:0 0 12px rgba(245,158,11,.08);
+    }
+    .badge-account {
+      background:linear-gradient(135deg, rgba(139,92,246,.15), rgba(139,92,246,.05));
+      color:#a78bfa; box-shadow:0 0 12px rgba(139,92,246,.08);
+    }
+
+    .tour-panel .panel-sub {
+      font-size:.85rem; color:var(--text2); line-height:1.75; margin-bottom:1.25rem;
+    }
+
+    .tour-feature-grid {
+      display:grid; grid-template-columns:1fr 1fr; gap:.75rem; margin:1rem 0;
+    }
+    .tour-feature-item {
+      background:linear-gradient(145deg, rgba(255,255,255,.025), rgba(255,255,255,.005));
+      border:1px solid var(--border);
+      border-radius:12px; padding:.9rem 1rem;
+      transition:border-color .25s, box-shadow .25s, transform .25s cubic-bezier(.21,.98,.35,1);
+      position:relative; overflow:hidden;
+    }
+    .tour-feature-item::before {
+      content:''; position:absolute; left:0; top:0; bottom:0; width:2px;
+      background:linear-gradient(to bottom, var(--accent), transparent);
+      opacity:0; transition:opacity .3s;
+    }
+    .tour-feature-item:hover {
+      border-color:rgba(0,229,160,.15);
+      transform:translateX(3px);
+      box-shadow:0 4px 16px rgba(0,0,0,.12);
+    }
+    .tour-feature-item:hover::before { opacity:1; }
+    .tour-feature-item strong {
+      display:block; font-size:.78rem; color:var(--text); margin-bottom:.25rem;
+    }
+    .tour-feature-item span {
+      font-size:.76rem; color:var(--text2); line-height:1.55; display:block;
+    }
+
+    .tour-setup-box {
+      background:linear-gradient(135deg, rgba(0,229,160,.05), rgba(0,229,160,.01));
+      border:1px solid rgba(0,229,160,.12);
+      border-radius:12px; padding:1.1rem 1.35rem; margin-top:1rem;
+      position:relative;
+    }
+    .tour-setup-box::before {
+      content:'⚙'; position:absolute; right:1rem; top:1rem;
+      font-size:1.2rem; opacity:.12;
+    }
+    .tour-setup-box h5 {
+      font-size:.78rem; text-transform:uppercase; letter-spacing:.5px;
+      color:var(--accent); margin-bottom:.5rem; font-weight:600;
+    }
+    .tour-setup-box p, .tour-setup-box li {
+      font-size:.82rem; color:var(--text2); line-height:1.65;
+    }
+    .tour-setup-box ul { padding-left:1.2rem; margin:.3rem 0 0; }
+    .tour-setup-box li { margin-bottom:.25rem; }
+    .tour-setup-box ol { padding-left:1.2rem; margin:0; }
+    .tour-setup-box ol li { font-size:.82rem; color:var(--text2); line-height:1.7; }
+
+    @media (max-width:700px) {
+      .tour-feature-grid { grid-template-columns:1fr; }
+      .tour-nav { gap:4px; padding:.25rem; }
+      .tour-nav-btn { font-size:.72rem; padding:.35rem .7rem; }
+    }
+
+    /* ══ FAQ ════════════════════════════════════ */
+    .faq-item {
+      border-bottom:1px solid var(--border);
+      padding:1.2rem 0; transition:background .25s;
+      padding-left:.5rem; padding-right:.5rem;
+      border-radius:6px;
+    }
+    .faq-item:last-child { border-bottom:none; }
+    .faq-item:hover { background:rgba(255,255,255,.015); }
+    .faq-q {
+      font-size:.9rem; font-weight:600; cursor:pointer;
+      display:flex; justify-content:space-between; align-items:center;
+      user-select:none; transition:color .25s;
+      color:var(--accent); text-shadow:0 0 12px rgba(0,229,160,.15);
+    }
+    .faq-q:hover { color:var(--accent); }
+    .faq-q span {
+      font-size:1.1rem; transition:transform .4s cubic-bezier(.21,.98,.35,1);
+      display:inline-flex; align-items:center; justify-content:center;
+      width:24px; height:24px; border-radius:50%;
+      background:rgba(255,255,255,.03); border:1px solid var(--border);
+    }
+    .faq-q span.rotated { transform:rotate(45deg); background:rgba(0,229,160,.08); border-color:rgba(0,229,160,.2); }
+    .faq-a {
+      color:var(--text2); font-size:.85rem; line-height:1.7;
+      margin-top:0; max-height:0; overflow:hidden;
+      transition:max-height .4s cubic-bezier(.21,.98,.35,1), margin-top .35s ease;
+    }
+    .faq-a.open { max-height:400px; margin-top:.7rem; }
+
+    /* ══ NEON SUB-HEADINGS ══════════════════════ */
+    .help-page .card-title,
+    .help-page h5 {
+      color:var(--accent);
+      text-shadow:0 0 14px rgba(0,229,160,.25);
+    }
+    .help-page h5 { font-size:.82rem; font-weight:600; margin-bottom:.6rem; }
+
+    /* ══ FAQ: revert to normal ══════════════════ */
+    #faq .help-section-title,
+    #faq .faq-q {
+      color:var(--text);
+      text-shadow:none;
+    }
+
+    /* ══ RESPONSIVE ═════════════════════════════ */
+    @media (max-width:700px) {
+      .help-section-title { font-size:1.1rem; }
+      .help-grid { grid-template-columns:1fr; }
+      .help-banner { padding:1.5rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-logo"><a href="../index.html" style="text-decoration:none;color:inherit">Stock<span>Wise</span></a></div>
+  <ul class="nav-links">
+    <li><a href="../index.html">Home</a></li>
+    <li><a href="tracker.html">Live Tracker</a></li>
+    <li><a href="/signals">Signals</a></li>
+    <li><a href="portfolio.html">Portfolio</a></li>
+    <li><a href="community.html">Community</a></li>
+    <li><a href="avatar.html">✨ Avatar</a></li>
+    <li><a href="analyzer.html">Analyzer</a></li>
+    <li><a href="bot-trading.html">Bot Trading</a></li>
+    <li><a href="profile.html">Profile</a></li>
+    <li><a href="help.html" class="active">Help</a></li>
+  </ul>
+  <div class="nav-badge">BETA</div>
+  <div class="nav-right" id="navRight"></div>
+</nav>
+
+<div class="page-wrap help-page">
+
+  <div class="page-header">
+    <h1> Help Center</h1>
+    <p>Welcome to StockWise — smart market intelligence. Whether you&rsquo;re tracking prices, analysing signals, or trading with bots, this guide gets you up and running.</p>
+  </div>
+
+  <div class="quick-nav">
+    <a href="#account-basics"> Account Basics</a>
+    <a href="#platform-tour"> Platform Tour</a>
+    <a href="#coindcx-setup"> CoinDCX Setup</a>
+    <a href="#faq"> FAQ</a>
+  </div>
+
+  <!-- ══ ACCOUNT BASICS ═════════════════════════ -->
+  <section id="account-basics" class="help-section">
+    <h2 class="help-section-title"> Account Basics</h2>
+
+    <div class="card">
+      <div class="card-title"> Create Account</div>
+      <p>Click <strong>Login</strong> in the top-right corner of any page, then select <strong>Create Account</strong>. Fill in your <strong>username</strong>, <strong>email address</strong>, and <strong>password</strong>. Password must be at least <strong>8 characters</strong> with at least one uppercase letter, one lowercase letter, one number, and one special character (e.g. <kbd>!@#$%</kbd>). Once submitted, your account is created and you are logged in automatically. A default avatar is generated for you — you can customise it later in the <strong> Avatar</strong> section.</p>
+      <div class="help-tip">Use a unique password that you don&rsquo;t reuse on other sites. StockWise stores passwords using bcrypt hashing — we never see your plain-text password.</div>
+    </div>
+
+    <div class="card" style="margin-top:.85rem">
+      <div class="card-title"> Login</div>
+      <p>Click <strong>Login</strong> in the top-right corner. Enter your <strong>email</strong> and <strong>password</strong>, then click <strong>Sign In</strong>. You can optionally check <strong>Remember Me</strong> to stay logged in across browser sessions. If you already have an active session, the login button will show your username instead — click it to access your profile or log out.</p>
+      <div class="help-note">If you see a <strong>&ldquo;Invalid credentials&rdquo;</strong> error, double-check your email and password. Passwords are case-sensitive. If you&rsquo;ve forgotten your password, use the <strong>Forgot Password</strong> link on the login form.</div>
+    </div>
+
+    <div class="card" style="margin-top:.85rem">
+      <div class="card-title"> Reset Password</div>
+      <p>On the login form, click <strong>Forgot Password</strong>. Enter the <strong>email address</strong> associated with your account. A <strong>password reset token</strong> will be generated and displayed on screen (in the current build, the token is shown directly — copy it). Then enter your <strong>new password</strong> (must meet the same strength requirements as registration) and the <strong>reset token</strong>, then click <strong>Reset Password</strong>. If the token matches, your password is updated immediately and you can log in with the new password.</p>
+      <div class="help-warn">Reset tokens are <strong>single-use</strong> and expire after 15 minutes. If the token expires, request a new one. Never share your reset token with anyone.</div>
+      <div class="help-tip">After resetting, log out of all other devices by going to <strong>Profile → Security</strong> and clicking <strong>Revoke All Sessions</strong>.</div>
+    </div>
+  </section>
+
+  <!-- ══ PLATFORM TOUR ══════════════════════════ -->
+  <section id="platform-tour" class="help-section">
+    <h2 class="help-section-title"> Platform Tour</h2>
+    <p style="color:var(--text2);font-size:0.88rem;margin-bottom:1rem">Click any feature below for a detailed breakdown — including setup steps, key features, and pro tips.</p>
+
+    <div class="tour-nav">
+      <button class="tour-nav-btn active" data-tour="home">Home</button>
+      <button class="tour-nav-btn" data-tour="tracker">Live Tracker</button>
+      <button class="tour-nav-btn" data-tour="signals">Signals</button>
+      <button class="tour-nav-btn" data-tour="portfolio">Portfolio</button>
+      <button class="tour-nav-btn" data-tour="community">Community</button>
+      <button class="tour-nav-btn" data-tour="avatar">Avatar</button>
+      <button class="tour-nav-btn" data-tour="analyzer">Analyzer</button>
+      <button class="tour-nav-btn" data-tour="bottrading">Bot Trading</button>
+      <button class="tour-nav-btn" data-tour="profile">Profile</button>
+    </div>
+
+    <!-- ── HOME ── -->
+    <div class="tour-panel active" id="tour-home">
+      <div class="panel-header">
+        <h3> Home</h3>
+        <span class="panel-badge badge-core">Core</span>
+      </div>
+      <p class="panel-sub">Your central launchpad. The Home page gives you a snapshot of everything happening on StockWise the moment you log in. It&rsquo;s designed for quick scanning — see what&rsquo;s moving, what&rsquo;s trending, and where to go next.</p>
+      <div class="tour-feature-grid">
+        <div class="tour-feature-item"><strong> Live Ticker</strong><span>Scrolling price feed showing real-time moves for top crypto and stocks.</span></div>
+        <div class="tour-feature-item"><strong> Trending Coins</strong><span>Quick-access cards for the most active cryptocurrencies right now.</span></div>
+        <div class="tour-feature-item"><strong> Navigation Hub</strong><span>Feature cards linking directly to Tracker, Signals, Portfolio, and more.</span></div>
+        <div class="tour-feature-item"><strong> Market Pulse</strong><span>Brief stats showing total signals active, top gainers, and recent activity.</span></div>
+      </div>
+    </div>
+
+    <!-- ── LIVE TRACKER ── -->
+    <div class="tour-panel" id="tour-tracker">
+      <div class="panel-header">
+        <h3> Live Tracker</h3>
+        <span class="panel-badge badge-core">Core</span>
+      </div>
+      <p class="panel-sub">The Live Tracker is a real-time market dashboard covering <strong>50+ Indian equities</strong> (Nifty 50, Midcap, Smallcap) and <strong>20+ cryptocurrencies</strong>. Prices refresh automatically every 30 seconds via WebSocket — no manual reload needed. Use it to monitor markets, spot trends, set alerts, and analyse price action with built-in charting tools.</p>
+
+      <h5 style="font-size:0.82rem;font-weight:600;margin-bottom:0.6rem"> Key Capabilities</h5>
+      <div class="tour-feature-grid">
+        <div class="tour-feature-item">
+          <strong> Category Filtering</strong>
+          <span>Toggle between Crypto, Nifty 50, Midcap, and Smallcap tabs. Each category loads its own set of assets with relevant data columns.</span>
+        </div>
+        <div class="tour-feature-item">
+          <strong> USD / INR Toggle</strong>
+          <span>Switch pricing between USD and INR with a single click. Your preference persists across the session.</span>
+        </div>
+        <div class="tour-feature-item">
+          <strong> Sortable Columns</strong>
+          <span>Click any column header — Price, Change %, Volume — to sort ascending or descending. Quickly find the biggest gainers and losers.</span>
+        </div>
+        <div class="tour-feature-item">
+          <strong> Search Bar</strong>
+          <span>Type any symbol (BTC, RELIANCE, etc.) or company name to instantly filter the asset list. Results narrow as you type.</span>
+        </div>
+        <div class="tour-feature-item">
+          <strong> Interactive Charts</strong>
+          <span>Click any asset row to open a detailed chart panel below. Choose from SMA, EMA, RSI, and Bollinger Bands indicators. Chart updates in real time.</span>
+        </div>
+        <div class="tour-feature-item">
+          <strong> Watchlist</strong>
+          <span>Click the star icon on any asset to add it to your personal watchlist. Use the Watchlist filter tab to view only your starred assets. Saved to your account.</span>
+        </div>
+        <div class="tour-feature-item">
+          <strong> Price Alerts</strong>
+          <span>Click the bell icon, set a target price, and choose Above or Below. You&rsquo;ll receive a browser notification when the price crosses your threshold. Manage all alerts from the top bar bell icon.</span>
+        </div>
+        <div class="tour-feature-item">
+          <strong> Live Update Dot</strong>
+          <span>A pulsing green dot in the header confirms the WebSocket connection is alive. If it turns red, data is stale — click the Refresh button to reconnect.</span>
+        </div>
+      </div>
+
+      <div class="tour-setup-box">
+        <h5> How to Use</h5>
+        <ol style="padding-left:1.2rem;margin:0">
+          <li style="font-size:0.82rem;color:var(--text2);line-height:1.7">Navigate to <strong>Live Tracker</strong> from the navbar.</li>
+          <li style="font-size:0.82rem;color:var(--text2);line-height:1.7">Select a <strong>category tab</strong> (Crypto, Nifty, Midcap, Smallcap).</li>
+          <li style="font-size:0.82rem;color:var(--text2);line-height:1.7">Toggle <strong>USD / INR</strong> as needed.</li>
+          <li style="font-size:0.82rem;color:var(--text2);line-height:1.7">Click any asset row to open the <strong>chart panel</strong>.</li>
+          <li style="font-size:0.82rem;color:var(--text2);line-height:1.7">Star assets to build your <strong>watchlist</strong>. Set <strong>price alerts</strong> with the bell icon.</li>
+        </ol>
+        <div class="help-tip" style="margin-top:0.6rem">The chart panel supports multiple indicators simultaneously. Toggle them on/off from the legend above the chart.</div>
+      </div>
+    </div>
+
+    <!-- ── SIGNALS ── -->
+    <div class="tour-panel" id="tour-signals">
+      <div class="panel-header">
+        <h3> Signals</h3>
+        <span class="panel-badge badge-core">Core</span>
+      </div>
+      <p class="panel-sub">StockWise generates <strong>BUY / SELL / HOLD</strong> signals using a <strong>Temporal Fusion Transformer (TFT)</strong> ensemble — a deep learning architecture designed for time-series forecasting. The model ingests multiple market data streams (price, volume, volatility, order book imbalance, social sentiment) and outputs probabilistic predictions with interpretable explanations. Signals update periodically as new training data becomes available.</p>
+
+      <h5 style="font-size:0.82rem;font-weight:600;margin-bottom:0.6rem">Understanding a Signal Card</h5>
+      <div class="tour-feature-grid">
+        <div class="tour-feature-item">
+          <strong> Signal Type</strong>
+          <span>BUY (green), SELL (red), or HOLD (yellow). Based on the model&rsquo;s highest-probability prediction for the next time window.</span>
+        </div>
+        <div class="tour-feature-item">
+          <strong> Confidence Score</strong>
+          <span>A 0–100% value indicating how strongly the model favours this signal. Higher confidence means greater agreement across the ensemble.</span>
+        </div>
+        <div class="tour-feature-item">
+          <strong> Entry Price</strong>
+          <span>The recommended price level to enter the trade. For BUY signals this is near the current ask; for SELL signals near the current bid.</span>
+        </div>
+        <div class="tour-feature-item">
+          <strong> Target Price</strong>
+          <span>The projected price level where the model suggests taking profit. Adjusts automatically when you change the risk-reward ratio.</span>
+        </div>
+        <div class="tour-feature-item">
+          <strong> Stop-Loss</strong>
+          <span>An exit price to limit downside risk. Calculated based on recent support/resistance levels and volatility. Moves with risk-reward adjustments.</span>
+        </div>
+        <div class="tour-feature-item">
+          <strong> Risk-Reward Slider</strong>
+          <span>Drag to adjust your desired reward ratio (e.g. 1:2, 1:3). The target and stop prices update dynamically to reflect the new ratio.</span>
+        </div>
+        <div class="tour-feature-item">
+          <strong> SHAP Explain</strong>
+          <span>Click to open an interactive bar chart showing which market factors (momentum, RSI, volume, volatility, spread, etc.) influenced the signal — and whether each factor pushed toward buy or sell. Built on SHAP (SHapley Additive exPlanations) from coalitional game theory.</span>
+        </div>
+        <div class="tour-feature-item">
+          <strong> Signal Table</strong>
+          <span>A sortable, filterable table listing all generated signals. Sort by confidence, expected return %, or timestamp. Filter by signal type (BUY/SELL/HOLD) or search by coin name.</span>
+        </div>
+      </div>
+
+      <div class="tour-setup-box">
+        <h5>How the ML Model Works</h5>
+        <ul>
+          <li>The <strong>TFT ensemble</strong> combines 5 independently trained TFT models with different random seeds and validation splits.</li>
+          <li>Each model learns <strong>temporal dependencies</strong> — how price action, volume, and order book data interact over time to produce future movements.</li>
+          <li>The ensemble reduces variance: final predictions are the <strong>probability-weighted average</strong> across all models.</li>
+          <li><strong>SHAP values</strong> decompose each prediction into additive contributions from every input feature, showing exactly why the model said BUY vs SELL.</li>
+          <li>The model is re-trained on a rolling window of data. The <strong>Analyzer</strong> page shows training status, fold-level backtest metrics (win rate, Sharpe ratio, profit factor), and feature importance rankings.</li>
+        </ul>
+        <div class="help-tip" style="margin-top:0.6rem">High confidence BUY/SELL signals with strong SHAP alignment on momentum + volume factors historically show the best backtest performance. Always verify with your own analysis.</div>
+      </div>
+    </div>
+
+    <!-- ── PORTFOLIO ── -->
+    <div class="tour-panel" id="tour-portfolio">
+      <div class="panel-header">
+        <h3> Portfolio</h3>
+        <span class="panel-badge badge-core">Core</span>
+      </div>
+      <p class="panel-sub">Track your investments in one place. Add holdings manually or sync your real CoinDCX portfolio to automatically import balances and trade history. View your total portfolio value, P&amp;L breakdown, allocation by asset type, 7-day performance trend, and a health score that measures diversification and risk exposure.</p>
+      <div class="tour-feature-grid">
+        <div class="tour-feature-item"><strong> Manual Holdings</strong><span>Add assets one by one with symbol, quantity, and entry price. Edit or remove anytime.</span></div>
+        <div class="tour-feature-item"><strong> CoinDCX Sync</strong><span>Connect your API keys to auto-import holdings. See CoinDCX Setup section below.</span></div>
+        <div class="tour-feature-item"><strong> P&amp;L Dashboard</strong><span>Realised and unrealised profit/loss, day change, and total return percentage.</span></div>
+        <div class="tour-feature-item"><strong> Allocation Chart</strong><span>Visual donut chart showing your portfolio split by asset class or individual holding.</span></div>
+        <div class="tour-feature-item"><strong> Portfolio Score</strong><span>AI-generated score (0–100) rating your diversification, risk balance, and asset quality.</span></div>
+        <div class="tour-feature-item"><strong> CSV Export</strong><span>Download your entire portfolio as a CSV file for offline analysis or tax reporting.</span></div>
+      </div>
+      <div class="tour-setup-box">
+        <h5>Setup</h5>
+        <p>To add your first holding, click <strong>Add Holding</strong>, enter the symbol, quantity, and purchase price. For CoinDCX auto-sync, configure your API keys in <strong>Profile → API Keys</strong>, then click <strong>Sync Portfolio</strong> on this page.</p>
+      </div>
+    </div>
+
+    <!-- ── COMMUNITY ── -->
+    <div class="tour-panel" id="tour-community">
+      <div class="panel-header">
+        <h3> Community</h3>
+        <span class="panel-badge badge-social">Social</span>
+      </div>
+      <p class="panel-sub">A real-time social hub inspired by Discord. Join <strong>text channels</strong> (General, Trading Talk, Signals Discussion) and <strong>voice channels</strong> for live conversation. See what the community is buzzing about with the Fear &amp; Greed Index, trending coins sidebar, and live news feed. Messages update in real time with auto-scroll.</p>
+      <div class="tour-feature-grid">
+        <div class="tour-feature-item"><strong> Text Channels</strong><span>Participate in topic-specific chat rooms. Supports markdown and inline code.</span></div>
+        <div class="tour-feature-item"><strong> Voice Channels</strong><span>Join voice rooms for live discussion. Mic and speaker controls included.</span></div>
+        <div class="tour-feature-item"><strong> Fear &amp; Greed</strong><span>Live market sentiment index from 0 (Extreme Fear) to 100 (Extreme Greed), updated hourly.</span></div>
+        <div class="tour-feature-item"><strong> Trending Coins</strong><span>Sidebar showing the most-discussed coins in the community right now.</span></div>
+        <div class="tour-feature-item"><strong> News Feed</strong><span>Curated crypto and stock news headlines with source links. Auto-refreshes.</span></div>
+        <div class="tour-feature-item"><strong> Direct Messages</strong><span>Send private messages to other members. Your DM history syncs across sessions.</span></div>
+        <div class="tour-feature-item"><strong> Server Info</strong><span>View member count, online users, and server stats from the community sidebar.</span></div>
+      </div>
+
+      <div style="margin-top:1.25rem">
+        <h5 style="font-size:.82rem;font-weight:600;margin-bottom:.6rem"> Community Roles</h5>
+        <p style="font-size:.82rem;color:var(--text2);line-height:1.7;margin-bottom:.8rem">StockWise has a role-based hierarchy that determines permissions and visual badges across the community. Your role is displayed next to your username in chat messages and the member list.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
+          <div style="background:linear-gradient(135deg,rgba(255,75,110,.08),rgba(255,75,110,.02));border:1px solid rgba(255,75,110,.15);border-radius:10px;padding:.8rem 1rem">
+            <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem">
+              <span style="display:inline-block;padding:1px 8px;border-radius:4px;font-size:.6rem;font-weight:800;text-transform:uppercase;background:#ff4b6e;color:#fff">Admin</span>
+            </div>
+            <span style="font-size:.74rem;color:var(--text2);line-height:1.5;display:block">Full server access. Manage roles, moderate messages, delete posts, and configure community settings from the Admin panel.</span>
+          </div>
+          <div style="background:linear-gradient(135deg,rgba(0,184,255,.08),rgba(0,184,255,.02));border:1px solid rgba(0,184,255,.15);border-radius:10px;padding:.8rem 1rem">
+            <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem">
+              <span style="display:inline-block;padding:1px 8px;border-radius:4px;font-size:.6rem;font-weight:800;text-transform:uppercase;background:#00b8ff;color:#fff">Moderator</span>
+            </div>
+            <span style="font-size:.74rem;color:var(--text2);line-height:1.5;display:block">Help maintain the community. Can delete messages, mute users, and flag content. Appointed by Admins.</span>
+          </div>
+          <div style="background:linear-gradient(135deg,rgba(245,166,35,.08),rgba(245,166,35,.02));border:1px solid rgba(245,166,35,.15);border-radius:10px;padding:.8rem 1rem">
+            <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem">
+              <span style="display:inline-block;padding:1px 8px;border-radius:4px;font-size:.6rem;font-weight:800;text-transform:uppercase;background:#f5a623;color:#fff">VIP</span>
+            </div>
+            <span style="font-size:.74rem;color:var(--text2);line-height:1.5;display:block">Trusted community contributors. Special badge recognition. Granted by Admins to active, helpful members.</span>
+          </div>
+          <div style="background:linear-gradient(135deg,rgba(0,229,160,.08),rgba(0,229,160,.02));border:1px solid rgba(0,229,160,.15);border-radius:10px;padding:.8rem 1rem">
+            <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem">
+              <span style="display:inline-block;padding:1px 8px;border-radius:4px;font-size:.6rem;font-weight:800;text-transform:uppercase;background:var(--accent);color:#000">User</span>
+            </div>
+            <span style="font-size:.74rem;color:var(--text2);line-height:1.5;display:block">Default role for all registered members. Full access to chat, voice channels, and community features.</span>
+          </div>
+          <div style="background:linear-gradient(135deg,rgba(100,100,100,.08),rgba(100,100,100,.02));border:1px solid rgba(100,100,100,.15);border-radius:10px;padding:.8rem 1rem">
+            <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem">
+              <span style="display:inline-block;padding:1px 8px;border-radius:4px;font-size:.6rem;font-weight:800;text-transform:uppercase;background:rgba(100,100,100,.5);color:#ccc">Member</span>
+            </div>
+            <span style="font-size:.74rem;color:var(--text2);line-height:1.5;display:block">Legacy role for early platform users. Same permissions as User with a distinct badge.</span>
+          </div>
+          <div style="background:linear-gradient(135deg,rgba(100,100,100,.08),rgba(100,100,100,.02));border:1px solid rgba(100,100,100,.15);border-radius:10px;padding:.8rem 1rem">
+            <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem">
+              <span style="display:inline-block;padding:1px 8px;border-radius:4px;font-size:.6rem;font-weight:800;text-transform:uppercase;background:rgba(100,100,100,.5);color:#ccc">Supporter</span>
+            </div>
+            <span style="font-size:.74rem;color:var(--text2);line-height:1.5;display:block">Community supporters and contributors. Special badge recognising valuable participation.</span>
+          </div>
+        </div>
+        <div class="help-note" style="margin-top:.8rem">Admins and Moderators can assign roles from the user profile panel. Right-click or tap the role badge on any user&rsquo;s profile to open the role management menu.</div>
+      </div>
+    </div>
+
+    <!-- ── AVATAR ── -->
+    <div class="tour-panel" id="tour-avatar">
+      <div class="panel-header">
+        <h3> Avatar</h3>
+        <span class="panel-badge badge-account">Profile</span>
+      </div>
+      <p class="panel-sub">Design a unique blocky avatar for your profile. Choose from multiple <strong>base colours</strong> (green, blue, purple, orange, pink, red), apply <strong>textures</strong> (solid, gradient, metallic, matte), and add <strong>accessories</strong> — crown, halo, sunglasses, cap, bow, or gem. Adjust <strong>facial expressions</strong> (neutral, happy, cool, sleepy) and enable a <strong>glow effect</strong>. The 3D preview panel lets you tilt and rotate your avatar before saving.</p>
+      <div class="tour-setup-box">
+        <h5>How to Customise</h5>
+        <p>Open the Avatar page, click any colour swatch to change the base, then browse the accessory and expression tabs. Use your mouse to drag the preview for a 360° view. Click <strong>Save</strong> to apply to your profile.</p>
+      </div>
+    </div>
+
+    <!-- ── ANALYZER ── -->
+    <div class="tour-panel" id="tour-analyzer">
+      <div class="panel-header">
+        <h3> Analyzer</h3>
+        <span class="panel-badge badge-trade">Analysis</span>
+      </div>
+      <p class="panel-sub">Two powerful analysis tools in one page. <strong>Portfolio Analysis</strong> scores your holdings on diversification, risk, and overall health, then highlights best/worst performers and gives AI-driven recommendations. <strong>ML Signals Analysis</strong> dives into the model itself — view training fold metrics, signal distribution charts, SHAP feature importance rankings, and historical backtest performance including win rate, Sharpe ratio, and profit factor.</p>
+    </div>
+
+    <!-- ── BOT TRADING ── -->
+    <div class="tour-panel" id="tour-bottrading">
+      <div class="panel-header">
+        <h3> Bot Trading</h3>
+        <span class="panel-badge badge-trade">Trading</span>
+      </div>
+      <p class="panel-sub">A simulated trading environment with <strong>$10,000 virtual funds</strong>. Use the interactive price chart with technical indicators (SMA, EMA, RSI, MACD, Bollinger Bands) to analyse markets. Place manual <strong>buy/sell orders</strong> or deploy <strong>automated trading bots</strong> — RSI Momentum, MACD Crossover, or Grid Scalper — with configurable parameters. Earn <strong>XP and achievements</strong> through the Academy as you learn.</p>
+      <div class="tour-feature-grid">
+        <div class="tour-feature-item"><strong> Interactive Chart</strong><span>Full trading-view-style chart with multiple timeframes and indicators.</span></div>
+        <div class="tour-feature-item"><strong> Manual Trading</strong><span>Place market and limit orders with your virtual balance. Track fills and open positions.</span></div>
+        <div class="tour-feature-item"><strong> Automated Bots</strong><span>Deploy RSI Momentum, MACD Crossover, or Grid Scalper. Set parameters and let them trade autonomously.</span></div>
+        <div class="tour-feature-item"><strong> Academy</strong><span>Earn XP for completing trades and lessons. Level up and unlock achievement badges.</span></div>
+        <div class="tour-feature-item"><strong> P&amp;L Tracking</strong><span>Real-time profit/loss, portfolio value chart, and trade history log.</span></div>
+        <div class="tour-feature-item"><strong> Risk-Free</strong><span>All virtual — no real money involved. Reset your demo account anytime from settings.</span></div>
+      </div>
+      <div class="tour-setup-box">
+        <h5>Getting Started</h5>
+        <p>Navigate to Bot Trading. Your demo account is pre-funded with $10,000 USDT. Select an asset from the left sidebar, use the chart to analyse, then place a trade using the order panel. To try a bot, click <strong>Deploy Bot</strong>, choose a strategy, configure parameters, and activate.</p>
+      </div>
+    </div>
+
+    <!-- ── PROFILE ── -->
+    <div class="tour-panel" id="tour-profile">
+      <div class="panel-header">
+        <h3> Profile</h3>
+        <span class="panel-badge badge-account">Account</span>
+      </div>
+      <p class="panel-sub">Your account command centre. Update your display name, email, and password. Configure <strong>CoinDCX API keys</strong> for portfolio sync. Set <strong>preferences</strong> — currency (USD/INR/EUR/GBP), signal notifications, price alert sounds, and compact mode. Review active <strong>sessions</strong> and <strong>security history</strong> (login attempts, device changes). Delete your account from Settings if needed.</p>
+      <div class="tour-feature-grid">
+        <div class="tour-feature-item"><strong> Personal Info</strong><span>Edit name, username, email, and profile picture (synced with Avatar page).</span></div>
+        <div class="tour-feature-item"><strong> API Keys</strong><span>Add or remove CoinDCX API credentials. Test connection before saving.</span></div>
+        <div class="tour-feature-item"><strong> Preferences</strong><span>Currency, notifications, sound alerts, display density.</span></div>
+        <div class="tour-feature-item"><strong> Security</strong><span>View active login sessions and recent security events.</span></div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ══ COINDCX SETUP ══════════════════════════ -->
+  <section id="coindcx-setup" class="help-section">
+    <h2 class="help-section-title"> CoinDCX API Key Setup</h2>
+
+    <div class="card">
+      <div class="card-title">Why connect CoinDCX?</div>
+      <p>Linking your CoinDCX account syncs your real portfolio holdings, balances, and trade history into StockWise. Keys are encrypted with <strong>AES-256</strong> before storage — StockWise never has access to your funds or withdrawal capabilities.</p>
+      <div class="help-warn"><strong>Security:</strong> Grant only <strong>Read-only</strong> permissions. Never share your secret key.</div>
+    </div>
+
+    <div class="card" style="margin-top:0.85rem">
+      <div class="card-title">Step-by-Step Guide</div>
+
+      <div class="help-api-step">
+        <div class="help-api-num">1</div>
+        <div class="help-api-content">
+          <h4>Log in to CoinDCX</h4>
+          <p>Go to <a href="https://coindcx.com" target="_blank" style="color:var(--accent)">coindcx.com</a> and navigate to <strong>Settings</strong> → <strong>API Keys</strong> from your profile menu.</p>
+        </div>
+      </div>
+
+      <div class="help-api-step">
+        <div class="help-api-num">2</div>
+        <div class="help-api-content">
+          <h4>Create a New API Key</h4>
+          <p>Click <strong>Generate API Key</strong> and label it <kbd>StockWise</kbd> for easy identification.</p>
+        </div>
+      </div>
+
+      <div class="help-api-step">
+        <div class="help-api-num">3</div>
+        <div class="help-api-content">
+          <h4>Set Permissions</h4>
+          <p>Select <strong>Read-only</strong> only. StockWise reads balances and trade history — it never trades or withdraws. Uncheck all write/withdrawal permissions.</p>
+          <div class="help-warn">Granting write permissions is unnecessary and exposes you to risk. Read-only is all you need.</div>
+        </div>
+      </div>
+
+      <div class="help-api-step">
+        <div class="help-api-num">4</div>
+        <div class="help-api-content">
+          <h4>Copy Your Credentials</h4>
+          <p>You&rsquo;ll receive two values:</p>
+          <ul>
+            <li><strong>API Key</strong> — your public identifier (long alphanumeric string)</li>
+            <li><strong>API Secret</strong> — keep this private (shown only once)</li>
+          </ul>
+          <div class="help-tip">Save both to a password manager before closing the popup. The secret will not be shown again.</div>
+        </div>
+      </div>
+
+      <div class="help-api-step">
+        <div class="help-api-num">5</div>
+        <div class="help-api-content">
+          <h4>Add Keys to StockWise</h4>
+          <p>Go to <strong>Profile</strong> → <strong>API Keys</strong>. Paste your API Key and Secret, then click <strong>Save Keys</strong>. StockWise encrypts and stores them securely.</p>
+        </div>
+      </div>
+
+      <div class="help-api-step">
+        <div class="help-api-num">6</div>
+        <div class="help-api-content">
+          <h4>Test the Connection</h4>
+          <p>Click <strong>Sync Portfolio</strong> on the Portfolio page. A green <strong>Connected</strong> status confirms everything works. If it fails, verify your key permissions and try again from Profile → API Keys.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ FAQ ════════════════════════════════════ -->
+  <section id="faq" class="help-section">
+    <h2 class="help-section-title"> Frequently Asked Questions</h2>
+
+    <div class="card">
+      <div class="faq-item">
+        <div class="faq-q">Is StockWise free? <span style="color:var(--text2)">+</span></div>
+        <div class="faq-a">Yes. Live tracking, ML signals, community chat, portfolio analysis, and bot trading with $10,000 demo funds are all free. No credit card required.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How do I create an account? <span style="color:var(--text2)">+</span></div>
+        <div class="faq-a">Click <strong>Login</strong> in the top-right corner of any page, then select <strong>Create Account</strong>. Enter a <strong>username</strong>, your <strong>email</strong>, and a <strong>password</strong> (8+ characters with uppercase, lowercase, number, and special character). Submit and you&rsquo;re logged in automatically with a default avatar.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How do I reset my password? <span style="color:var(--text2)">+</span></div>
+        <div class="faq-a">On the login form, click <strong>Forgot Password</strong>. Enter your email — a <strong>reset token</strong> is displayed on screen. Copy it, then enter your <strong>new password</strong> (same strength rules) and the token, then click <strong>Reset Password</strong>. Tokens are single-use and expire after 15 minutes.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Do I need a CoinDCX account? <span style="color:var(--text2)">+</span></div>
+        <div class="faq-a">No. Almost all features work without one. CoinDCX is only needed to sync real portfolio holdings automatically. You can also track holdings manually on the Portfolio page.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Are the ML signals financial advice? <span style="color:var(--text2)">+</span></div>
+        <div class="faq-a">No. Signals are generated by ML models for educational and informational purposes only. Always do your own research before making investment decisions.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How accurate are the ML signals? <span style="color:var(--text2)">+</span></div>
+        <div class="faq-a">Accuracy varies by market conditions. The Analyzer page shows historical backtest metrics (win rate, Sharpe ratio, profit factor). Past performance does not guarantee future results.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Is my CoinDCX API key safe? <span style="color:var(--text2)">+</span></div>
+        <div class="faq-a">Yes. Keys are encrypted with <strong>AES-256</strong> before storage. StockWise only uses read-only endpoints. We never have the ability to trade or withdraw on your behalf.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What is the Bot Trading demo account? <span style="color:var(--text2)">+</span></div>
+        <div class="faq-a">Every user gets a simulated $10,000 portfolio with real market data. Place trades, deploy automated bots, and track P&L — all risk-free. Reset your practice account anytime.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Where does market data come from? <span style="color:var(--text2)">+</span></div>
+        <div class="faq-a">Cryptocurrency data is from <strong>CoinGecko</strong> and <strong>Binance WebSocket</strong>. Stock data is from <strong>Finnhub</strong> and <strong>Yahoo Finance</strong>. Data refreshes every 30 seconds.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Where can I get help? <span style="color:var(--text2)">+</span></div>
+        <div class="faq-a">The <strong>Community</strong> section has live chat channels. For technical issues, check the project README or open a GitHub issue.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How do I set a price alert? <span style="color:var(--text2)">+</span></div>
+        <div class="faq-a">On the <strong>Live Tracker</strong> page, click the bell icon next to any asset. Enter your target price and choose <strong>Above</strong> or <strong>Below</strong>. You&rsquo;ll receive a browser notification when the price crosses your threshold. Manage all alerts from the bell icon in the top bar.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How does the watchlist work? <span style="color:var(--text2)">+</span></div>
+        <div class="faq-a">Click the <strong>star icon</strong> on any asset in the Live Tracker to add it to your personal watchlist. Use the <strong>Watchlist</strong> filter tab to view only starred items. Your watchlist is saved to your account and syncs across sessions.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Can I export my portfolio data? <span style="color:var(--text2)">+</span></div>
+        <div class="faq-a">Yes. On the <strong>Portfolio</strong> page, click the <strong>Export CSV</strong> button to download all your holdings, including quantities, entry prices, current values, and P&L. You can also export your trade history from the Bot Trading section.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What are SHAP explanations? <span style="color:var(--text2)">+</span></div>
+        <div class="faq-a"><strong>SHAP</strong> (SHapley Additive exPlanations) is a game-theoretic method that explains how each market factor contributed to an ML signal. On the Signals page, click <strong>SHAP Explain</strong> on any signal card to see a bar chart showing which factors (momentum, RSI, volume, volatility, etc.) pushed the prediction toward buy or sell, and by how much.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How do I reset my bot trading account? <span style="color:var(--text2)">+</span></div>
+        <div class="faq-a">Go to the <strong>Bot Trading</strong> page and click <strong>Reset Account</strong> in the settings panel. This resets your virtual balance back to $10,000 and clears all open positions and trade history. Use this to start fresh with a new strategy.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What are the automated trading bots? <span style="color:var(--text2)">+</span></div>
+        <div class="faq-a">Bot Trading offers three pre-built strategies: <strong>RSI Momentum</strong> (buys when RSI oversold, sells when overbought), <strong>MACD Crossover</strong> (trades on MACD line crossovers), and <strong>Grid Scalper</strong> (places multiple limit orders in a range). Deploy them on any asset with configurable parameters and let them trade autonomously in the demo environment.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Can I change my display currency? <span style="color:var(--text2)">+</span></div>
+        <div class="faq-a">Yes. Go to <strong>Profile</strong> → <strong>Preferences</strong> and select your preferred currency from <strong>USD, INR, EUR, or GBP</strong>. The setting applies across all pages including Live Tracker, Portfolio, and Signals.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What happens if I delete my account? <span style="color:var(--text2)">+</span></div>
+        <div class="faq-a">Deleting your account removes all personal data: your profile, portfolio holdings, watchlist, alerts, avatar, and bot trading history. This action is permanent and cannot be undone. To delete, go to <strong>Profile</strong> → <strong>Settings</strong> → <strong>Delete Account</strong>.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How is the Fear &amp; Greed Index calculated? <span style="color:var(--text2)">+</span></div>
+        <div class="faq-a">The Fear &amp; Greed Index in the <strong>Community</strong> section aggregates signals from multiple sources: market momentum, trading volume, social media sentiment, surveys, and market dominance. It ranges from <strong>0 (Extreme Fear)</strong> to <strong>100 (Extreme Greed)</strong> and updates every hour as a quick pulse on market sentiment.</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script defer src="../js/main.js"></script>
+<script nonce="__NONCE__">
+  document.querySelectorAll('.faq-q').forEach(function(q) {
+    q.addEventListener('click', function() {
+      var a = this.nextElementSibling;
+      a.classList.toggle('open');
+      var plus = this.querySelector('span');
+      if (plus) plus.classList.toggle('rotated');
+    });
+  });
+
+  // ── Tour sub-navigation ──
+  document.querySelectorAll('.tour-nav-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.tour-nav-btn').forEach(function(b) { b.classList.remove('active'); });
+      document.querySelectorAll('.tour-panel').forEach(function(p) { p.classList.remove('active'); });
+      this.classList.add('active');
+      var target = document.getElementById('tour-' + this.getAttribute('data-tour'));
+      if (target) target.classList.add('active');
+    });
+  });
+
+  document.querySelectorAll('.quick-nav a').forEach(function(a) {
+    a.addEventListener('click', function(e) {
+      e.preventDefault();
+      var target = document.querySelector(this.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+</script>
+
+</body>
+</html>

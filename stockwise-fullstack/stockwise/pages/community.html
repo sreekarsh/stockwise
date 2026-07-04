@@ -1,0 +1,3271 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Community — StockWise Hub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  
+  <style>
+    /* ══════════════════════════════════════════════
+       DISCORD PRO ENGINE - ARCHITECTURE & DESIGN SYSTEM
+       ══════════════════════════════════════════════ */
+    :root {
+      --discord-bg: #0b0f17;
+      --discord-sidebar: #070a10;
+      --discord-server-bar: #05070a;
+      --discord-right-sidebar: #080c14;
+      --discord-card: #121824;
+      --discord-card-hover: #1a2233;
+      --discord-accent: #00e5a0;
+      --discord-accent-dim: rgba(0, 229, 160, 0.1);
+      --discord-text-muted: #8fa0b5;
+      --discord-voice-green: #23a55a;
+      --discord-danger: #f23f43;
+      --discord-border: rgba(255, 255, 255, 0.06);
+      --discord-input: #05070a;
+    }
+
+    body.community-page {
+      background-color: var(--discord-bg);
+      font-family: 'DM Sans', sans-serif;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      color: #fff;
+    }
+
+    /* Navbar Fixes */
+    .navbar {
+      z-index: 1001;
+      position: relative;
+    }
+
+    /* System Layout Wrapper */
+    .discord-app-container {
+      display: grid;
+      grid-template-columns: 72px 240px 1fr 340px;
+      flex: 1;
+      background: var(--discord-bg);
+      position: relative;
+      overflow: hidden;
+    }
+
+    @media (max-width: 1400px) {
+      .discord-app-container { grid-template-columns: 72px 240px 1fr; }
+      .discord-sidebar-right { display: none; }
+    }
+    @media (max-width: 900px) {
+      .discord-app-container { grid-template-columns: 72px 1fr; }
+      .discord-sidebar-left { display: none; }
+    }
+
+    /* ── SERVER BAR (FAR LEFT) ── */
+    .discord-server-sidebar {
+      background: var(--discord-server-bar);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 0;
+      gap: 12px;
+      border-right: 1px solid rgba(0,0,0,0.2);
+      z-index: 10;
+      overflow-y: auto;
+    }
+
+    .server-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--discord-card);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      color: var(--discord-text-muted);
+      font-size: 1.1rem;
+      font-weight: 700;
+      position: relative;
+    }
+    .server-icon:hover, .server-icon.active {
+      border-radius: 16px;
+      background: var(--discord-accent);
+      color: #000;
+    }
+    .server-icon.active::before {
+      content: ''; position: absolute; left: -12px; width: 4px; height: 32px; background: #fff; border-radius: 0 4px 4px 0;
+    }
+    
+    .role-badge { font-size: 0.6rem; padding: 1px 4px; border-radius: 3px; font-weight: 800; text-transform: uppercase; margin-right: 4px; vertical-align: middle; }
+    .badge-admin { background: #ff4b6e; color: #fff; }
+    .badge-mod { background: #00b8ff; color: #fff; }
+    .badge-vip { background: #f5a623; color: #fff; }
+
+    .server-separator {
+      width: 32px; height: 2px; background: var(--discord-border); margin: 4px 0;
+    }
+
+    /* ── LEFT SIDEBAR (CHANNELS) ── */
+    .discord-sidebar-left {
+      background: var(--discord-sidebar);
+      border-right: 1px solid var(--discord-border);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .sidebar-header {
+      padding: 0 1rem;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      font-weight: 800;
+      font-family: 'Syne', sans-serif;
+      border-bottom: 1px solid var(--discord-border);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .sidebar-scrollable {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem 0.5rem;
+    }
+
+    .sidebar-category {
+      margin-bottom: 1.5rem;
+    }
+
+    .category-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--discord-text-muted);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 0 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .category-btn {
+      background: none; border: none; color: var(--discord-text-muted); cursor: pointer; font-size: 1.1rem; transition: color 0.1s;
+    }
+    .category-btn:hover { color: #fff; }
+
+    .d-channel-item {
+      display: flex;
+      align-items: center;
+      padding: 0.5rem 0.75rem;
+      border-radius: 4px;
+      cursor: pointer;
+      color: var(--discord-text-muted);
+      text-decoration: none;
+      font-size: 0.92rem;
+      margin-bottom: 2px;
+      transition: all 0.1s;
+    }
+    .d-channel-item:hover, .d-channel-item.active {
+      background: var(--discord-card-hover);
+      color: #fff;
+    }
+    .d-channel-item.active {
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .channel-hash {
+      margin-right: 6px; font-size: 1.2rem; opacity: 0.5; font-weight: 400;
+    }
+    .channel-delete-btn {
+      background: none; border: none; color: var(--discord-text-muted);
+      cursor: pointer; font-size: 0.75rem; padding: 2px 6px; border-radius: 3px;
+      opacity: 0; transition: opacity 0.1s;
+      line-height: 1;
+    }
+    .channel-delete-btn:hover { color: var(--discord-danger); }
+    .channel-list-items > div:hover .channel-delete-btn { opacity: 1; }
+
+    /* User Panel (Bottom) */
+    .user-status-panel {
+      background: rgba(0,0,0,0.2);
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-top: 1px solid var(--discord-border);
+    }
+    .user-avatar-small {
+      width: 32px; height: 32px; border-radius: 50%; background: #313338; position: relative;
+    }
+    .user-status-dot {
+      position: absolute; bottom: -2px; right: -2px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--discord-sidebar); background: var(--discord-voice-green);
+    }
+    .user-info-text { flex: 1; min-width: 0; }
+    .u-name { font-size: 0.85rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .u-tag { font-size: 0.72rem; color: var(--discord-text-muted); }
+    .user-actions { display: flex; gap: 4px; }
+    .u-btn { background: none; border: none; color: var(--discord-text-muted); cursor: pointer; padding: 4px; border-radius: 4px; font-size: 1rem; }
+    .u-btn:hover { background: var(--discord-card-hover); color: #fff; }
+    
+    .voice-status-text { font-size: 0.8rem; font-weight: 700; color: var(--discord-voice-green); }
+    .voice-room-text { font-size: 0.75rem; color: var(--discord-text-muted); }
+    .u-btn.active-red { color: var(--discord-danger); }
+    .u-btn.active-green { color: var(--discord-voice-green); }
+
+    /* ── CENTER FEED ── */
+    .discord-feed {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background: var(--discord-bg);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .d-feed-header {
+      height: 48px;
+      padding: 0 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--discord-border);
+      background: rgba(11, 15, 23, 0.7);
+      backdrop-filter: blur(12px);
+      z-index: 5;
+    }
+    .d-feed-header h2 {
+      margin: 0; font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 8px;
+    }
+
+    .d-messages-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 1.25rem;
+      scroll-behavior: smooth;
+    }
+
+    /* Message Styles */
+    .d-msg {
+      display: flex; gap: 1rem; position: relative; padding: 4px 0;
+    }
+    .d-msg:hover { background: rgba(255, 255, 255, 0.01); }
+    .d-msg-avatar {
+      width: 40px; height: 40px; border-radius: 50%; background: #313338; flex-shrink: 0; overflow: hidden;
+    }
+    .d-msg-body { flex: 1; min-width: 0; }
+    .d-msg-header { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
+    .d-msg-author { font-weight: 600; color: #fff; font-size: 0.95rem; cursor: pointer; }
+    .d-msg-author:hover { text-decoration: underline; }
+    .d-msg-time { font-size: 0.72rem; color: var(--discord-text-muted); font-weight: 400; }
+    .d-msg-content { color: #dbdee1; font-size: 0.95rem; line-height: 1.4; word-break: break-word; }
+    .post-coin { background: var(--discord-accent-dim); color: var(--discord-accent); padding: 1px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; margin-left: 8px; }
+
+    /* Composer */
+    .d-composer-wrap {
+      padding: 0 1rem 1.5rem;
+    }
+    .d-composer-box {
+      background: var(--discord-card);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      position: relative;
+    }
+    .composer-textarea {
+      width: 100%; background: transparent; border: none; resize: none; outline: none; color: #dbdee1; font-family: inherit; font-size: 0.95rem; min-height: 44px; max-height: 50vh; padding-right: 40px;
+    }
+    .composer-actions-bar {
+      display: flex; align-items: center; justify-content: space-between; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.04);
+    }
+    .composer-tools-left { display: flex; align-items: center; gap: 12px; }
+    .composer-tool-btn { background: none; border: none; color: var(--discord-text-muted); cursor: pointer; font-size: 1.2rem; transition: color 0.1s; display: flex; align-items: center; gap: 4px; }
+    .composer-tool-btn:hover { color: #dbdee1; }
+
+    /* ── RIGHT SIDEBAR (INSIGHTS) ── */
+    .discord-sidebar-right {
+      background: var(--discord-right-sidebar);
+      border-left: 1px solid var(--discord-border);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+    }
+    .right-sidebar-header {
+      height: 48px; padding: 0 1rem; display: flex; align-items: center; font-weight: 700; border-bottom: 1px solid var(--discord-border); color: #fff; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .right-panel-content {
+      flex: 1; overflow-y: auto; padding: 1.25rem; display: flex; flex-direction: column; gap: 1.5rem;
+    }
+    .insights-card {
+      background: var(--discord-card); border: 1px solid var(--discord-border); border-radius: 8px; padding: 1rem;
+    }
+    .insights-title {
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: var(--discord-text-muted); margin-bottom: 1rem; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center;
+    }
+    
+    .coin-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .coin-icon { width: 24px; height: 24px; border-radius: 50%; background: #2b2d31; }
+    .coin-tag-name { font-size: 0.88rem; color: #fff; font-weight: 600; flex: 1; }
+    .coin-pct-pill { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: 700; }
+    .coin-pct-pill.up { background: rgba(35, 165, 90, 0.1); color: #23a55a; }
+    .coin-pct-pill.down { background: rgba(242, 63, 67, 0.1); color: #f23f43; }
+
+    .pulse-meter { height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; margin-bottom: 8px; position: relative; overflow: hidden; }
+    .pulse-fill { height: 100%; background: var(--discord-accent); transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); width: 50%; }
+
+    /* ── FRIENDS SECTION ── */
+    .friends-view {
+      padding: 1rem 0;
+    }
+    .friend-card {
+      background: linear-gradient(135deg, var(--discord-card) 0%, #151e2d 100%);
+      border: 1px solid var(--discord-border);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    .friend-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+      border-color: var(--discord-accent);
+    }
+    .streak-tag {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: linear-gradient(90deg, var(--discord-accent) 0%, #00ffa3 100%);
+      color: #000;
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 4px 8px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+    }
+    .friend-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+    }
+    .friend-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--discord-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      position: relative;
+      border: 2px solid #000;
+    }
+    .friend-status {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid var(--discord-card);
+      background: var(--discord-text-muted);
+    }
+    .friend-status.status-online {
+      background: var(--discord-voice-green);
+      box-shadow: 0 0 8px var(--discord-voice-green);
+    }
+    .friend-details {
+      flex: 1;
+      min-width: 0;
+    }
+    .friend-name {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 2px;
+    }
+    .friend-meta {
+      font-size: 0.75rem;
+      color: var(--discord-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .activity-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      padding: 6px 12px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.06);
+      font-weight: 500;
+    }
+    .activity-analyzing { color: var(--discord-accent); }
+    .activity-trading { color: var(--discord-voice-green); }
+    .activity-idle { color: var(--discord-text-muted); }
+    .presence-context {
+      font-size: 0.8rem;
+      color: var(--discord-text-muted);
+      margin-top: -4px;
+    }
+    .friend-badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: -4px;
+    }
+    .friend-badge {
+      font-size: 0.68rem;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .badge-accent {
+      background: var(--discord-accent-dim);
+      color: var(--discord-accent);
+      border: 1px solid var(--discord-accent);
+    }
+    .badge-gold {
+      background: rgba(255, 204, 51, 0.15);
+      color: #ffcc33;
+      border: 1px solid #ffcc33;
+    }
+    .friend-quick-actions {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .action-btn-brutal {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--discord-border);
+      color: #e0e0e0;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.3px;
+    }
+    .action-btn-brutal:hover {
+      background: var(--discord-card-hover);
+      border-color: var(--discord-accent);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+    .action-btn-brutal.primary {
+      background: var(--discord-accent);
+      color: #000;
+      border-color: var(--discord-accent);
+    }
+    .action-btn-brutal.primary:hover {
+      background: #00ffa3;
+      box-shadow: 0 4px 12px rgba(0, 229, 160, 0.3);
+    }
+    .friends-section-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--discord-text-muted);
+      margin: 1.5rem 0 0.75rem 0;
+      letter-spacing: 0.8px;
+      position: relative;
+      padding-left: 8px;
+    }
+    .friends-section-title::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 16px;
+      background: var(--discord-accent);
+      border-radius: 2px;
+    }
+    .friends-search-header {
+      margin-bottom: 1.5rem;
+    }
+
+    /* ── COMMAND PALETTE SEARCH ── */
+    .search-command-palette {
+      position: relative;
+    }
+    .search-container {
+      position: relative;
+      z-index: 100;
+    }
+    .command-input {
+      width: 100%;
+      height: 56px;
+      background: rgba(18, 24, 36, 0.8);
+      border: 2px solid var(--discord-accent);
+      border-radius: 14px;
+      padding: 0 20px;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 500;
+      outline: none;
+      transition: all 0.2s;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    .command-input:focus {
+      border-color: var(--discord-accent);
+      box-shadow: 0 0 0 4px var(--discord-accent-dim);
+    }
+    .command-input::placeholder {
+      color: var(--discord-text-muted);
+    }
+    .search-filter-chips {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      padding: 0 4px;
+    }
+    .filter-chip {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--discord-border);
+      border-radius: 20px;
+      padding: 6px 14px;
+      color: var(--discord-text-muted);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .filter-chip:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      border-color: var(--discord-accent);
+    }
+    .filter-chip.active {
+      background: var(--discord-accent);
+      color: #000;
+      border-color: var(--discord-accent);
+    }
+    .live-results-backdrop {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(11, 15, 23, 0.8);
+      backdrop-filter: blur(8px);
+      z-index: 99;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 100px;
+    }
+    .live-results {
+      background: var(--discord-card);
+      border: 1px solid var(--discord-border);
+      border-radius: 12px;
+      max-width: 540px;
+      width: 90%;
+      max-height: 60vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    }
+    .live-result-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .live-result-item:hover {
+      background: var(--discord-card-hover);
+    }
+    .live-result-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: var(--discord-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    /* Sticker Picker */
+    .sticker-picker-wrap {
+      position: absolute; bottom: 80px; left: 1rem; z-index: 1000; background: var(--discord-card); border: 1px solid var(--discord-accent); border-radius: 12px; padding: 12px; width: 300px; max-height: 400px; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+    }
+    .sticker-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+    .sticker-item { background: none; border: none; font-size: 1.8rem; cursor: pointer; padding: 4px; border-radius: 8px; transition: transform 0.1s; }
+    .sticker-item:hover { transform: scale(1.2); background: rgba(255,255,255,0.05); }
+
+    .engine-input {
+      background: var(--discord-input); border: 1px solid var(--discord-border); color: #fff; padding: 0.5rem; border-radius: 6px; width: 100%; outline: none; font-size: 0.85rem;
+    }
+    .engine-input:focus { border-color: var(--discord-accent); }
+    .engine-input:-webkit-autofill,
+    .engine-input:-webkit-autofill:hover,
+    .engine-input:-webkit-autofill:focus {
+      -webkit-text-fill-color: #fff;
+      -webkit-box-shadow: 0 0 0px 1000px var(--discord-input) inset;
+      transition: background-color 5000s ease-in-out 0s;
+    }
+
+    .spinner { width: 24px; height: 24px; border: 3px solid rgba(0, 229, 160, 0.1); border-top-color: var(--discord-accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loader { display: flex; align-items: center; justify-content: center; padding: 1rem; }
+
+    /* Fix layout direction for friends page to top-aligned */
+    .d-messages-container.friends-active {
+      flex-direction: column !important;
+      justify-content: flex-start !important;
+      display: flex !important;
+    }
+
+    /* Friends navigation tabs */
+    .friends-nav-tabs {
+      display: flex;
+      gap: 16px;
+      border-bottom: 1px solid var(--discord-border);
+      padding-bottom: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .f-nav-tab {
+      background: none;
+      border: none;
+      color: var(--discord-text-muted);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: 4px;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+    }
+    .f-nav-tab:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: #fff;
+    }
+    .f-nav-tab.active {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+    .f-nav-tab.add-friend-btn {
+      color: var(--discord-voice-green);
+    }
+    .f-nav-tab.add-friend-btn.active {
+      background: var(--discord-voice-green);
+      color: #000;
+    }
+    .f-nav-tab .badge {
+      background: var(--discord-danger);
+      color: #fff;
+      font-size: 0.72rem;
+      padding: 1px 6px;
+      border-radius: 10px;
+      margin-left: 6px;
+      font-weight: 700;
+    }
+
+    /* Post action & like buttons */
+    .post-actions { display: inline-flex; gap: 2px; margin-left: 6px; }
+    .post-action-btn { background:none; border:none; cursor:pointer; font-size:0.7rem; padding:0 2px; opacity:0.5; transition:opacity 0.2s; }
+    .post-action-btn:hover { opacity:1; }
+    .d-msg-footer { margin-top: 4px; }
+    .like-btn { background:none; border:none; cursor:pointer; font-size:0.75rem; color:var(--discord-text-muted); padding:2px 6px; border-radius:4px; transition:all 0.2s; display:inline-flex; align-items:center; gap:3px; }
+    .like-btn:hover { background:rgba(255,255,255,0.05); }
+    .like-btn.liked { color:var(--discord-accent); }
+    .like-count { font-size:0.7rem; }
+    .btn-sm.secondary { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:var(--discord-text-muted); }
+    .btn-sm.secondary:hover { background:rgba(255,255,255,0.1); color:#fff; }
+    .d-msg-reactions { display:flex; gap:4px; flex-wrap:wrap; margin-top:4px; }
+    .reaction-badge { display:inline-flex; align-items:center; gap:2px; padding:1px 6px; border-radius:10px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); font-size:0.7rem; cursor:pointer; transition:all 0.15s; }
+    .reaction-badge:hover { background:rgba(255,255,255,0.08); border-color:var(--discord-accent); }
+    .d-msg-reaction-picker { display:flex; gap:2px; margin-top:2px; opacity:0; transition:opacity 0.15s; }
+    .d-msg:hover .d-msg-reaction-picker { opacity:1; }
+    .reaction-opt { cursor:pointer; font-size:0.75rem; padding:1px 3px; border-radius:4px; transition:background 0.15s; }
+    .reaction-opt:hover { background:rgba(255,255,255,0.08); }
+  </style>
+</head>
+
+<body class="community-page">
+  <nav class="navbar">
+    <div class="nav-logo"><a href="../index.html" style="text-decoration:none;color:inherit">Stock<span>Wise</span></a></div>
+    <ul class="nav-links">
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="tracker.html">Live Tracker</a></li>
+      <li><a href="/signals">Signals</a></li>
+      <li><a href="portfolio.html">Portfolio</a></li>
+      <li><a href="community.html" class="active">Community</a></li>
+      <li><a href="avatar.html">✨ Avatar</a></li>
+      <li><a href="analyzer.html">Analyzer</a></li>
+      <li><a href="bot-trading.html">Bot Trading</a></li>
+      <li><a href="profile.html">Profile</a></li>
+      <li><a href="help.html">Help</a></li>
+    </ul>
+    <div class="nav-badge">BETA</div>
+    <div class="nav-right" id="navRight"></div>
+  </nav>
+
+  <div class="discord-app-container">
+
+    <!-- ── SERVER BAR (FAR LEFT) ── -->
+    <aside class="discord-server-sidebar">
+      <div class="server-icon active" title="Home & Friends" onclick="switchCategory('home', this)">🏠</div>
+      <div class="server-separator"></div>
+      <div class="server-icon" title="StockWise Hub" onclick="switchCategory('hub', this)">SW</div>
+      <div class="server-separator"></div>
+      <div class="server-icon" title="Crypto Markets" onclick="switchCategory('crypto', this)">₿</div>
+      <div class="server-icon" title="Stock Insights" onclick="switchCategory('stocks', this)">📈</div>
+      <div class="server-separator"></div>
+      <div class="server-icon" id="createGroupBtn" title="Create Group" style="color:var(--discord-voice-green);display:none" onclick="openCreateGroup()">＋</div>
+    </aside>
+
+    <!-- ── LEFT SIDEBAR (CHANNELS) ── -->
+    <aside class="discord-sidebar-left">
+      <header class="sidebar-header" id="sidebarHubTitle">
+        Home
+      </header>
+      
+      <div class="sidebar-scrollable">
+        <div id="friendsSidebarSection">
+           <div class="d-channel-item active" onclick="showFriendsList()"><span class="channel-hash">👥</span> Friends</div>
+        </div>
+
+        <div class="sidebar-category">
+          <div class="category-header">
+            <span>💬 Channels</span>
+            <button class="category-btn" onclick="openCreateGroup()">＋</button>
+          </div>
+          <div class="channel-list-items" id="groupsList">
+            <a href="#" class="d-channel-item active" onclick="setActiveGroup(null, this)">
+                <span class="channel-hash">#</span> global-feed
+            </a>
+            <!-- Groups dynamic list -->
+          </div>
+        </div>
+
+        <div class="sidebar-category">
+          <div class="category-header">
+            <span>🎤 Voice Channels</span>
+          </div>
+          <div class="channel-list-items">
+            <div class="d-channel-item voice-channel" data-name="Trader Lounge" onclick="joinVoice('Trader Lounge')" style="display:flex; justify-content:space-between; align-items:center;">
+              <div style="display:flex; align-items:center;">
+                <svg class="voice-channel-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px; color:var(--discord-text-muted); opacity:0.6; transition:all 0.2s;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                <span>Trader Lounge</span>
+              </div>
+              <span class="join-badge" style="font-size:0.65rem; background:rgba(35,165,90,0.15); color:var(--discord-voice-green); padding:2px 6px; border-radius:4px; opacity:0.6; transition:opacity 0.2s; font-weight:700;">JOIN</span>
+            </div>
+            <div id="voiceUsers-TraderLounge" class="voice-channel-users" style="padding-left: 24px; margin-bottom: 8px; display: none; flex-direction: column; gap: 6px; margin-top: 2px;"></div>
+
+            <div class="d-channel-item voice-channel" data-name="Alpha Room" onclick="joinVoice('Alpha Room')" style="display:flex; justify-content:space-between; align-items:center;">
+              <div style="display:flex; align-items:center;">
+                <svg class="voice-channel-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px; color:var(--discord-text-muted); opacity:0.6; transition:all 0.2s;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                <span>Alpha Room</span>
+              </div>
+              <span class="join-badge" style="font-size:0.65rem; background:rgba(35,165,90,0.15); color:var(--discord-voice-green); padding:2px 6px; border-radius:4px; opacity:0.6; transition:opacity 0.2s; font-weight:700;">JOIN</span>
+            </div>
+            <div id="voiceUsers-AlphaRoom" class="voice-channel-users" style="padding-left: 24px; margin-bottom: 8px; display: none; flex-direction: column; gap: 6px; margin-top: 2px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Voice Connection Panel (Modernized) -->
+      <div id="voiceControlsPanel" style="display:none; background: linear-gradient(180deg, rgba(0,229,160,0.04) 0%, rgba(0,0,0,0.2) 100%); border-top: 1px solid rgba(0,229,160,0.1); padding: 12px 14px; backdrop-filter: blur(8px); transition: all 0.3s ease;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px">
+          <div style="display:flex; flex-direction:column; gap:3px">
+            <div style="display:flex; align-items:center; gap:7px">
+              <span class="live-dot" style="width:8px;height:8px;background:var(--discord-voice-green);border-radius:50%;box-shadow:0 0 8px var(--discord-voice-green);animation: voicePulse 2s ease-in-out infinite;"></span>
+              <span class="voice-status-text" style="font-size:0.82rem;font-weight:700;color:var(--discord-voice-green);letter-spacing:0.3px;">Voice Connected</span>
+              <span style="font-size:0.65rem;color:var(--discord-text-muted);background:rgba(255,255,255,0.04);padding:1px 6px;border-radius:4px;">RTC</span>
+            </div>
+            <span id="voicePanelRoom" class="voice-room-text" style="font-size:0.72rem;color:var(--discord-text-muted);padding-left:15px;">Trader Lounge</span>
+            <div style="display:flex; align-items:center; gap:6px; margin-top:3px; padding-left:15px;">
+              <span id="voicePingDot" style="display:inline-block; width:5px; height:5px; background:#23a55a; border-radius:50%; box-shadow: 0 0 4px #23a55a; transition: all 0.3s;"></span>
+              <span id="voicePingText" style="font-size:0.65rem; color:var(--discord-text-muted); font-family:'DM Sans',sans-serif;">Ping: 42 ms</span>
+            </div>
+          </div>
+          <button class="u-btn" onclick="disconnectVoice()" title="Disconnect" style="width:28px;height:28px;border-radius:6px;background:rgba(242,63,67,0.1);border:1px solid rgba(242,63,67,0.2);color:var(--discord-danger);font-size:0.85rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(242,63,67,0.25)'" onmouseout="this.style.background='rgba(242,63,67,0.1)'">✕</button>
+        </div>
+        <div style="display:flex; gap:5px; margin-bottom:10px;">
+          <button id="btnVoiceMute" class="voice-ctrl-btn" style="flex:1;height:30px;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.03);color:var(--discord-text-muted);font-size:0.85rem;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:4px;" onclick="toggleMute()" title="Mute">🎤</button>
+          <button id="btnVoiceDeafen" class="voice-ctrl-btn" style="flex:1;height:30px;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.03);color:var(--discord-text-muted);font-size:0.85rem;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:4px;" onclick="toggleDeafen()" title="Deafen">🎧</button>
+          <button id="btnScreenShare" class="voice-ctrl-btn" style="flex:1;height:30px;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.03);color:var(--discord-text-muted);font-size:0.85rem;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:4px;" onclick="toggleScreenShare()" title="Share Screen">📺</button>
+        </div>
+        <!-- Soundboard -->
+        <div style="border-top: 1px solid rgba(255,255,255,0.04); padding-top: 8px;">
+          <div style="font-size:0.6rem; color:var(--discord-text-muted); font-weight:700; text-transform:uppercase; margin-bottom:5px; letter-spacing:0.8px; opacity:0.7;">🔊 Soundboard</div>
+          <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 3px;">
+            <button class="soundboard-btn" onclick="playSynthSound('bull')" title="Bull Run" style="height:26px;border-radius:4px;border:1px solid rgba(35,165,90,0.15);background:rgba(35,165,90,0.06);color:rgba(35,165,90,0.8);font-size:0.75rem;cursor:pointer;transition:all 0.15s;">🚀</button>
+            <button class="soundboard-btn" onclick="playSynthSound('bear')" title="Bear Market" style="height:26px;border-radius:4px;border:1px solid rgba(242,63,67,0.15);background:rgba(242,63,67,0.06);color:rgba(242,63,67,0.8);font-size:0.75rem;cursor:pointer;transition:all 0.15s;">📉</button>
+            <button class="soundboard-btn" onclick="playSynthSound('cash')" title="Cha-Ching" style="height:26px;border-radius:4px;border:1px solid rgba(250,168,26,0.15);background:rgba(250,168,26,0.06);color:rgba(250,168,26,0.8);font-size:0.75rem;cursor:pointer;transition:all 0.15s;">💰</button>
+            <button class="soundboard-btn" onclick="playSynthSound('alert')" title="Alert" style="height:26px;border-radius:4px;border:1px solid rgba(242,63,67,0.2);background:rgba(242,63,67,0.08);color:rgba(242,63,67,0.9);font-size:0.75rem;cursor:pointer;transition:all 0.15s;">🚨</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Panel -->
+      <div class="user-status-panel">
+        <div class="user-avatar-small" id="userPanelAvatar">
+          <div class="user-status-dot"></div>
+        </div>
+        <div class="user-info-text">
+          <div class="u-name" id="userPanelName">Trader</div>
+          <div class="u-tag">#0001</div>
+        </div>
+        <div class="user-actions">
+          <button class="u-btn" title="Mute">🎤</button>
+          <button class="u-btn" title="Deafen">🎧</button>
+          <button class="u-btn" onclick="location.href='profile.html'" title="Settings">⚙️</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ── CENTER FEED ── -->
+    <main class="discord-feed">
+      <header class="d-feed-header">
+        <h2>
+          <span class="channel-hash" id="headerHash">👥</span>
+          <span id="currentChannelName">Friends</span>
+        </h2>
+        <div style="display:flex;gap:12px;align-items:center">
+          <span id="currentChannelMembers" style="font-size:0.8rem;color:var(--discord-text-muted)"></span>
+          <span id="voiceStatus" style="font-size:0.8rem;color:var(--discord-text-muted)">● DISCONNECTED</span>
+          <button class="u-btn" onclick="loadPosts()" title="Refresh Feed">↻</button>
+        </div>
+      </header>
+
+      <div class="d-messages-container" id="postsFeed">
+        <!-- Messages dynamic list -->
+        <div class="loader"><div class="spinner"></div></div>
+      </div>
+
+      <!-- Composer -->
+      <div class="d-composer-wrap">
+        <div id="composerBlock" style="display:none" class="d-composer-box">
+          <textarea id="postContent" 
+                    class="composer-textarea" 
+                    placeholder="Message #global-feed"
+                    oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';updateCharCount()"
+                    onkeydown="if(event.key==='Enter' && !event.shiftKey){ event.preventDefault(); submitPost(); }"></textarea>
+          
+          <div class="composer-actions-bar">
+            <div class="composer-tools-left">
+              <button class="composer-tool-btn" onclick="toggleStickerPicker()">😊 <span style="font-size:0.75rem">Stickers</span></button>
+              <select id="postCoin" class="engine-input" style="width:auto;padding:2px 8px;font-size:0.75rem;background:var(--discord-sidebar)">
+                <option value="">🔗 Tag Coin</option>
+                <option>BTC</option><option>ETH</option><option>SOL</option>
+                <option>BNB</option><option>XRP</option><option>DOGE</option>
+              </select>
+              <span id="charCount" style="font-size:0.75rem;color:var(--discord-text-muted)">0 / 500</span>
+            </div>
+            <button class="btn-sm primary" onclick="submitPost()" style="padding:0.4rem 1.2rem;font-weight:700">Send</button>
+          </div>
+
+          <!-- Sticker picker -->
+          <div id="stickerPicker" class="sticker-picker-wrap" style="display:none">
+            <div style="font-size:0.7rem;color:var(--discord-accent);font-weight:800;text-transform:uppercase;margin-bottom:8px;position:sticky;top:0;background:var(--discord-card);padding-bottom:4px;z-index:1">Quick Expression Matrix</div>
+            <div id="stickerGrid" class="sticker-grid"></div>
+          </div>
+        </div>
+
+        <div id="loginPrompt" style="display:none;padding:1.5rem;text-align:center;background:var(--discord-card);border-radius:8px;border:1px solid var(--discord-border)">
+          <p style="color:var(--discord-text-muted);margin-bottom:1rem;font-size:0.9rem">Authentication required to bridge message streams.</p>
+          <button class="btn-sm primary" onclick="openAuth('login')" style="padding:0.5rem 2rem">Sync Session</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- ── RIGHT SIDEBAR (INSIGHTS) ── -->
+    <aside class="discord-sidebar-right">
+      <header class="right-sidebar-header">
+        Insights Engine
+      </header>
+
+      <div class="right-panel-content">
+        <div class="insights-card">
+          <div class="insights-title">🌍 Global Market</div>
+          <div id="globalMarket" style="font-size:0.85rem;color:#fff">
+            <div class="loader"><div class="spinner"></div></div>
+          </div>
+        </div>
+
+        <div class="insights-card">
+          <div class="insights-title">
+            <span>🔥 Community Pulse</span>
+            <span id="pulseStatus" style="color:var(--discord-accent)">Bullish</span>
+          </div>
+          <div class="pulse-meter">
+            <div class="pulse-fill"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--discord-text-muted)">
+            <span>65% Bullish</span>
+            <span>35% Bearish</span>
+          </div>
+        </div>
+
+        <div class="insights-card">
+          <div class="insights-title">🚀 Trending</div>
+          <div id="trendingList"></div>
+        </div>
+
+        <div class="insights-card">
+          <div class="insights-title">📈 Top Gainers</div>
+          <div id="gainersList"></div>
+        </div>
+
+        <div class="insights-card">
+          <div class="insights-title">📉 Top Losers</div>
+          <div id="losersList"></div>
+        </div>
+
+        <div class="insights-card">
+          <div class="insights-title">
+            <span>📰 Market News</span>
+            <span style="font-size:0.6rem;background:var(--discord-danger);color:#fff;padding:1px 4px;border-radius:3px;animation:pulse 2s infinite">LIVE</span>
+          </div>
+          <div id="newsLoader" class="loader"><div class="spinner"></div></div>
+          <div id="newsGrid" style="display:flex; flex-direction:column; gap:0.5rem;"></div>
+        </div>
+
+        <div class="insights-card">
+          <div class="insights-title">😰 Fear & Greed</div>
+          <div id="fearGreed"></div>
+        </div>
+
+        <div class="insights-card" style="margin-top:auto;background:rgba(0,0,0,0.15)">
+          <div class="insights-title" style="margin-bottom:8px">🔑 API Pipeline</div>
+          <div style="display:flex;flex-direction:column;gap:0.5rem">
+            <input type="password" id="newsApiKey" class="engine-input" placeholder="CryptoCompare API Key">
+            <input type="password" id="communityApiKey" class="engine-input" placeholder="Chat Matrix Key">
+            <button class="btn-sm primary" style="width:100%" onclick="saveCommunityKeys()">Save Pipeline Keys</button>
+            <p id="keySaveMsg" style="font-size:0.7rem;text-align:center;margin-top:4px"></p>
+          </div>
+        </div>
+      </div>
+    </aside>
+    
+    <!-- ── ADMIN ROLE MENU ── -->
+    <div id="adminRoleMenu" class="admin-menu" style="display:none">
+       <div style="font-size:0.65rem; color:var(--discord-text-muted); font-weight:800; margin-bottom:6px; padding:0 4px">ASSIGN ROLE</div>
+       <button onclick="assignUserRole('admin')">Admin</button>
+       <button onclick="assignUserRole('moderator')">Moderator</button>
+       <button onclick="assignUserRole('vip')">VIP Member</button>
+       <button onclick="assignUserRole('user')">Reset to User</button>
+       <div style="height:1px; background:var(--discord-border); margin:4px 0"></div>
+       <button onclick="closeAdminMenu()" style="color:var(--discord-danger)">Cancel</button>
+    </div>
+
+  </div>
+
+  <!-- AUTH MODAL -->
+  <div class="modal-backdrop" id="authModal" onclick="if(event.target===this)closeAuth()">
+    <div class="modal" style="background:var(--discord-card); border:1px solid var(--discord-border); padding:2rem; border-radius:14px;">
+      <button class="modal-close" onclick="closeAuth()">×</button>
+      <h2 style="margin-top:0">Welcome to <span style="color:var(--discord-accent)">StockWise</span></h2>
+      <p style="color:var(--discord-text-muted); font-size:0.85rem; margin-bottom:1.5rem">Join the conversation — login to post and react.</p>
+      <div class="modal-tabs">
+        <button class="modal-tab active" data-tab="login" onclick="switchTabModal('login')">Login</button>
+        <button class="modal-tab" data-tab="register" onclick="switchTabModal('register')">Create Account</button>
+      </div>
+      <div id="loginForm">
+        <form onsubmit="doLogin(event)">
+          <div class="form-group"><label>Email</label><input type="email" id="loginEmail" required class="engine-input"></div>
+          <div class="form-group"><label>Password</label><div class="password-wrap"><input type="password" id="loginPass" required class="engine-input"><button type="button" class="toggle-pw" onclick="toggleLoginPw(this)" tabindex="-1" title="Show/hide password">👁</button></div></div>
+          <button type="submit" class="btn-full primary-action" style="background:var(--discord-accent);color:#000;border:none;padding:0.75rem;border-radius:8px;font-weight:700;width:100%;cursor:pointer">Login →</button>
+        </form>
+      </div>
+      <div id="registerForm" style="display:none">
+        <form onsubmit="doRegister(event)">
+          <div class="form-group"><label>Username</label><input type="text" id="regUsername" required class="engine-input"></div>
+          <div class="form-group"><label>Email</label><input type="email" id="regEmail" required class="engine-input"></div>
+          <div class="form-group"><label>Password</label><div class="password-wrap"><input type="password" id="regPass" required class="engine-input" oninput="onPasswordInput()"><button type="button" class="toggle-pw" onclick="toggleRegPw(this)" tabindex="-1" title="Show/hide password">👁</button></div><div class="pw-strength-checklist" id="pwChecklist"><div class="pw-rule" data-rule="length"><span class="pw-icon">○</span> 8+ characters</div><div class="pw-rule" data-rule="upper"><span class="pw-icon">○</span> Uppercase letter</div><div class="pw-rule" data-rule="lower"><span class="pw-icon">○</span> Lowercase letter</div><div class="pw-rule" data-rule="number"><span class="pw-icon">○</span> Number (0-9)</div><div class="pw-rule" data-rule="special"><span class="pw-icon">○</span> Special character (!@#$%^&amp;*)</div></div><div class="pw-strength-bar-wrap"><div class="pw-strength-bar" id="pwStrengthBar"></div></div><div class="pw-suggest-wrap"><button type="button" class="pw-suggest-btn" onclick="suggestPassword()">✨ Suggest strong password</button></div></div>
+          <button type="submit" class="btn-full primary-action" style="background:var(--discord-accent);color:#000;border:none;padding:0.75rem;border-radius:8px;font-weight:700;width:100%;cursor:pointer">Create Account →</button>
+        </form>
+      </div>
+      <p class="error-msg" id="authError" style="color:var(--discord-danger);font-size:0.8rem;margin-top:1rem"></p>
+    </div>
+  </div>
+
+  <!-- USER PROFILE MODAL -->
+  <div class="modal-backdrop" id="userProfileModal" onclick="if(event.target===this)closeUserProfile()">
+    <div class="modal" style="background:var(--discord-card); border:1px solid var(--discord-border); padding:2rem; border-radius:14px; max-width: 480px; width: 90%;">
+      <button class="modal-close" onclick="closeUserProfile()">×</button>
+      
+      <!-- Profile Header / Banner -->
+      <div id="profileBanner" style="height: 80px; margin: -2rem -2rem 0 -2rem; border-radius: 12px 12px 0 0; background: linear-gradient(135deg, var(--discord-accent) 0%, #009966 100%); position: relative;">
+      </div>
+
+      <!-- Avatar & Profile Details -->
+      <div style="display: flex; flex-direction: column; align-items: center; margin-top: -40px; position: relative; z-index: 2; margin-bottom: 1.5rem;">
+        <div id="profileAvatarContainer" style="width: 80px; height: 80px; border-radius: 50%; border: 4px solid var(--discord-card); overflow: hidden; background: #313338; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+        </div>
+        <h2 id="profileUsername" style="margin: 10px 0 2px 0; font-family:'Syne',sans-serif; color: #fff;">Trader</h2>
+        <span id="profileUserTag" style="color: var(--discord-text-muted); font-size: 0.8rem; margin-bottom: 6px;">#0001</span>
+      </div>
+
+      <!-- Divider -->
+      <div style="height: 1px; background: var(--discord-border); margin: 0.5rem 0 1.2rem 0;"></div>
+
+      <!-- User Stats / Info -->
+      <div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.9rem;">
+        <div>
+          <span style="font-weight: 700; text-transform: uppercase; font-size: 0.7rem; color: var(--discord-text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px;">Role</span>
+          <span id="profileRole" style="color: #fff; background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; display: inline-block;">USER</span>
+        </div>
+
+        <div>
+          <span style="font-weight: 700; text-transform: uppercase; font-size: 0.7rem; color: var(--discord-text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px;">Registered Email</span>
+          <span id="profileEmail" style="color: #fff; font-family: monospace;">email@domain.com</span>
+        </div>
+
+        <div>
+          <span style="font-weight: 700; text-transform: uppercase; font-size: 0.7rem; color: var(--discord-text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px;">Joined Since</span>
+          <span id="profileJoinedDate" style="color: #fff;">June 9, 2026</span>
+        </div>
+
+        <div>
+          <span style="font-weight: 700; text-transform: uppercase; font-size: 0.7rem; color: var(--discord-text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px;">Public Assets Portfolio</span>
+          <div id="profileHoldingsList" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px;">
+          </div>
+        </div>
+
+        <!-- Admin-only Role Settings -->
+        <div id="profileAdminSettings" style="display: none; border-top: 1px dashed var(--discord-border); padding-top: 12px; margin-top: 6px;">
+          <span style="font-weight: 700; text-transform: uppercase; font-size: 0.7rem; color: var(--discord-accent); letter-spacing: 0.5px; display: block; margin-bottom: 6px;">🛡️ Server Role Management</span>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <select id="profileRoleSelect" class="engine-input" style="height: 34px; padding: 2px 8px; font-size: 0.82rem; flex: 1; background: var(--discord-sidebar)">
+              <option value="user">Member (User)</option>
+              <option value="supporter">Supporter</option>
+              <option value="vip">VIP Member</option>
+              <option value="moderator">Moderator</option>
+              <option value="admin">Admin</option>
+            </select>
+            <button class="btn-sm primary" id="btnSaveRole" style="height: 34px; padding: 0 14px; font-size: 0.8rem; border-radius: 6px;">Assign</button>
+          </div>
+        </div>
+
+        <div>
+          <span style="font-weight: 700; text-transform: uppercase; font-size: 0.7rem; color: var(--discord-text-muted); letter-spacing: 0.5px; display: block; margin-bottom: 4px;">Connection Status</span>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span id="profileMutualCount" style="color: #fff;">0 mutual connections</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Footer Button to Send Friend Request / Chat -->
+      <div style="margin-top: 2rem; display: flex; gap: 12px; justify-content: flex-end;">
+        <button class="btn-sm outline" onclick="closeUserProfile()" style="padding: 0.55rem 1.2rem; border-radius: 8px;">Close</button>
+        <button id="profileActionBtn" class="btn-sm primary" style="padding: 0.55rem 1.2rem; border-radius: 8px;">Connect Bridge</button>
+      </div>
+    </div>
+  </div>
+
+  <script defer src="/socket.io/socket.io.js"></script>
+  <script defer src="../js/main.js?v=2"></script>
+  <script nonce="__NONCE__">
+    let activeGroupId = null; 
+    let editingPostId  = null;
+    let activeRecipientId = null;
+    let targetAdminUserId = null;
+    let currentCategory = 'all';
+
+    const STICKERS = [
+        '📈','📉','💎','🙌','🚀','🌙','🔥','⚡','💪','🤑','😎','🤝','👀','🦁','🍕','☕','📊','🔔','💰','🧠','👑','🍀','🎯','🛸','👽','👻','🤖','💯','✨','💥','❤️','🌈','🌊','🍔','🍦','🎮','🎲','🎸','🎹','🏆','🥇','🥈','🥉','🏅','🎖️','🎫','🎟️','🎭','🎨','🎬','🎤','🎧','🎼','🎷','🎺','🎻','🥁','✅','❌','⚠️','⭕','🛑','🟢','🔴','🟡','🔵','🟣','⚪','⚫','🟤'
+    ];
+
+    async function init() {
+      const user = window.stockwise?.currentUser();
+      if (user) {
+        document.getElementById('userPanelName').textContent = user.username || 'Trader';
+        if (window.auSvg) {
+          const a = user.avatar || {};
+          document.getElementById('userPanelAvatar').innerHTML = window.auSvg(user.username || 'U', {
+            bg_color: a.bg_color || '#00e5a0', accessory: a.accessory || 'none', energy: a.energy || 'none', showLegs: false
+          }) + '<div class="user-status-dot"></div>';
+        }
+        document.getElementById('composerBlock').style.display = 'block';
+        document.getElementById('loginPrompt').style.display  = 'none';
+        loadCommunityKeys();
+        showFriendsList(); // Default view is friends for Home
+      } else {
+        document.getElementById('composerBlock').style.display = 'none';
+        document.getElementById('loginPrompt').style.display  = 'block';
+      }
+
+      if (user && (user.role === 'admin' || user.role === 'moderator')) {
+        document.getElementById('createGroupBtn').style.display = '';
+      }
+      loadGroups();
+      currentCategory = 'all';
+      loadTrending(currentCategory);
+      loadGainersLosers(currentCategory);
+      loadFearGreed(currentCategory);
+      loadNews('stock market trading');
+      buildStickerGrid();
+
+      // Refresh these widgets periodically (news included)
+      setInterval(() => {
+        loadTrending(currentCategory);
+        if (currentCategory) loadGainersLosers(currentCategory);
+        loadFearGreed(currentCategory);
+        const nq = currentCategory === 'crypto' ? 'cryptocurrency bitcoin ethereum' : currentCategory === 'stocks' ? 'stock market trading wallstreet' : 'financial markets investing';
+        loadNews(nq);
+      }, 120000);
+    }
+
+    function waitForAuth() { if (window.stockwiseAuthReady) { init(); return; } setTimeout(waitForAuth, 100); }
+    waitForAuth();
+
+    window.addEventListener('auth-changed', () => {
+      const user = window.stockwise?.currentUser();
+      document.getElementById('composerBlock').style.display = user ? 'block' : 'none';
+      document.getElementById('loginPrompt').style.display = user ? 'none' : 'block';
+    });
+
+    // ─── FRIEND AUTOCOMPLETE & PUBLIC PROFILE MODAL ───
+    let autocompleteTimeout = null;
+
+    function handleFriendAutocomplete(val) {
+      const suggestionsEl = document.getElementById('addFriendSuggestions');
+      if (!suggestionsEl) return;
+
+      if (autocompleteTimeout) clearTimeout(autocompleteTimeout);
+
+      const query = val.trim();
+      if (query.length < 2) {
+        suggestionsEl.innerHTML = '';
+        suggestionsEl.style.display = 'none';
+        return;
+      }
+
+      autocompleteTimeout = setTimeout(async () => {
+        try {
+          const res = await fetch(`/api/users/search?q=${encodeURIComponent(query)}`, { credentials: 'include' });
+          if (!res.ok) throw new Error('Search failed');
+          const users = await res.json();
+          renderAutocompleteSuggestions(users);
+        } catch (e) {
+          console.error(e);
+        }
+      }, 250);
+    }
+
+    function renderAutocompleteSuggestions(users) {
+      const suggestionsEl = document.getElementById('addFriendSuggestions');
+      if (!suggestionsEl) return;
+
+      if (!users.length) {
+        suggestionsEl.innerHTML = `
+          <div style="padding: 12px 16px; color: var(--discord-text-muted); font-size: 0.85rem; text-align: center;">
+            No users found matching query.
+          </div>
+        `;
+        suggestionsEl.style.display = 'block';
+        return;
+      }
+
+      suggestionsEl.innerHTML = users.map(u => {
+        const initial = u.username ? u.username.charAt(0).toUpperCase() : 'U';
+        const roleText = u.role ? ` • ${u.role.toUpperCase()}` : '';
+        return `
+          <div class="search-result-row" onclick="viewPublicProfile(${u.id})" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.03); cursor: pointer; transition: background 0.15s ease;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="width: 32px; height: 32px; border-radius: 50%; background: ${u.avatar_bg_color || '#00e5a0'}; color: #000; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;">
+                ${initial}
+              </div>
+              <div style="display: flex; flex-direction: column;">
+                <span style="color: #fff; font-weight: 600; font-size: 0.9rem;">${escHtml(u.username)}</span>
+                <span style="color: var(--discord-text-muted); font-size: 0.75rem;">${escHtml(u.email || '')}${roleText}</span>
+              </div>
+            </div>
+            <div style="display: flex; gap: 6px;" onclick="event.stopPropagation()">
+              <button class="action-btn-brutal primary" onclick="sendFriendRequestFromSearch(${u.id}, '${attrEsc(u.username)}')" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 4px; height: 28px;">Add</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      suggestionsEl.style.display = 'block';
+
+      // Add CSS styles dynamically for autocomplete row hovering
+      if (!document.getElementById('autocomplete-styles')) {
+        const style = document.createElement('style');
+        style.id = 'autocomplete-styles';
+        style.textContent = `
+          .search-result-row:hover {
+            background: rgba(255, 255, 255, 0.08) !important;
+          }
+          .search-result-row:last-child {
+            border-bottom: none;
+          }
+        `;
+        document.head.appendChild(style);
+      }
+    }
+
+    async function sendFriendRequestFromSearch(id, username) {
+      const statusEl = document.getElementById('addFriendStatus');
+      if (statusEl) {
+        statusEl.textContent = '';
+        statusEl.style.color = '';
+      }
+
+      try {
+        const res = await fetch('/api/friends/request-by-identifier', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ identifier: '#' + id })
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(data?.error || 'Failed to send friend request');
+        }
+
+        if (statusEl) {
+          if (data.accepted) {
+            statusEl.textContent = `Success! You are now friends with ${username}.`;
+            statusEl.style.color = 'var(--discord-voice-green)';
+          } else {
+            statusEl.textContent = `Success! Friend request sent to ${username}.`;
+            statusEl.style.color = 'var(--discord-voice-green)';
+          }
+        }
+        
+        // Hide autocomplete suggestions
+        const suggestionsEl = document.getElementById('addFriendSuggestions');
+        if (suggestionsEl) suggestionsEl.style.display = 'none';
+
+        // Clear input
+        const inputEl = document.getElementById('addFriendIdentifier');
+        if (inputEl) inputEl.value = '';
+
+        loadFriends();
+      } catch (e) {
+        if (statusEl) {
+          statusEl.textContent = e.message;
+          statusEl.style.color = 'var(--discord-danger)';
+        }
+      }
+    }
+
+    async function viewPublicProfile(userId) {
+      const suggestionsEl = document.getElementById('addFriendSuggestions');
+      if (suggestionsEl) suggestionsEl.style.display = 'none';
+
+      try {
+        const res = await fetch(`/api/users/${userId}/profile`, { credentials: 'include' });
+        if (!res.ok) throw new Error('Failed to load profile');
+        const data = await res.json();
+        
+        document.getElementById('profileUsername').textContent = data.username;
+        document.getElementById('profileUserTag').textContent = `#00${data.id}`;
+        document.getElementById('profileEmail').textContent = data.email;
+        document.getElementById('profileRole').textContent = (data.role || 'user').toUpperCase();
+        
+        const joinedDate = new Date(data.created_at || Date.now());
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('profileJoinedDate').textContent = joinedDate.toLocaleDateString('en-US', options);
+
+        document.getElementById('profileMutualCount').textContent = `${data.mutual_count} mutual connections`;
+
+        const bannerColor = data.avatar?.bg_color || '#00e5a0';
+        document.getElementById('profileBanner').style.background = `linear-gradient(135deg, ${bannerColor} 0%, #111 100%)`;
+
+        const avatarContainer = document.getElementById('profileAvatarContainer');
+        if (avatarContainer) {
+          avatarContainer.style.background = bannerColor;
+          if (window.auSvg) {
+            avatarContainer.innerHTML = window.auSvg(data.username, {
+              bg_color: bannerColor,
+              accessory: data.avatar?.accessory || 'none',
+              energy: data.avatar?.energy || 'none'
+            });
+          } else {
+            avatarContainer.innerHTML = `<div style="font-size: 2.2rem; font-weight: 800; color: #000; font-family: 'Syne', sans-serif;">${data.username.charAt(0).toUpperCase()}</div>`;
+          }
+        }
+
+        const holdingsList = document.getElementById('profileHoldingsList');
+        if (holdingsList) {
+          if (data.holdings && data.holdings.length) {
+            holdingsList.innerHTML = data.holdings.map(h => `
+              <span style="font-size: 0.72rem; font-weight: 700; color: var(--discord-accent); background: rgba(0, 229, 160, 0.1); border: 1px solid rgba(0, 229, 160, 0.25); padding: 2px 8px; border-radius: 4px;">${h}</span>
+            `).join('');
+          } else {
+            holdingsList.innerHTML = `<span style="font-size: 0.8rem; color: var(--discord-text-muted);">No public holdings found.</span>`;
+          }
+        }
+
+        // Style role display in modal
+        const roleEl = document.getElementById('profileRole');
+        const role = (data.role || 'user').toLowerCase();
+        roleEl.textContent = role === 'user' ? 'MEMBER' : role.toUpperCase();
+        if (role === 'admin') {
+          roleEl.style.background = 'rgba(237, 66, 69, 0.15)';
+          roleEl.style.color = '#ed4245';
+        } else if (role === 'moderator') {
+          roleEl.style.background = 'rgba(52, 152, 219, 0.15)';
+          roleEl.style.color = '#3498db';
+        } else if (role === 'supporter') {
+          roleEl.style.background = 'rgba(235, 69, 158, 0.15)';
+          roleEl.style.color = '#eb459e';
+        } else if (role === 'vip') {
+          roleEl.style.background = 'rgba(155, 89, 182, 0.15)';
+          roleEl.style.color = '#9b59b6';
+        } else {
+          roleEl.style.background = 'rgba(46, 196, 182, 0.15)';
+          roleEl.style.color = '#2ec4b6';
+        }
+
+        const actionBtn = document.getElementById('profileActionBtn');
+        const me = window.stockwise?.currentUser();
+        
+        // Admin Roles Management
+        const adminSettingsEl = document.getElementById('profileAdminSettings');
+        if (adminSettingsEl) {
+          if (me && me.role === 'admin' && me.id !== data.id) {
+            adminSettingsEl.style.display = 'block';
+            document.getElementById('profileRoleSelect').value = role;
+            document.getElementById('btnSaveRole').onclick = async () => {
+              const selectedRole = document.getElementById('profileRoleSelect').value;
+              try {
+                const roleRes = await fetch('/api/admin/set-role', {
+                  method: 'POST',
+                  credentials: 'include',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ userId: data.id, role: selectedRole })
+                });
+                const roleData = await roleRes.json();
+                if (!roleRes.ok) throw new Error(roleData.error || 'Failed to update role');
+                window.stockwise?.toast(`Successfully assigned role ${selectedRole.toUpperCase()} to ${data.username}`, 'success');
+                
+                // Update modal details locally
+                data.role = selectedRole;
+                viewPublicProfile(data.id); // Re-run to update style
+                loadFriends();
+              } catch (err) {
+                window.stockwise?.toast(err.message, 'error');
+              }
+            };
+          } else {
+            adminSettingsEl.style.display = 'none';
+          }
+        }
+
+        if (me && me.id === data.id) {
+          actionBtn.style.display = 'none';
+        } else {
+          actionBtn.style.display = 'block';
+          const friendRel = allFriendsData.find(f => f.id === data.id);
+          if (friendRel) {
+            if (friendRel.status === 'accepted') {
+              actionBtn.textContent = 'Already Connected';
+              actionBtn.disabled = true;
+              actionBtn.className = 'btn-sm outline';
+              actionBtn.onclick = null;
+            } else if (friendRel.status === 'pending') {
+              actionBtn.textContent = 'Request Pending';
+              actionBtn.disabled = true;
+              actionBtn.className = 'btn-sm outline';
+              actionBtn.onclick = null;
+            }
+          } else {
+            actionBtn.textContent = 'Connect Bridge';
+            actionBtn.disabled = false;
+            actionBtn.className = 'btn-sm primary';
+            actionBtn.onclick = () => {
+              sendFriendRequestFromSearch(data.id, data.username);
+              closeUserProfile();
+            };
+          }
+        }
+
+        document.getElementById('userProfileModal').classList.add('open');
+      } catch (err) {
+        console.error(err);
+        window.stockwise?.toast('Error loading trader profile.', 'error');
+      }
+    }
+
+    function closeUserProfile() {
+      document.getElementById('userProfileModal').classList.remove('open');
+    }
+
+    // Close suggestions dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      const suggestionsEl = document.getElementById('addFriendSuggestions');
+      const inputEl = document.getElementById('addFriendIdentifier');
+      if (suggestionsEl && inputEl && !suggestionsEl.contains(e.target) && e.target !== inputEl) {
+        suggestionsEl.style.display = 'none';
+      }
+    });
+
+    // ─────────────────────────────────────────────────────────────
+    // Create Group (Admin: your + button)
+    // ─────────────────────────────────────────────────────────────
+    function ensureCreateGroupModal() {
+      let modal = document.getElementById('createGroupModal');
+      if (modal) return modal;
+
+      modal = document.createElement('div');
+      modal.id = 'createGroupModal';
+      modal.className = 'modal-backdrop';
+      modal.onclick = (e) => { if (e.target === modal) closeCreateGroupModal(); };
+
+      modal.innerHTML = `
+        <div class="modal" style="max-width:520px;background:var(--discord-card);border:1px solid var(--discord-border);padding:1.5rem;border-radius:14px;position:relative">
+          <button class="modal-close" onclick="closeCreateGroupModal()" style="position:absolute;top:10px;right:12px;background:none;border:none;color:var(--discord-text-muted);font-size:1.6rem;cursor:pointer">×</button>
+          <h2 style="margin:0 0 0.25rem 0;font-family:'Syne',sans-serif">Create Group</h2>
+          <p style="margin:0 0 1rem 0;color:var(--discord-text-muted);font-size:0.85rem">Make a topic room for discussions (e.g., BTC, DeFi, Trading Strategy).</p>
+
+          <div style="display:grid;gap:0.9rem">
+            <div>
+              <div style="font-size:0.72rem;text-transform:uppercase;color:var(--discord-text-muted);font-weight:800;letter-spacing:0.5px;margin-bottom:0.4rem">Group Name</div>
+              <input id="groupNameInput" class="engine-input" placeholder="e.g., BTC Traders" maxlength="100" />
+            </div>
+
+            <div>
+              <div style="font-size:0.72rem;text-transform:uppercase;color:var(--discord-text-muted);font-weight:800;letter-spacing:0.5px;margin-bottom:0.4rem">Description (optional)</div>
+              <textarea id="groupDescInput" class="engine-input" style="min-height:90px;resize:vertical" placeholder="What will you discuss?"></textarea>
+            </div>
+
+            <div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:0.2rem">
+              <button class="btn-sm outline" type="button" onclick="closeCreateGroupModal()" style="padding:0.55rem 1rem;border-radius:8px">Cancel</button>
+              <button class="btn-sm primary" type="button" onclick="submitCreateGroup()" style="padding:0.55rem 1rem;border-radius:8px">Create</button>
+            </div>
+
+            <div id="createGroupErr" style="color:var(--discord-danger);font-size:0.8rem;min-height:18px"></div>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+      return modal;
+    }
+
+    function openCreateGroup() {
+      if (!window.stockwise?.currentUser()) {
+        openAuth('login');
+        return;
+      }
+      const modal = ensureCreateGroupModal();
+      document.getElementById('createGroupErr').textContent = '';
+      document.getElementById('groupNameInput').value = '';
+      document.getElementById('groupDescInput').value = '';
+      modal.classList.add('open');
+    }
+
+    function closeCreateGroupModal() {
+      const modal = document.getElementById('createGroupModal');
+      if (modal) modal.classList.remove('open');
+    }
+
+    async function submitCreateGroup() {
+      const errEl = document.getElementById('createGroupErr');
+      errEl.textContent = '';
+
+      const name = document.getElementById('groupNameInput').value.trim();
+      const description = document.getElementById('groupDescInput').value.trim();
+
+      if (!name) {
+        errEl.textContent = 'Group name is required.';
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/groups', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, description })
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(data?.error || 'Failed to create group');
+        }
+
+        closeCreateGroupModal();
+        // Refresh groups and activate the new one
+        await loadGroups();
+        setActiveGroup(data.id, null);
+      } catch (e) {
+        errEl.textContent = String(e.message || e);
+      }
+    }
+
+
+    async function loadTrending(category) {
+      const el = document.getElementById('trendingList');
+
+      try {
+        el.innerHTML = '<div class="loader"><div class="spinner"></div></div>';
+
+        // Stock mode — show most actively moving stocks
+        if (category && category !== 'crypto') {
+          const res = await fetch('/api/stocks?category=all&nocache=1');
+          const stocks = await res.json();
+          if (!Array.isArray(stocks)) throw new Error('No stock data');
+
+          const sorted = [...stocks]
+            .filter(s => s && s.symbol && s.total_volume != null)
+            .sort((a, b) => b.total_volume - a.total_volume)
+            .slice(0, 7);
+
+          if (!sorted.length) {
+            el.innerHTML = '<p style="font-size:0.7rem;color:var(--discord-text-muted)">No volume data.</p>';
+            return;
+          }
+
+          const fmtVol = v => v >= 1e7 ? (v / 1e7).toFixed(1) + 'Cr' : v >= 1e5 ? (v / 1e5).toFixed(1) + 'L' : (v / 1e3).toFixed(0) + 'K';
+
+          el.innerHTML = sorted.map(s => {
+            const chg = s.price_change_percentage_24h || 0;
+            const cls = chg >= 0 ? 'up' : 'down';
+            const icon = s.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(s.symbol)}&background=111927&color=00e5a0&size=128&font-size=0.4&bold=true`;
+            return `
+              <div class="coin-row" style="margin-bottom:10px">
+                <div style="position:relative; width:26px; height:26px; flex-shrink:0; margin-right:8px;">
+                  <img class="coin-icon" style="width:26px;height:26px;border-radius:8px;display:block" src="${icon}" onerror="window.handleStockLogoError(this,'${s.symbol}','${s.domain||''}')" />
+                  <div style="display:none; width:26px; height:26px; border-radius:8px; background:rgba(0,229,160,0.12); color:#00e5a0; align-items:center; justify-content:center; font-size:0.6rem; font-weight:800; border:1px solid rgba(0,229,160,0.25); font-family:'Syne',sans-serif;">${s.symbol.slice(0,3)}</div>
+                </div>
+                <span class="coin-tag-name">${escHtml(s.symbol)}</span>
+                <span class="coin-pct-pill ${cls}">${chg >= 0 ? '+' : ''}${chg.toFixed(1)}%</span>
+                <span style="font-size:0.6rem;color:var(--discord-text-muted);margin-left:auto">${fmtVol(s.total_volume)}</span>
+              </div>
+            `;
+          }).join('');
+          return;
+        }
+
+        // Crypto mode — CoinGecko trending
+        const res = await fetch('/api/market-trends', { credentials: 'include' });
+        const data = await res.json();
+
+        const coins = Array.isArray(data?.trending) ? data.trending : [];
+
+        if (!coins.length) {
+          el.innerHTML = '<p style="font-size:0.7rem;color:var(--discord-text-muted)">No trending data.</p>';
+          return;
+        }
+
+        el.innerHTML = coins.slice(0, 7).map(c => {
+          const item = c?.item || {};
+          const directId = c?.id;
+          const id = (item?.id ?? directId ?? '').toString();
+
+          const symRaw = item?.symbol ?? c?.symbol ?? id;
+          const sym = String(symRaw || '').toUpperCase();
+
+          const name = item?.name ?? c?.name ?? sym;
+
+          const icon = item?.small || item?.thumb || c?.small || c?.thumb || (window.COINGECKO_LOGO_MAP && window.COINGECKO_LOGO_MAP[sym]) || `https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/${sym.toLowerCase()}.png`;
+
+          const nameHtml = name.toLowerCase() === sym.toLowerCase()
+            ? escHtml(name)
+            : `${escHtml(name)} <span style="font-size:0.72rem;color:var(--discord-text-muted);font-weight:500;margin-left:6px;">${escHtml(sym)}</span>`;
+
+          return `
+            <div class="coin-row" style="margin-bottom:10px">
+              <div style="position:relative; width:26px; height:26px; flex-shrink:0; margin-right:8px;">
+                <img class="coin-icon" style="width:26px;height:26px;border-radius:8px;display:block" src="${icon}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                <div style="display:none; width:26px; height:26px; border-radius:8px; background:rgba(0,229,160,0.12); color:#00e5a0; align-items:center; justify-content:center; font-size:0.6rem; font-weight:800; border:1px solid rgba(0,229,160,0.25); font-family:'Syne',sans-serif;">${sym.slice(0,3)}</div>
+              </div>
+              <span class="coin-tag-name">${nameHtml}</span>
+            </div>
+          `;
+        }).join('');
+      } catch {
+        el.innerHTML = '<p style="font-size:0.7rem;color:var(--discord-text-muted)">Trending offline.</p>';
+      }
+    }
+
+    function switchCategory(cat, el) {
+      if (!el) return;
+      document.querySelectorAll('.server-icon').forEach(i => i.classList.remove('active'));
+      el.classList.add('active');
+      const hubTitle = document.getElementById('sidebarHubTitle');
+      if (cat === 'home') { hubTitle.textContent = 'Home'; showFriendsList(); return; }
+      if (cat === 'crypto') { hubTitle.textContent = 'Crypto Hub'; currentCategory = 'crypto'; loadGainersLosers('crypto'); loadNews('cryptocurrency bitcoin ethereum'); }
+      else if (cat === 'stocks') { hubTitle.textContent = 'Equity Hub'; currentCategory = 'all'; loadGainersLosers('all'); loadNews('stock market trading wallstreet'); }
+      else { hubTitle.textContent = 'StockWise Hub'; currentCategory = 'all'; loadGainersLosers('all'); loadNews('financial markets investing'); }
+      
+      activeRecipientId = null;
+      setActiveGroup(null, null);
+      loadTrending(currentCategory);
+      loadFearGreed(currentCategory);
+    }
+
+    function setActiveGroup(id, el) {
+      activeGroupId = id;
+      activeRecipientId = null;
+      document.querySelectorAll('.d-channel-item').forEach(i => i.classList.remove('active'));
+      if (el) el.classList.add('active');
+      document.getElementById('headerHash').textContent = '#';
+      document.getElementById('currentChannelName').textContent = el ? el.textContent.trim().replace('# ','') : 'global-feed';
+
+      // Auto-join selected group so composer POST doesn't fail with 403.
+      if (activeGroupId) {
+        const user = window.stockwise?.currentUser?.();
+        if (user) {
+          fetch(`/api/groups/${activeGroupId}/join`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+          }).catch(() => {});
+        }
+      }
+
+      loadPosts();
+    }
+
+    let voiceState = { connected: false, room: null, reconnecting: false, muted: false, deafened: false };
+    let audioCtx = null;
+    let voiceSocket = null;
+    let localStream = null;
+    let peerConnections = {};
+    let voiceAnalyser = null;
+    let voiceAnalyserInterval = null;
+    let voicePingInterval = null;
+
+    window.addEventListener('beforeunload', () => { if (voiceState?.connected) disconnectVoice(); });
+
+    let activePeers = {
+      'Trader Lounge': [],
+      'Alpha Room': []
+    };
+
+    function getVoiceSocket() {
+      if (voiceSocket && voiceSocket.connected) return voiceSocket;
+      voiceSocket = io({ transports: ['websocket', 'polling'] });
+      voiceSocket.on('voice:room-users', (data) => {
+        if (voiceState.room !== data.room) return;
+        activePeers[data.room] = data.users
+          .filter(u => u.socketId !== voiceSocket.id)
+          .map(u => ({
+            id: u.userId,
+            socketId: u.socketId,
+            username: u.username,
+            role: u.role || 'user',
+            isMuted: u.muted,
+            avatar_bg_color: '#5865f2'
+          }));
+        renderVoiceChannelsUsers();
+        data.users.forEach(u => {
+          if (u.socketId !== voiceSocket.id) createPeerConnection(u.socketId, true);
+        });
+      });
+      voiceSocket.on('voice:user-joined', (data) => {
+        if (!voiceState.connected || !activePeers[voiceState.room]) return;
+        if (data.socketId === voiceSocket?.id) return;
+        activePeers[voiceState.room].push({
+          id: data.userId, socketId: data.socketId, username: data.username,
+          role: data.role || 'user', isMuted: false, avatar_bg_color: '#5865f2'
+        });
+        renderVoiceChannelsUsers();
+        createPeerConnection(data.socketId, false);
+      });
+      voiceSocket.on('voice:user-left', (data) => {
+        if (!activePeers[voiceState.room]) return;
+        activePeers[voiceState.room] = activePeers[voiceState.room].filter(u => u.socketId !== data.socketId);
+        closePeerConnection(data.socketId);
+        renderVoiceChannelsUsers();
+      });
+      voiceSocket.on('voice:user-kicked', (data) => {
+        if (!activePeers[voiceState.room]) return;
+        activePeers[voiceState.room] = activePeers[voiceState.room].filter(u => u.socketId !== data.socketId);
+        closePeerConnection(data.socketId);
+        renderVoiceChannelsUsers();
+      });
+      voiceSocket.on('voice:you-were-kicked', (data) => {
+        window.stockwise?.toast(`You were removed from ${data.room} by an admin`, 'error');
+        disconnectVoice();
+      });
+      voiceSocket.on('voice:user-muted', (data) => {
+        if (!activePeers[voiceState.room]) return;
+        const user = activePeers[voiceState.room].find(u => u.socketId === data.socketId);
+        if (user) {
+          user.isMuted = data.muted;
+          user.mutedByAdmin = data.byAdmin || false;
+        }
+        renderVoiceChannelsUsers();
+      });
+      voiceSocket.on('signal:offer', async (data) => {
+        const pc = getOrCreatePC(data.from);
+        try {
+          await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+          const answer = await pc.createAnswer();
+          await pc.setLocalDescription(answer);
+          voiceSocket.emit('signal:answer', { to: data.from, answer: pc.localDescription });
+        } catch (e) { console.error('offer error', e); }
+      });
+      voiceSocket.on('signal:answer', async (data) => {
+        const pc = peerConnections[data.from];
+        if (pc) {
+          try { await pc.setRemoteDescription(new RTCSessionDescription(data.answer)); }
+          catch (e) { console.error('answer error', e); }
+        }
+      });
+      voiceSocket.on('signal:ice-candidate', async (data) => {
+        const pc = peerConnections[data.from];
+        if (pc && data.candidate) {
+          try { await pc.addIceCandidate(new RTCIceCandidate(data.candidate)); }
+          catch (e) { console.error('ice error', e); }
+        }
+      });
+      return voiceSocket;
+    }
+
+    function getOrCreatePC(socketId) {
+      if (peerConnections[socketId]) return peerConnections[socketId];
+      const pc = new RTCPeerConnection({
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }
+        ]
+      });
+      if (localStream) {
+        localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+      }
+      pc.onicecandidate = (e) => {
+        if (e.candidate && voiceSocket) {
+          voiceSocket.emit('signal:ice-candidate', { to: socketId, candidate: e.candidate });
+        }
+      };
+      pc.ontrack = (e) => {
+        const audioEl = document.getElementById(`remote-audio-${socketId}`);
+        if (audioEl) { audioEl.srcObject = e.streams[0]; return; }
+        const newAudio = document.createElement('audio');
+        newAudio.id = `remote-audio-${socketId}`;
+        newAudio.srcObject = e.streams[0];
+        newAudio.autoplay = true;
+        document.body.appendChild(newAudio);
+      };
+      pc.onconnectionstatechange = () => {
+        if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
+          closePeerConnection(socketId);
+        }
+      };
+      peerConnections[socketId] = pc;
+      return pc;
+    }
+
+    async function createPeerConnection(socketId, isInitiator) {
+      if (peerConnections[socketId]) return;
+      const pc = getOrCreatePC(socketId);
+      if (isInitiator) {
+        try {
+          const offer = await pc.createOffer();
+          await pc.setLocalDescription(offer);
+          voiceSocket.emit('signal:offer', { to: socketId, offer: pc.localDescription });
+        } catch (e) { console.error('createOffer error', e); }
+      }
+    }
+
+    function closePeerConnection(socketId) {
+      if (peerConnections[socketId]) {
+        peerConnections[socketId].close();
+        delete peerConnections[socketId];
+      }
+      const audioEl = document.getElementById(`remote-audio-${socketId}`);
+      if (audioEl) audioEl.remove();
+    }
+
+    function closeAllPeerConnections() {
+      Object.keys(peerConnections).forEach(id => closePeerConnection(id));
+    }
+
+    function startVoiceAnalyser() {
+      if (voiceAnalyserInterval) return;
+      if (!localStream) return;
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const source = audioCtx.createMediaStreamSource(localStream);
+        const analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 256;
+        source.connect(analyser);
+        voiceAnalyser = analyser;
+        const dataArray = new Uint8Array(analyser.frequencyBinCount);
+        voiceAnalyserInterval = setInterval(() => {
+          analyser.getByteFrequencyData(dataArray);
+          const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+          const isSpeaking = avg > 15;
+          const meAvatar = document.getElementById('vuser-avatar-me');
+          if (meAvatar) {
+            if (isSpeaking) {
+              meAvatar.style.borderColor = 'var(--discord-voice-green)';
+              meAvatar.style.boxShadow = '0 0 12px var(--discord-voice-green)';
+            } else {
+              meAvatar.style.borderColor = 'transparent';
+              meAvatar.style.boxShadow = 'none';
+            }
+          }
+        }, 200);
+      } catch (e) { console.error('analyser error', e); }
+    }
+
+    function stopVoiceAnalyser() {
+      if (voiceAnalyserInterval) { clearInterval(voiceAnalyserInterval); voiceAnalyserInterval = null; }
+      voiceAnalyser = null;
+    }
+
+    // Style helper for voice rows hover and channel hover
+    if (!document.getElementById('voice-lounge-custom-styles')) {
+      const style = document.createElement('style');
+      style.id = 'voice-lounge-custom-styles';
+      style.textContent = `
+        .voice-channel:hover .join-badge {
+          opacity: 1 !important;
+        }
+        .voice-user-row:hover {
+          background: rgba(255, 255, 255, 0.05);
+        }
+        .mute-badge {
+          font-size: 0.65rem;
+          color: #f23f43;
+          background: rgba(242,63,67,0.12);
+          padding: 2px 6px;
+          border-radius: 4px;
+          display: inline-flex;
+          align-items: center;
+          font-weight: 700;
+        }
+        @keyframes pulse {
+          0% { transform: scale(0.95); opacity: 0.6; }
+          50% { transform: scale(1.2); opacity: 1; }
+          100% { transform: scale(0.95); opacity: 0.6; }
+        }
+        @keyframes voicePulse {
+          0% { opacity: 0.6; transform: scale(0.95); }
+          50% { opacity: 1; transform: scale(1.1); }
+          100% { opacity: 0.6; transform: scale(0.95); }
+        }
+        .voice-ctrl-btn:hover {
+          background: rgba(255,255,255,0.08) !important;
+          border-color: rgba(255,255,255,0.15) !important;
+          color: #fff !important;
+        }
+        .voice-ctrl-btn.active-red {
+          background: rgba(242,63,67,0.15) !important;
+          border-color: rgba(242,63,67,0.3) !important;
+          color: #f23f43 !important;
+        }
+        .soundboard-btn:hover {
+          transform: scale(1.05);
+          filter: brightness(1.3);
+        }
+        .voice-channel-users {
+          transition: all 0.3s ease;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    function renderVoiceChannelsUsers() {
+      ['Trader Lounge', 'Alpha Room'].forEach(room => {
+        const containerId = room === 'Trader Lounge' ? 'voiceUsers-TraderLounge' : 'voiceUsers-AlphaRoom';
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        // Display participant list ONLY if connected to this room
+        const isUserConnected = voiceState.connected && voiceState.room === room;
+        if (!isUserConnected) {
+          container.innerHTML = '';
+          container.style.display = 'none';
+          return;
+        }
+
+        const peers = activePeers[room] || [];
+        let listHtml = '';
+
+        // Current User (if connected to this channel)
+        const me = window.stockwise?.currentUser() || { id: 99, username: 'You', role: 'user', avatar: { bg_color: '#00e5a0' } };
+        const meInitial = me.username.charAt(0).toUpperCase();
+        const meBgColor = me.avatar?.bg_color || me.avatar_bg_color || '#00e5a0';
+        
+        // Custom vector SVGs for mute and deafen
+        const muteSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f23f43" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.9; margin-right:4px;" title="Muted"><line x1="1" y1="1" x2="23" y2="23"></line><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path><path d="M17 11a5 5 0 0 1-2.5 4.3"></path><path d="M12 18.5V21"></path><path d="M8 21h8"></path></svg>`;
+        const deafenSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f23f43" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.9; margin-right:4px;" title="Deafened"><line x1="1" y1="1" x2="23" y2="23"></line><path d="M3 14c-1.1 0-2 .9-2 2v3c0 1.1.9 2 2 2h2a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H3z"></path><path d="M21 14c1.1 0 2 .9 2 2v3c0 1.1-.9 2-2 2h-2a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h2z"></path><path d="M18 14A6 6 0 0 0 6 14"></path></svg>`;
+
+        listHtml += `
+          <div class="voice-user-row" id="vuser-me" onclick="viewPublicProfile(${me.id})" style="display:flex; align-items:center; justify-content:space-between; padding:5px 8px; border-radius:4px; transition: background 0.15s; cursor: pointer; margin-bottom: 2px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div class="vuser-avatar" id="vuser-avatar-me" style="width:24px; height:24px; border-radius:50%; background:${meBgColor}; color:#000; font-size:0.75rem; font-weight:700; display:flex; align-items:center; justify-content:center; border:2px solid transparent; transition: all 0.2s;">
+                ${meInitial}
+              </div>
+              <span style="font-size:0.82rem; color:#fff; font-weight:600;">${escHtml(me.username)}</span>
+            </div>
+            <div style="display:flex; gap:4px; align-items:center;">
+              ${voiceState.deafened 
+                ? deafenSvg 
+                : (voiceState.muted 
+                    ? muteSvg 
+                    : '<span title="Connected" style="width:6px;height:6px;border-radius:50%;background:var(--discord-voice-green);display:inline-block;"></span>')}
+            </div>
+          </div>
+        `;
+
+        // Peers
+        const isAdmin = me.role === 'admin' || me.role === 'moderator';
+        peers.forEach(peer => {
+          const initial = peer.username.charAt(0).toUpperCase();
+          const isPeerAdmin = peer.role === 'admin' || peer.role === 'moderator';
+          const roleBadge = isPeerAdmin
+            ? `<span style="font-size:0.55rem;background:${peer.role === 'admin' ? 'rgba(237,66,69,0.2)' : 'rgba(52,152,219,0.2)'};color:${peer.role === 'admin' ? '#ed4245' : '#3498db'};padding:1px 4px;border-radius:3px;font-weight:800;margin-left:4px;vertical-align:middle;">${peer.role.toUpperCase()}</span>`
+            : '';
+          listHtml += `
+            <div class="voice-user-row" id="vuser-${peer.id}" style="display:flex; align-items:center; justify-content:space-between; padding:5px 8px; border-radius:4px; transition: background 0.15s; margin-bottom: 2px;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <div class="vuser-avatar" id="vuser-avatar-${peer.id}" style="width:24px; height:24px; border-radius:50%; background:${peer.avatar_bg_color}; color:#000; font-size:0.75rem; font-weight:700; display:flex; align-items:center; justify-content:center; border:2px solid transparent; transition: all 0.2s;">
+                  ${initial}
+                </div>
+                <span style="font-size:0.82rem; color:#b5bac1; font-weight:500; cursor:pointer;" onclick="viewPublicProfile(${peer.id})">${escHtml(peer.username)}${roleBadge}</span>
+              </div>
+              <div style="display:flex; gap:4px; align-items:center;">
+                ${peer.isMuted
+                  ? `<span title="${peer.mutedByAdmin ? 'Muted by admin' : 'Muted'}" style="display:inline-flex;align-items:center;gap:2px;font-size:0.65rem;color:#f23f43;background:rgba(242,63,67,0.12);padding:2px 6px;border-radius:4px;font-weight:700;">${peer.mutedByAdmin ? '🔇 ADMIN' : '🔇'}</span>`
+                  : ''}
+                ${isAdmin && peer.socketId !== voiceSocket?.id
+                  ? `<button onclick="event.stopPropagation();adminToggleMute('${peer.socketId}', ${peer.isMuted})" title="${peer.isMuted ? 'Unmute' : 'Mute'} user" style="background:none;border:none;cursor:pointer;color:${peer.isMuted ? 'var(--discord-voice-green)' : 'var(--discord-text-muted)'};font-size:0.75rem;padding:2px 4px;border-radius:3px;transition:all 0.2s;">${peer.isMuted ? '🎤' : '🔇'}</button>
+<button onclick="event.stopPropagation();adminKickUser('${peer.socketId}','${attrEsc(peer.username)}')" title="Remove user" style="background:none;border:none;cursor:pointer;color:var(--discord-text-muted);font-size:0.75rem;padding:2px 4px;border-radius:3px;transition:all 0.2s;">✕</button>`
+                  : ''}
+              </div>
+            </div>
+          `;
+        });
+
+        container.innerHTML = listHtml;
+        container.style.display = 'flex';
+      });
+    }
+
+    function updateVoiceChannelBadges() {
+      document.querySelectorAll('.voice-channel').forEach(ch => {
+        const name = ch.getAttribute('data-name');
+        const badge = ch.querySelector('.join-badge');
+        if (badge) {
+          if (voiceState.connected && voiceState.room === name) {
+            badge.textContent = 'CONNECTED';
+            badge.style.opacity = '1';
+            badge.style.background = 'rgba(35,165,90,0.2)';
+            badge.style.color = 'var(--discord-voice-green)';
+          } else {
+            badge.textContent = 'JOIN';
+            badge.style.opacity = '0.6';
+            badge.style.background = 'rgba(35,165,90,0.15)';
+            badge.style.color = 'var(--discord-voice-green)';
+          }
+        }
+      });
+    }
+
+    function updateVoiceUI() {
+      const el = document.getElementById('voiceStatus');
+      const panel = document.getElementById('voiceControlsPanel');
+      const panelRoom = document.getElementById('voicePanelRoom');
+      const muteBtn = document.getElementById('btnVoiceMute');
+      const deafenBtn = document.getElementById('btnVoiceDeafen');
+
+      if (!el) return;
+      
+      // Update voice channel badges & connected user list
+      updateVoiceChannelBadges();
+      renderVoiceChannelsUsers();
+
+      if (voiceState.reconnecting) {
+        el.textContent = `● CONNECTING...`;
+        el.style.color = 'var(--discord-accent)';
+        if (panel) panel.style.display = 'none';
+      } else if (!voiceState.connected) {
+        el.textContent = `● DISCONNECTED`;
+        el.style.color = 'var(--discord-text-muted)';
+        if (panel) panel.style.display = 'none';
+      } else {
+        el.textContent = `● CONNECTED: ${voiceState.room}`;
+        el.style.color = 'var(--discord-voice-green)';
+        
+        if (panel) {
+          panel.style.display = 'block';
+          panelRoom.textContent = voiceState.room;
+          
+          muteBtn.innerHTML = voiceState.muted ? '🔇 <span style="font-size:0.6rem;color:#f23f43;margin-left:4px;">MUTED</span>' : '🎤';
+          muteBtn.classList.toggle('active-red', voiceState.muted);
+          
+          deafenBtn.innerHTML = voiceState.deafened ? '🔇 <span style="font-size:0.6rem;color:#f23f43;margin-left:4px;">DEAF</span>' : '🎧';
+          deafenBtn.classList.toggle('active-red', voiceState.deafened);
+        }
+      }
+
+      // Highlight active channels in sidebar
+      document.querySelectorAll('.voice-channel').forEach(ch => {
+        const name = ch.getAttribute('data-name');
+        const icon = ch.querySelector('.voice-channel-icon');
+        const isActive = voiceState.connected && voiceState.room === name;
+        
+        ch.classList.toggle('active', isActive);
+        if (icon) {
+          icon.style.color = isActive ? 'var(--discord-voice-green)' : 'var(--discord-text-muted)';
+          icon.style.opacity = isActive ? '1' : '0.6';
+          icon.style.filter = isActive ? 'drop-shadow(0 0 3px var(--discord-voice-green))' : 'none';
+        }
+      });
+    }
+
+    function joinVoice(name) {
+      if (!window.stockwise?.currentUser()) { openAuth('login'); return; }
+
+      if (voiceState.connected && String(voiceState.room) === String(name)) {
+        disconnectVoice();
+        window.stockwise?.toast(`Disconnected from ${name}`, 'info');
+        return;
+      }
+
+      if (voiceSocket && voiceState.room) {
+        voiceSocket.emit('voice:leave', { room: voiceState.room });
+      }
+      if (localStream) {
+        localStream.getTracks().forEach(t => t.stop());
+        localStream = null;
+      }
+      activePeers['Trader Lounge'] = [];
+      activePeers['Alpha Room'] = [];
+      closeAllPeerConnections();
+      stopVoiceAnalyser();
+
+      const me = window.stockwise?.currentUser();
+      if (!me) return;
+
+      voiceState.reconnecting = true;
+      voiceState.connected = false;
+      voiceState.room = name;
+      voiceState.muted = false;
+      voiceState.deafened = false;
+      updateVoiceUI();
+
+      window.stockwise?.toast(`Connecting to ${name}...`, 'success');
+
+      (async () => {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true }, video: false });
+          localStream = stream;
+
+          const sock = getVoiceSocket();
+          voiceState.reconnecting = false;
+          voiceState.connected = true;
+          updateVoiceUI();
+          sock.emit('voice:join', { room: name, username: me.username }, (ack) => {
+            if (ack && ack.error) {
+              window.stockwise?.toast(ack.error, 'error');
+              cleanupVoice();
+              return;
+            }
+            playSynthSound('join');
+            window.stockwise?.toast(`Connected to ${name}`, 'success');
+
+            if (ack && ack.users) {
+              ack.users.forEach(u => {
+                if (u.socketId !== sock.id) {
+                  activePeers[name].push({
+                    id: u.userId, socketId: u.socketId, username: u.username,
+                    isMuted: u.muted, avatar_bg_color: '#5865f2'
+                  });
+                }
+              });
+              renderVoiceChannelsUsers();
+              ack.users.forEach(u => {
+                if (u.socketId !== sock.id) createPeerConnection(u.socketId, true);
+              });
+            }
+
+            startVoiceAnalyser();
+            startRealPing();
+          });
+        } catch (err) {
+          console.error('getUserMedia error:', err);
+          window.stockwise?.toast('Microphone access denied. Please allow mic permissions.', 'error');
+          cleanupVoice();
+        }
+      })();
+    }
+
+    function cleanupVoice() {
+      closeAllPeerConnections();
+      stopVoiceAnalyser();
+      stopRealPing();
+      if (voiceSocket && voiceState.room) {
+        voiceSocket.emit('voice:leave', { room: voiceState.room });
+      }
+      if (localStream) {
+        localStream.getTracks().forEach(t => t.stop());
+        localStream = null;
+      }
+      activePeers['Trader Lounge'] = [];
+      activePeers['Alpha Room'] = [];
+      voiceState.reconnecting = false;
+      voiceState.connected = false;
+      voiceState.room = null;
+      voiceState.muted = false;
+      voiceState.deafened = false;
+      updateVoiceUI();
+    }
+
+    function disconnectVoice() {
+      if (voiceState.connected) playSynthSound('leave');
+      cleanupVoice();
+    }
+
+    function adminToggleMute(targetSocketId, currentlyMuted) {
+      const sock = getVoiceSocket();
+      if (!sock.connected) return;
+      sock.emit('voice:admin-mute', { room: voiceState.room, targetSocketId, muted: !currentlyMuted });
+    }
+
+    function adminKickUser(targetSocketId, username) {
+      if (!confirm(`Remove ${username} from the voice channel?`)) return;
+      const sock = getVoiceSocket();
+      if (!sock.connected) return;
+      sock.emit('voice:admin-kick', { room: voiceState.room, targetSocketId });
+    }
+
+    function startRealPing() {
+      stopRealPing();
+      voicePingInterval = setInterval(async () => {
+        const pcs = Object.values(peerConnections);
+        if (pcs.length === 0) return;
+        try {
+          const stats = await pcs[0].getStats();
+          let rtt = null;
+          stats.forEach(report => {
+            if (report.type === 'candidate-pair' && report.state === 'succeeded' && report.currentRoundTripTime != null) {
+              rtt = Math.round(report.currentRoundTripTime * 1000);
+            }
+          });
+          if (rtt !== null) {
+            const pingDot = document.getElementById('voicePingDot');
+            const pingText = document.getElementById('voicePingText');
+            if (pingText) pingText.textContent = `Ping: ${rtt} ms`;
+            if (pingDot) {
+              if (rtt < 80) { pingDot.style.background = '#23a55a'; pingDot.style.boxShadow = '0 0 4px #23a55a'; }
+              else if (rtt < 150) { pingDot.style.background = '#f0a818'; pingDot.style.boxShadow = '0 0 4px #f0a818'; }
+              else { pingDot.style.background = '#f23f43'; pingDot.style.boxShadow = '0 0 4px #f23f43'; }
+            }
+          }
+        } catch (e) { /* stats not ready yet */ }
+      }, 3000);
+    }
+
+    function stopRealPing() {
+      if (voicePingInterval) { clearInterval(voicePingInterval); voicePingInterval = null; }
+    }
+
+    function toggleMute() {
+      voiceState.muted = !voiceState.muted;
+      if (localStream) {
+        localStream.getAudioTracks().forEach(t => { t.enabled = !voiceState.muted; });
+      }
+      if (!voiceState.muted) voiceState.deafened = false;
+      if (voiceSocket && voiceState.room) {
+        voiceSocket.emit('voice:mute-toggle', { room: voiceState.room, muted: voiceState.muted });
+      }
+      updateVoiceUI();
+      window.stockwise?.toast(voiceState.muted ? 'Microphone muted' : 'Microphone active', 'info');
+    }
+
+    function toggleDeafen() {
+      voiceState.deafened = !voiceState.deafened;
+      if (voiceState.deafened) {
+        voiceState.muted = true;
+        if (localStream) localStream.getAudioTracks().forEach(t => { t.enabled = false; });
+        if (voiceSocket && voiceState.room) {
+          voiceSocket.emit('voice:mute-toggle', { room: voiceState.room, muted: true });
+        }
+      } else {
+        if (localStream) localStream.getAudioTracks().forEach(t => { t.enabled = !voiceState.muted; });
+      }
+      updateVoiceUI();
+      window.stockwise?.toast(voiceState.deafened ? 'Audio output suppressed' : 'Audio active', 'info');
+    }
+
+    let screenShareStream = null;
+
+    function toggleScreenShare() {
+      if (screenShareStream) {
+        stopScreenShare();
+        return;
+      }
+      if (!voiceState.connected) {
+        window.stockwise?.toast('Join a voice channel first', 'error');
+        return;
+      }
+      navigator.mediaDevices.getDisplayMedia({ video: true, audio: false })
+        .then(stream => {
+          screenShareStream = stream;
+          const btn = document.getElementById('btnScreenShare');
+          if (btn) { btn.style.background = 'rgba(35,165,90,0.15)'; btn.style.color = '#23a55a'; btn.title = 'Stop Sharing'; }
+          window.stockwise?.toast('Screen sharing started', 'success');
+          // Add video track to all existing peer connections
+          const videoTrack = stream.getVideoTracks()[0];
+          Object.values(peerConnections).forEach((pc) => {
+            if (pc && pc.connectionState !== 'closed') {
+              pc.addTrack(videoTrack, stream);
+            }
+          });
+          // Stop when user stops sharing via browser UI
+          videoTrack.onended = stopScreenShare;
+        })
+        .catch(() => {});
+    }
+
+    function stopScreenShare() {
+      if (screenShareStream) {
+        screenShareStream.getTracks().forEach(t => t.stop());
+        screenShareStream = null;
+      }
+      const btn = document.getElementById('btnScreenShare');
+      if (btn) { btn.style.background = ''; btn.style.color = ''; btn.title = 'Share Screen'; }
+      window.stockwise?.toast('Screen sharing stopped', 'info');
+    }
+
+    // ─── WEB AUDIO API SYNTHESIZER SOUNDBOARD ───
+    function playSynthSound(type) {
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+
+        const now = audioCtx.currentTime;
+
+        if (type === 'join') {
+          // Discord-style double-rising join sound
+          const osc1 = audioCtx.createOscillator();
+          const osc2 = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+
+          osc1.type = 'sine';
+          osc2.type = 'sine';
+
+          osc1.frequency.setValueAtTime(330, now); // E4
+          osc1.frequency.setValueAtTime(440, now + 0.12); // A4
+
+          osc2.frequency.setValueAtTime(396, now); // G4
+          osc2.frequency.setValueAtTime(528, now + 0.12); // C5
+
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
+
+          osc1.connect(gain);
+          osc2.connect(gain);
+          gain.connect(audioCtx.destination);
+
+          osc1.start(now);
+          osc2.start(now);
+          osc1.stop(now + 0.4);
+          osc2.stop(now + 0.4);
+        }
+        else if (type === 'leave') {
+          // Discord-style double-falling leave sound
+          const osc1 = audioCtx.createOscillator();
+          const osc2 = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+
+          osc1.type = 'sine';
+          osc2.type = 'sine';
+
+          osc1.frequency.setValueAtTime(440, now); // A4
+          osc1.frequency.setValueAtTime(330, now + 0.12); // E4
+
+          osc2.frequency.setValueAtTime(528, now); // C5
+          osc2.frequency.setValueAtTime(396, now + 0.12); // G4
+
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
+
+          osc1.connect(gain);
+          osc2.connect(gain);
+          gain.connect(audioCtx.destination);
+
+          osc1.start(now);
+          osc2.start(now);
+          osc1.stop(now + 0.4);
+          osc2.stop(now + 0.4);
+        }
+        else if (type === 'bull') {
+          // Bull Run Synthesizer Arpeggio
+          const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99]; // C4, E4, G4, C5, E5, G5
+          notes.forEach((freq, idx) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+            
+            gain.gain.setValueAtTime(0.08, now + idx * 0.08);
+            gain.gain.linearRampToValueAtTime(0.001, now + idx * 0.08 + 0.25);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now + idx * 0.08);
+            osc.stop(now + idx * 0.08 + 0.25);
+          });
+        }
+        else if (type === 'bear') {
+          // Bear Market slide down
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(380, now);
+          osc.frequency.exponentialRampToValueAtTime(80, now + 0.65);
+          
+          // Apply lowpass filter to make it warmer/muffled
+          const filter = audioCtx.createBiquadFilter();
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(600, now);
+          
+          gain.gain.setValueAtTime(0.1, now);
+          gain.gain.linearRampToValueAtTime(0.001, now + 0.65);
+          
+          osc.connect(filter);
+          filter.connect(gain);
+          gain.connect(audioCtx.destination);
+          
+          osc.start(now);
+          osc.stop(now + 0.65);
+        }
+        else if (type === 'cash') {
+          // Cha-Ching metal coin drop sound
+          const osc1 = audioCtx.createOscillator();
+          const osc2 = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          
+          osc1.type = 'sine';
+          osc1.frequency.setValueAtTime(880, now); // A5
+          osc1.frequency.setValueAtTime(1250, now + 0.08);
+          
+          osc2.type = 'sine';
+          osc2.frequency.setValueAtTime(1500, now);
+          osc2.frequency.setValueAtTime(1800, now + 0.08);
+          
+          gain.gain.setValueAtTime(0.08, now);
+          gain.gain.setValueAtTime(0.12, now + 0.08);
+          gain.gain.linearRampToValueAtTime(0.001, now + 0.45);
+          
+          osc1.connect(gain);
+          osc2.connect(gain);
+          gain.connect(audioCtx.destination);
+          
+          osc1.start(now);
+          osc2.start(now);
+          osc1.stop(now + 0.45);
+          osc2.stop(now + 0.45);
+        }
+        else if (type === 'alert') {
+          // Margin Call alarm buzzer
+          const duration = 0.5;
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          
+          osc.type = 'sawtooth';
+          // oscillating sweep
+          osc.frequency.setValueAtTime(220, now);
+          osc.frequency.setValueAtTime(260, now + 0.12);
+          osc.frequency.setValueAtTime(220, now + 0.24);
+          osc.frequency.setValueAtTime(260, now + 0.36);
+          
+          const filter = audioCtx.createBiquadFilter();
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(450, now);
+          
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.linearRampToValueAtTime(0.001, now + duration);
+          
+          osc.connect(filter);
+          filter.connect(gain);
+          gain.connect(audioCtx.destination);
+          
+          osc.start(now);
+          osc.stop(now + duration);
+        }
+      } catch (err) {
+        console.error('Web Audio API error:', err);
+      }
+    }
+     // ─── FRIENDS SYSTEM ───
+    let currentFriendsTab = 'all';
+    let allFriendsData = [];
+
+    function showFriendsList() {
+      activeGroupId = null;
+      activeRecipientId = null;
+      const feed = document.getElementById('postsFeed');
+      if (feed) {
+        feed.classList.add('friends-active');
+      }
+      document.getElementById('currentChannelName').textContent = 'Friends';
+      document.getElementById('headerHash').textContent = '👥';
+      
+      feed.innerHTML = `
+        <div class="friends-view" style="width: 100%;">
+          <div class="friends-nav-tabs">
+            <button class="f-nav-tab active" onclick="switchFriendsTab('all')">All Friends</button>
+            <button class="f-nav-tab" onclick="switchFriendsTab('pending')">Pending <span class="badge" id="pendingFriendsCount" style="display:none">0</span></button>
+            <button class="f-nav-tab" onclick="switchFriendsTab('suggestions')">Suggestions</button>
+            <button class="f-nav-tab add-friend-btn" onclick="switchFriendsTab('add')">Add Friend</button>
+          </div>
+          
+          <div id="friendsTabContent">
+            <div class="loader"><div class="spinner"></div></div>
+          </div>
+        </div>
+      `;
+      
+      document.removeEventListener('keydown', handleCommandK);
+      document.addEventListener('keydown', handleCommandK);
+      
+      loadFriends();
+    }
+
+    function switchFriendsTab(tab) {
+      currentFriendsTab = tab;
+      document.querySelectorAll('.f-nav-tab').forEach(btn => {
+        const isTarget = btn.getAttribute('onclick').includes(`'${tab}'`);
+        btn.classList.toggle('active', isTarget);
+      });
+      renderFriendsTabContent();
+    }
+
+    function handleCommandK(e) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        switchFriendsTab('add');
+        setTimeout(() => {
+          const input = document.getElementById('addFriendIdentifier');
+          if (input) input.focus();
+        }, 50);
+      }
+    }
+
+    async function loadFriends() {
+      try {
+        const res = await fetch('/api/friends', { credentials: 'include' });
+        allFriendsData = await res.json();
+
+        // Update pending count badge
+        const me = window.stockwise?.currentUser();
+        const pendingCount = allFriendsData.filter(f => f.status === 'pending' && f.sender_id !== me?.id).length;
+        const badge = document.getElementById('pendingFriendsCount');
+        if (badge) {
+          badge.textContent = pendingCount;
+          badge.style.display = pendingCount > 0 ? 'inline-block' : 'none';
+        }
+
+        renderFriendsTabContent();
+      } catch (err) {
+        const content = document.getElementById('friendsTabContent');
+        if (content) {
+          content.innerHTML = '<p style="color:var(--discord-danger);padding:1rem">Failed to load connection streams.</p>';
+        }
+      }
+    }
+
+    const renderFriendCard = f => {
+      const me = window.stockwise?.currentUser();
+      const isPending = f.status === 'pending';
+      const isOutgoing = isPending && f.sender_id === me?.id;
+
+      return `
+        <div class="friend-card">
+          <div class="friend-info">
+            <div class="friend-avatar" style="background:${f.avatar_bg_color || '#313338'}">
+              ${f.username ? f.username.charAt(0).toUpperCase() : 'U'}
+              <div class="friend-status ${f.status === 'accepted' ? 'status-online' : ''}"></div>
+            </div>
+            <div class="friend-details">
+              <div class="friend-name">${escHtml(f.username)}</div>
+              <div class="friend-meta">
+                ${(f.role || 'user').toUpperCase()} • ${f.mutual_count || 0} mutual
+                ${f.shared_holdings ? ` • ${f.shared_holdings} shared holdings` : ''}
+              </div>
+            </div>
+          </div>
+
+          ${!isPending ? `
+            <div class="activity-badge ${act.cls}">
+              <span style="width:6px; height:6px; border-radius:50%; background:currentColor; display:inline-block;"></span>
+              ${act.label}
+            </div>
+
+            ${act.ticker ? `<div class="presence-context">Currently viewing: <b>${act.ticker}</b></div>` : ''}
+            
+            <div class="friend-badges">
+                <div class="friend-badge badge-accent">TOP PICK: ${f.topPick}</div>
+                ${streak > 8 ? `<div class="friend-badge badge-gold">⭐ MENTOR</div>` : ''}
+                ${f.shared_holdings && f.shared_holdings > 2 ? `<div class="friend-badge" style="background:rgba(0,229,160,0.15);color:#00e5a0">📊 COMPATIBLE</div>` : ''}
+            </div>
+          ` : ''}
+
+          <div class="friend-quick-actions">
+            ${isPending 
+               ? (isOutgoing 
+                  ? `<div style="font-size:0.8rem; color:var(--discord-text-muted); display:flex; align-items:center; gap:6px;">⌛ Outgoing Request</div>
+                     <button class="action-btn-brutal" onclick="cancelFriend(${f.id})" style="background:rgba(242,63,67,0.1);color:#f23f43;border-color:#f23f43;margin-left:auto">CANCEL</button>`
+                  : `<button class="action-btn-brutal primary" onclick="acceptFriend(${f.id})">ACCEPT BRIDGE</button>
+                     <button class="action-btn-brutal" onclick="cancelFriend(${f.id})" style="background:rgba(242,63,67,0.1);color:#f23f43;border-color:#f23f43">DECLINE</button>`
+                 )
+               : `
+                   <button class="action-btn-brutal" onclick="startDM(${f.id}, '${attrEsc(f.username)}')">CHAT</button>
+                  <button class="action-btn-brutal" onclick="viewPortfolio(${f.id}, '${attrEsc(f.username)}')">ASSETS</button>
+                  <button class="action-btn-brutal" onclick="window.stockwise?.toast('Following signals from ${attrEsc(f.username)}')">SIGNALS</button>
+                  <button class="action-btn-brutal" onclick="joinVoice('Alpha Room')">VOICE</button>
+                  <button class="action-btn-brutal" onclick="removeFriend(${f.id})" style="background:rgba(242,63,67,0.1);color:#f23f43;border-color:#f23f43">REMOVE</button>
+                `}
+          </div>
+        </div>
+      `;
+    };
+
+    function renderFriendsTabContent() {
+      const container = document.getElementById('friendsTabContent');
+      if (!container) return;
+
+      const me = window.stockwise?.currentUser();
+      if (!me) return;
+
+      if (currentFriendsTab === 'all') {
+        const friendsList = allFriendsData.filter(f => f.status === 'accepted');
+        
+        const mentors = friendsList.filter(f => f.streak > 8);
+        const rest = friendsList.filter(f => f.streak <= 8);
+
+        container.innerHTML = `
+          <div style="margin-bottom: 1.5rem; position: relative;">
+            <input type="text" id="friendFilterInput" class="engine-input" style="height:44px; padding-left: 16px; border-radius: 8px;" placeholder="Search friends by name..." onkeyup="filterFriendsList(this.value)">
+          </div>
+          <div class="friends-section-title">🌟 Trading Mentors & Circles</div>
+          <div id="friendsCirclesContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-bottom: 2rem;">
+            ${mentors.length ? mentors.map(renderFriendCard).join('') : '<p style="font-size:0.75rem; color:var(--discord-text-muted); padding-left:0.5rem">No mentors in your circle yet.</p>'}
+          </div>
+          <div class="friends-section-title">🤝 Established Connections</div>
+          <div id="friendsListContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+            ${rest.length ? rest.map(renderFriendCard).join('') : '<p style="font-size:0.75rem; color:var(--discord-text-muted); padding-left:0.5rem">Scan the network to find more connections.</p>'}
+          </div>
+        `;
+      } 
+      else if (currentFriendsTab === 'pending') {
+        const pendingRequests = allFriendsData.filter(f => f.status === 'pending');
+        const incoming = pendingRequests.filter(f => f.sender_id !== me.id);
+        const outgoing = pendingRequests.filter(f => f.sender_id === me.id);
+
+        container.innerHTML = `
+          <div class="friends-section-title" style="margin-top:0">📥 Incoming Requests (${incoming.length})</div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-bottom: 2rem;">
+            ${incoming.length ? incoming.map(renderFriendCard).join('') : '<p style="font-size:0.75rem; color:var(--discord-text-muted); padding-left:0.5rem">No pending incoming requests.</p>'}
+          </div>
+          <div class="friends-section-title">📤 Outgoing Requests (${outgoing.length})</div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+            ${outgoing.length ? outgoing.map(renderFriendCard).join('') : '<p style="font-size:0.75rem; color:var(--discord-text-muted); padding-left:0.5rem">No pending outgoing requests.</p>'}
+          </div>
+        `;
+      }
+      else if (currentFriendsTab === 'suggestions') {
+        container.innerHTML = `
+          <div class="friends-section-title" style="margin-top:0">💡 Suggested Connections</div>
+          <div id="friendSuggestionsContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+            <div class="loader"><div class="spinner"></div></div>
+          </div>
+        `;
+        loadFriendSuggestions();
+      }
+      else if (currentFriendsTab === 'add') {
+        container.innerHTML = `
+          <div class="add-friend-container" style="background: var(--discord-card); border: 1px solid var(--discord-border); border-radius: 12px; padding: 24px;">
+            <h3 style="margin-top:0; color: #fff; font-family:'Syne',sans-serif; letter-spacing:0.5px">ADD FRIEND</h3>
+            <p style="color: var(--discord-text-muted); font-size: 0.88rem; margin-bottom: 1.5rem; line-height: 1.4">
+              You can send a friend request to any trader on the network. Search by username, registered email address, or unique User ID (e.g. <b>#4</b> or just <b>4</b>).
+            </p>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap; position: relative;">
+              <div style="position: relative; flex: 1; min-width: 250px;">
+                <input type="text" id="addFriendIdentifier" class="engine-input" style="height: 44px; font-size: 0.95rem; width: 100%;" placeholder="e.g. sreekar, sreekarsh44@gmail.com, or #4" oninput="handleFriendAutocomplete(this.value)">
+                <div id="addFriendSuggestions" style="display: none; position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: var(--discord-sidebar); border: 1px solid var(--discord-border); border-radius: 8px; z-index: 100; max-height: 280px; overflow-y: auto; box-shadow: 0 6px 20px rgba(0,0,0,0.6);"></div>
+              </div>
+              <button class="action-btn-brutal primary" onclick="submitAddFriend()" style="height: 44px; padding: 0 24px; font-weight: 700; border-radius:8px">Send Friend Request</button>
+            </div>
+            <p id="addFriendStatus" style="font-size: 0.88rem; margin-top: 16px; min-height: 20px; font-weight: 600; transition: all 0.2s;"></p>
+          </div>
+        `;
+      }
+    }
+
+    function filterFriendsList(val) {
+      const searchVal = val.toLowerCase().trim();
+      const cards = document.querySelectorAll('#friendsCirclesContainer .friend-card, #friendsListContainer .friend-card');
+      cards.forEach(card => {
+        const nameEl = card.querySelector('.friend-name');
+        if (nameEl) {
+          const name = nameEl.textContent.toLowerCase();
+          card.style.display = name.includes(searchVal) ? '' : 'none';
+        }
+      });
+    }
+
+    async function submitAddFriend() {
+      const statusEl = document.getElementById('addFriendStatus');
+      const inputEl = document.getElementById('addFriendIdentifier');
+      if (!statusEl || !inputEl) return;
+
+      statusEl.textContent = '';
+      statusEl.style.color = '';
+
+      const identifier = inputEl.value.trim();
+      if (!identifier) {
+        statusEl.textContent = 'Please enter a Username, Email, or User ID.';
+        statusEl.style.color = 'var(--discord-danger)';
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/friends/request-by-identifier', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ identifier })
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(data?.error || 'Failed to send friend request');
+        }
+
+        inputEl.value = '';
+        if (data.accepted) {
+          statusEl.textContent = `Success! You are now friends with ${data.username}.`;
+          statusEl.style.color = 'var(--discord-voice-green)';
+        } else {
+          statusEl.textContent = `Success! Friend request sent to ${data.username}.`;
+          statusEl.style.color = 'var(--discord-voice-green)';
+        }
+        
+        loadFriends();
+      } catch (e) {
+        statusEl.textContent = e.message;
+        statusEl.style.color = 'var(--discord-danger)';
+      }
+    }
+
+    async function cancelFriend(id) {
+      await fetch('/api/friends/cancel', { method: 'POST', credentials: 'include', headers: {'Content-Type':'application/json'}, body: JSON.stringify({friend_id: id}) });
+      loadFriends();
+    }
+
+    async function removeFriend(id) {
+      if (!confirm('Remove this friend?')) return;
+      await fetch('/api/friends/cancel', { method: 'POST', credentials: 'include', headers: {'Content-Type':'application/json'}, body: JSON.stringify({friend_id: id}) });
+      loadFriends();
+      window.stockwise?.toast('Friend removed', 'info');
+    }
+
+    function viewPortfolio(userId, username) {
+       viewPublicProfile(userId);
+    }
+
+    async function loadFriendSuggestions() {
+      const res = await fetch('/api/friends/suggestions', { credentials: 'include' });
+      const suggestions = await res.json();
+      const container = document.getElementById('friendSuggestionsContainer');
+      
+      if (!container) return;
+
+      if (!suggestions.length) {
+        container.innerHTML = '<p style="font-size:0.75rem; color:var(--discord-text-muted); padding-left:0.5rem">No suggestions available.</p>';
+        return;
+      }
+      
+      container.innerHTML = suggestions.map(u => `
+        <div class="friend-card" style="padding:12px">
+          <div class="friend-info">
+            <div class="friend-avatar" style="width:36px;height:36px;background:${u.avatar_bg_color || '#313338'};font-size:0.9rem">
+              ${u.username ? u.username.charAt(0).toUpperCase() : 'U'}
+            </div>
+            <div class="friend-details">
+              <div class="friend-name" style="font-size:0.85rem">${escHtml(u.username)}</div>
+              <div class="friend-meta" style="font-size:0.7rem">${(u.role || 'user').toUpperCase()}</div>
+            </div>
+          </div>
+          ${u.shared_holdings ? `<div style="font-size:0.7rem;color:var(--discord-accent);margin-top:4px">📊 ${u.shared_holdings} shared holdings</div>` : ''}
+          <button class="action-btn-brutal primary" style="margin-top:8px;width:100%;font-size:0.75rem" onclick="sendFriendRequest(${u.id})">CONNECT</button>
+        </div>
+      `).join('');
+    }
+
+    async function acceptFriend(id) {
+      await fetch('/api/friends/accept', { method: 'POST', credentials: 'include', headers: {'Content-Type':'application/json'}, body: JSON.stringify({friend_id: id}) });
+      loadFriends();
+    }
+
+    async function sendFriendRequest(id) {
+      await fetch('/api/friends/request', { method: 'POST', credentials: 'include', headers: {'Content-Type':'application/json'}, body: JSON.stringify({friend_id: id}) });
+      window.stockwise?.toast('Request sent!', 'success');
+      loadFriends();
+    }
+
+    function startDM(userId, username) {
+      activeRecipientId = userId;
+      activeGroupId = null;
+      document.getElementById('currentChannelName').textContent = username;
+      document.getElementById('headerHash').textContent = '@';
+      loadPosts();
+    }
+    
+    // ─── ADMIN ROLE UI ───
+    function openAdminMenu(userId, username, event) {
+       const me = window.stockwise?.currentUser();
+       if (!me || me.role !== 'admin') return true;
+       
+       event.preventDefault();
+       targetAdminUserId = userId;
+       const menu = document.getElementById('adminRoleMenu');
+       menu.style.display = 'block';
+       menu.style.left = event.pageX + 'px';
+       menu.style.top = event.pageY + 'px';
+       return false;
+    }
+    
+    function closeAdminMenu() { document.getElementById('adminRoleMenu').style.display = 'none'; }
+    document.addEventListener('click', (e) => { if (!e.target.closest('#adminRoleMenu')) closeAdminMenu(); });
+
+    async function assignUserRole(role) {
+       const res = await fetch('/api/admin/set-role', {
+          method: 'POST', credentials: 'include', headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ userId: targetAdminUserId, role })
+       });
+       if (res.ok) { window.stockwise?.toast('Role updated successfully', 'success'); loadPosts(); }
+       closeAdminMenu();
+    }
+
+    let postsHasMore = false;
+    let postsLastId = null;
+
+    async function loadPosts() {
+      const feed = document.getElementById('postsFeed');
+      if (feed) {
+        feed.classList.remove('friends-active');
+      }
+      postsLastId = null;
+      postsHasMore = false;
+      try {
+        let url = '/api/community';
+        if (activeRecipientId) url = `/api/community?recipient_id=${activeRecipientId}`;
+        else if (activeGroupId) url = `/api/community?group_id=${activeGroupId}`;
+
+        const res = await fetch(url, { credentials: 'include' });
+        const data = await res.json();
+        const posts = Array.isArray(data) ? data : data.posts || [];
+        postsHasMore = !Array.isArray(data) ? !!data.has_more : false;
+        const me = window.stockwise?.currentUser();
+        const auSvgFn = window.auSvg || (s=>s);
+        
+        if (!posts.length) {
+          feed.innerHTML = `<div style="text-align:center;padding:4rem;color:var(--discord-text-muted)"><div style="font-size:3rem;margin-bottom:1rem;opacity:0.2">💬</div><p>No transmissions detected in this node.</p></div>`;
+          return;
+        }
+        
+        postsLastId = posts[posts.length - 1].id;
+
+        const getRoleBadge = (r) => {
+           if (r === 'admin') return '<span class="role-badge badge-admin">ADMIN</span>';
+           if (r === 'moderator') return '<span class="role-badge badge-mod">MOD</span>';
+           if (r === 'vip') return '<span class="role-badge badge-vip">VIP</span>';
+           return '';
+        };
+
+        const canModify = (p) => me && (p.user_id === me.id || me.role === 'admin' || me.role === 'moderator');
+
+        feed.innerHTML = posts.map(p => `
+          <div class="d-msg">
+            <div class="d-msg-avatar">${auSvgFn(p.username, {bg_color: p.avatar_bg_color, accessory: p.avatar_accessory, energy: p.avatar_energy, showLegs:false})}</div>
+            <div class="d-msg-body">
+              <div class="d-msg-header">
+                <span class="d-msg-author" onclick="viewPublicProfile(${p.user_id})" oncontextmenu="openAdminMenu(${p.user_id}, '${attrEsc(p.username)}', event)">
+                  ${getRoleBadge(p.role)}${escHtml(p.username)}
+                </span>
+                <span class="d-msg-time">${timeAgo(p.created_at)}</span>
+                ${p.coin ? `<span class="post-coin">${escHtml(p.coin)}</span>` : ''}
+                ${canModify(p) ? `<span class="post-actions"><button class="post-action-btn" onclick="editPost(${p.id})" title="Edit">✏️</button><button class="post-action-btn" onclick="deletePost(${p.id})" title="Delete">🗑️</button></span>` : ''}
+              </div>
+              <div class="d-msg-content">${escHtml(p.content)}</div>
+              <div class="d-msg-footer">
+                <button class="like-btn ${p.liked ? 'liked' : ''}" onclick="toggleLike(${p.id}, this)" title="Like">
+                  ${p.liked ? '💔' : '👍'} <span class="like-count">${p.likes || 0}</span>
+                </button>
+              </div>
+              ${(p.reactions && p.reactions.length) ? `<div class="d-msg-reactions">${p.reactions.map(r => `<span class="reaction-badge" onclick="toggleReaction(${p.id}, '${r.emoji}')" title="${escHtml(r.users.join(', '))}">${r.emoji} ${r.count}</span>`).join('')}</div>` : ''}
+              <div class="d-msg-reaction-picker">
+                ${['👍','❤️','😂','😮','😢','🔥','🚀','💎'].map(e => `<span class="reaction-opt" onclick="toggleReaction(${p.id}, '${e}')">${e}</span>`).join('')}
+              </div>
+            </div>
+          </div>
+        `).join('');
+        if (postsHasMore) {
+          feed.innerHTML += '<div style="text-align:center;padding:1rem"><button class="btn-sm secondary" onclick="loadMorePosts()" id="loadMoreBtn">Load more</button></div>';
+        }
+        feed.scrollTop = 0;
+      } catch (err) { feed.innerHTML = '<p style="color:var(--discord-danger);text-align:center;padding:2rem">Feed connection lost.</p>'; }
+    }
+
+    async function loadMorePosts() {
+      if (!postsLastId) return;
+      const btn = document.getElementById('loadMoreBtn');
+      if (btn) { btn.textContent = 'Loading...'; btn.disabled = true; }
+      try {
+        let url = `/api/community?before=${postsLastId}&limit=50`;
+        if (activeRecipientId) url += `&recipient_id=${activeRecipientId}`;
+        else if (activeGroupId) url += `&group_id=${activeGroupId}`;
+
+        const res = await fetch(url, { credentials: 'include' });
+        const data = await res.json();
+        const posts = Array.isArray(data) ? data : data.posts || [];
+        postsHasMore = !Array.isArray(data) ? !!data.has_more : false;
+        const me = window.stockwise?.currentUser();
+        const auSvgFn = window.auSvg || (s=>s);
+        const feed = document.getElementById('postsFeed');
+
+        if (!posts.length) {
+          if (btn) btn.remove();
+          return;
+        }
+
+        postsLastId = posts[posts.length - 1].id;
+
+        const getRoleBadge = (r) => {
+           if (r === 'admin') return '<span class="role-badge badge-admin">ADMIN</span>';
+           if (r === 'moderator') return '<span class="role-badge badge-mod">MOD</span>';
+           if (r === 'vip') return '<span class="role-badge badge-vip">VIP</span>';
+           return '';
+        };
+
+        const canModify = (p) => me && (p.user_id === me.id || me.role === 'admin' || me.role === 'moderator');
+
+        const html = posts.map(p => `
+          <div class="d-msg">
+            <div class="d-msg-avatar">${auSvgFn(p.username, {bg_color: p.avatar_bg_color, accessory: p.avatar_accessory, energy: p.avatar_energy, showLegs:false})}</div>
+            <div class="d-msg-body">
+              <div class="d-msg-header">
+                <span class="d-msg-author" onclick="viewPublicProfile(${p.user_id})" oncontextmenu="openAdminMenu(${p.user_id}, '${attrEsc(p.username)}', event)">
+                  ${getRoleBadge(p.role)}${escHtml(p.username)}
+                </span>
+                <span class="d-msg-time">${timeAgo(p.created_at)}</span>
+                ${p.coin ? `<span class="post-coin">${escHtml(p.coin)}</span>` : ''}
+                ${canModify(p) ? `<span class="post-actions"><button class="post-action-btn" onclick="editPost(${p.id})" title="Edit">✏️</button><button class="post-action-btn" onclick="deletePost(${p.id})" title="Delete">🗑️</button></span>` : ''}
+              </div>
+              <div class="d-msg-content">${escHtml(p.content)}</div>
+              <div class="d-msg-footer">
+                <button class="like-btn ${p.liked ? 'liked' : ''}" onclick="toggleLike(${p.id}, this)" title="Like">
+                  ${p.liked ? '💔' : '👍'} <span class="like-count">${p.likes || 0}</span>
+                </button>
+              </div>
+              ${(p.reactions && p.reactions.length) ? `<div class="d-msg-reactions">${p.reactions.map(r => `<span class="reaction-badge" onclick="toggleReaction(${p.id}, '${r.emoji}')" title="${escHtml(r.users.join(', '))}">${r.emoji} ${r.count}</span>`).join('')}</div>` : ''}
+              <div class="d-msg-reaction-picker">
+                ${['👍','❤️','😂','😮','😢','🔥','🚀','💎'].map(e => `<span class="reaction-opt" onclick="toggleReaction(${p.id}, '${e}')">${e}</span>`).join('')}
+              </div>
+            </div>
+          </div>
+        `).join('');
+
+        // Remove the load more button, append new posts, re-add button if needed
+        const existingBtn = feed.querySelector('#loadMoreBtn');
+        if (existingBtn) existingBtn.remove();
+        feed.insertAdjacentHTML('beforeend', html);
+        if (postsHasMore) {
+          feed.insertAdjacentHTML('beforeend', '<div style="text-align:center;padding:1rem"><button class="btn-sm secondary" onclick="loadMorePosts()" id="loadMoreBtn">Load more</button></div>');
+        }
+      } catch {}
+    }
+
+    async function toggleLike(postId, btn) {
+      try {
+        const isLiked = btn.classList.contains('liked');
+        const method = isLiked ? 'DELETE' : 'POST';
+        const res = await fetch(`/api/community/${postId}/like`, { method, credentials: 'include' });
+        if (res.ok) {
+          const data = await res.json();
+          btn.classList.toggle('liked');
+          btn.innerHTML = `${btn.classList.contains('liked') ? '💔' : '👍'} <span class="like-count">${data.likes || 0}</span>`;
+        }
+      } catch {}
+    }
+
+    async function toggleReaction(postId, emoji) {
+      try {
+        const res = await fetch(`/api/community/${postId}/reaction`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ emoji })
+        });
+        if (res.ok) { loadPosts(); }
+        else {
+          // If already reacted (409), try removing it
+          const data = await res.json().catch(()=>({}));
+          window.stockwise?.toast(data?.error || 'Reaction failed', 'error');
+        }
+      } catch {}
+    }
+
+    async function editPost(postId) {
+      const newContent = prompt('Edit message:');
+      if (!newContent || !newContent.trim()) return;
+      try {
+        const res = await fetch(`/api/community/${postId}`, {
+          method: 'PUT',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: newContent.trim(), coin: '' })
+        });
+        if (res.ok) { window.stockwise?.toast('Post updated', 'success'); loadPosts(); }
+        else { const d = await res.json().catch(()=>({})); window.stockwise?.toast(d.error || 'Edit failed', 'error'); }
+      } catch { window.stockwise?.toast('Edit failed', 'error'); }
+    }
+
+    async function deletePost(postId) {
+      if (!confirm('Delete this post?')) return;
+      try {
+        const res = await fetch(`/api/community/${postId}`, {
+          method: 'DELETE', credentials: 'include'
+        });
+        if (res.ok) { window.stockwise?.toast('Post deleted', 'success'); loadPosts(); }
+        else { const d = await res.json().catch(()=>({})); window.stockwise?.toast(d.error || 'Delete failed', 'error'); }
+      } catch { window.stockwise?.toast('Delete failed', 'error'); }
+    }
+
+    async function submitPost() {
+      const user = window.stockwise?.currentUser?.();
+      if (!user) {
+        window.stockwise?.openAuth?.('login');
+        return;
+      }
+
+      const content = document.getElementById('postContent').value.trim();
+      const coin = document.getElementById('postCoin').value;
+      if (!content) return;
+
+      try {
+        const res = await fetch('/api/community', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content, coin, group_id: activeGroupId, recipient_id: activeRecipientId })
+        });
+        if (res.ok) {
+          document.getElementById('postContent').value = '';
+          updateCharCount();
+          await loadPosts();
+        } else {
+          const data = await res.json().catch(() => ({}));
+          window.stockwise?.toast(data?.error || 'Post failed', 'error');
+        }
+      } catch (err) {
+        window.stockwise?.toast('Message failed to deploy.', 'error');
+      }
+    }
+
+    async function deleteGroup(id, name) {
+      if (!confirm(`Delete channel "#${name}"? This cannot be undone.`)) return;
+      try {
+        const res = await fetch(`/api/groups/${id}`, {
+          method: 'DELETE',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        if (res.ok) {
+          if (activeGroupId === id) { activeGroupId = null; loadPosts(); }
+          loadGroups();
+        } else {
+          const data = await res.json().catch(() => ({}));
+          window.stockwise?.toast(data?.error || 'Failed to delete channel', 'error');
+        }
+      } catch {
+        window.stockwise?.toast('Failed to delete channel', 'error');
+      }
+    }
+
+    async function loadGroups() {
+      try {
+        const res = await fetch('/api/groups', { credentials: 'include' });
+        const groups = await res.json();
+        const list = document.getElementById('groupsList');
+        const user = window.stockwise?.currentUser();
+        const isAdmin = user && (user.role === 'admin' || user.role === 'moderator');
+        const existingGlobal = `<a href="#" class="d-channel-item ${!activeGroupId ? 'active' : ''}" onclick="setActiveGroup(null, this)"><span class="channel-hash">#</span> global-feed</a>`;
+        list.innerHTML = existingGlobal + groups.map(g => `
+          <div style="display:flex;align-items:center">
+            <a href="#" class="d-channel-item ${activeGroupId === g.id ? 'active' : ''}" onclick="setActiveGroup(${g.id}, this)" style="flex:1">
+              <span class="channel-hash">#</span> ${escHtml(g.name)}
+            </a>
+            ${isAdmin ? `<button class="channel-delete-btn" data-group-id="${g.id}" data-group-name="${escHtml(g.name)}" onclick="event.stopPropagation();deleteGroup(this.dataset.groupId, this.dataset.groupName)" title="Delete channel">✕</button>` : ''}
+          </div>
+        `).join('');
+      } catch {}
+    }
+
+    async function loadGainersLosers(category) {
+      const gList = document.getElementById('gainersList');
+      const lList = document.getElementById('losersList');
+      try {
+        let stocks = [];
+        if (category === 'crypto') {
+            const res = await fetch(`/api/markets?vs_currency=usd&per_page=50`, { credentials: 'include' });
+            stocks = await res.json();
+        } else {
+            const res = await fetch(`/api/stocks?category=${category}`);
+            stocks = await res.json();
+        }
+        
+        const sorted = [...stocks].filter(s => s && s.symbol && s.price_change_percentage_24h != null).sort((a,b) => b.price_change_percentage_24h - a.price_change_percentage_24h);
+        const gainers = sorted.slice(0, 5);
+        const losers = [...sorted].reverse().slice(0, 5);
+
+        const renderRow = s => {
+          const onerrorAttr = category === 'crypto'
+            ? `this.style.display='none'; this.nextElementSibling.style.display='flex';`
+            : `window.handleStockLogoError(this, '${s.symbol}', '${s.domain || ''}')`;
+          return `
+            <div class="coin-row">
+              <div style="position:relative; width:24px; height:24px; flex-shrink:0; margin-right:8px;">
+                <img src="${s.image}" class="coin-icon" onerror="${onerrorAttr}" style="width:24px;height:24px;border-radius:8px;display:block">
+                <div style="display:none; width:24px; height:24px; border-radius:8px; background:rgba(0,229,160,0.12); color:#00e5a0; align-items:center; justify-content:center; font-size:0.55rem; font-weight:800; border:1px solid rgba(0,229,160,0.25); font-family:'Syne',sans-serif;">${s.symbol.slice(0,3)}</div>
+              </div>
+              <span class="coin-tag-name">${s.symbol.toUpperCase()}</span>
+              <span class="coin-pct-pill ${s.price_change_percentage_24h >= 0 ? 'up' : 'down'}">${s.price_change_percentage_24h >= 0 ? '▲' : '▼'} ${Math.abs(s.price_change_percentage_24h).toFixed(1)}%</span>
+            </div>`;
+        };
+        
+        const formatPct = v => {
+          const n = typeof v === 'number' ? v : parseFloat(v);
+          if (!Number.isFinite(n)) return 0;
+          return n;
+        };
+
+        const norm = arr => arr
+          .map(s => ({
+            ...s,
+            price_change_percentage_24h: formatPct(s.price_change_percentage_24h),
+            image: s.image || '',
+          }))
+          .filter(s => Number.isFinite(s.price_change_percentage_24h));
+
+        const gainersN = norm(gainers);
+        const losersN  = norm(losers);
+
+        const renderRowSafe = s => renderRow({
+          ...s,
+          price_change_percentage_24h: s.price_change_percentage_24h,
+        });
+
+        gList.innerHTML = gainersN.length ? gainersN.map(renderRowSafe).join('') : '<p style="font-size:0.7rem;color:var(--discord-text-muted)">Scanning market...</p>';
+        lList.innerHTML = losersN.length ? losersN.map(renderRowSafe).join('') : '<p style="font-size:0.7rem;color:var(--discord-text-muted)">Scanning market...</p>';
+      } catch { gList.innerHTML = 'Offline'; lList.innerHTML = 'Offline'; }
+    }
+
+    async function loadNews(q) {
+      const grid = document.getElementById('newsGrid');
+      const loader = document.getElementById('newsLoader');
+      if (!grid || !loader) return;
+      const query = q || (currentCategory === 'crypto' ? 'cryptocurrency bitcoin ethereum' : 'stock market trading wallstreet');
+      try {
+        const res = await fetch(`/api/news?q=${encodeURIComponent(query)}`, { credentials: 'include' });
+        const data = await res.json();
+        const articles = data.results || [];
+        if (articles.length === 0) {
+          grid.innerHTML = '<div style="font-size:0.75rem;color:var(--discord-text-muted);padding:8px 0">No news available. Add a CryptoCompare API key below or try again later.</div>';
+        } else {
+          grid.innerHTML = articles.slice(0, 5).map(a => `
+            <a href="${escHtml(a.url)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;display:block;margin-bottom:8px">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <span style="font-size:0.65rem;color:var(--discord-accent);text-transform:uppercase">${escHtml(a.source.title)}</span>
+                ${a.published_on ? `<span style="font-size:0.6rem;color:var(--discord-text-muted)">${timeAgo(a.published_on * 1000)}</span>` : ''}
+              </div>
+              <div style="font-size:0.8rem;color:#fff;font-weight:500;line-height:1.2;margin-top:2px">${escHtml(a.title)}</div>
+            </a>`).join('');
+        }
+        loader.style.display = 'none';
+      } catch {
+        loader.innerHTML = '📡 News unavailable. Add a CryptoCompare API key in the panel below.';
+      }
+    }
+
+    async function loadFearGreed(category) {
+      const el = document.getElementById('fearGreed');
+      const gMarket = document.getElementById('globalMarket');
+      const pulseFill = document.querySelector('.pulse-fill');
+      const pulseStatus = document.getElementById('pulseStatus');
+
+      try {
+        // ── EQUITY / STOCK mode ──────────────────────────────────
+        if (category && category !== 'crypto') {
+          const res = await fetch('/api/stocks?category=all&nocache=1');
+          const stocks = await res.json();
+          if (!Array.isArray(stocks) || stocks.length === 0) throw new Error('No stock data');
+
+          const valid = stocks.filter(s => s.price_change_percentage_24h != null);
+          const advancers = valid.filter(s => s.price_change_percentage_24h > 0).length;
+          const decliners = valid.filter(s => s.price_change_percentage_24h < 0).length;
+          const total = advancers + decliners || 1;
+          const avgChange = valid.reduce((sum, s) => sum + (s.price_change_percentage_24h || 0), 0) / (valid.length || 1);
+
+          // Best/worst sector
+          const byCat = {};
+          valid.forEach(s => {
+            const c = s.category || 'other';
+            if (!byCat[c]) byCat[c] = { total: 0, count: 0 };
+            byCat[c].total += s.price_change_percentage_24h || 0;
+            byCat[c].count++;
+          });
+          let bestCat = '', bestCatChg = -Infinity;
+          for (const [cat, d] of Object.entries(byCat)) {
+            const avg = d.total / d.count;
+            if (avg > bestCatChg) { bestCatChg = avg; bestCat = cat; }
+          }
+
+          const ratio = (advancers / total) * 100;
+          const sentiment = ratio > 55 ? 'Bullish' : ratio < 45 ? 'Bearish' : 'Neutral';
+
+          gMarket.innerHTML = `
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Advancers</span><span style="color:var(--discord-accent)">${advancers}</span></div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Decliners</span><span style="color:var(--discord-danger)">${decliners}</span></div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Avg Change</span><span style="color:${avgChange >= 0 ? 'var(--discord-accent)' : 'var(--discord-danger)'}">${avgChange >= 0 ? '+' : ''}${avgChange.toFixed(2)}%</span></div>
+            <div style="display:flex;justify-content:space-between"><span>Top Segment</span><span style="color:var(--discord-accent);text-transform:capitalize">${bestCat} ${bestCatChg >= 0 ? '+' : ''}${bestCatChg.toFixed(2)}%</span></div>`;
+
+          if (pulseFill) pulseFill.style.width = `${ratio}%`;
+          if (pulseStatus) {
+            pulseStatus.textContent = sentiment;
+            pulseStatus.style.color = ratio >= 50 ? 'var(--discord-accent)' : 'var(--discord-danger)';
+          }
+          const pulseLabels = document.querySelectorAll('.pulse-meter + div span');
+          if (pulseLabels.length >= 2) {
+            pulseLabels[0].textContent = `${Math.round(ratio)}% Bullish`;
+            pulseLabels[1].textContent = `${100 - Math.round(ratio)}% Bearish`;
+          }
+
+          el.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:1.2rem;font-weight:800;color:${ratio >= 50 ? 'var(--discord-accent)' : 'var(--discord-danger)'}">${Math.round(ratio)}</span>
+            <span style="font-size:0.8rem;color:var(--discord-text-muted)">${sentiment}</span>
+          </div>`;
+          return;
+        }
+
+        // ── CRYPTO mode ─────────────────────────────────────────
+        const res = await fetch('/api/market-trends', { credentials: 'include' });
+        const data = await res.json();
+        const fg = data.fearGreed || { value: 50, value_classification: 'Neutral' };
+        const val = parseInt(fg.value);
+        
+        el.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:1.2rem;font-weight:800;color:${val > 50 ? 'var(--discord-accent)' : 'var(--discord-danger)'}">${val}</span>
+          <span style="font-size:0.8rem;color:var(--discord-text-muted)">${fg.value_classification}</span>
+        </div>`;
+
+        if (pulseFill) pulseFill.style.width = `${val}%`;
+        if (pulseStatus) {
+            pulseStatus.textContent = fg.value_classification;
+            pulseStatus.style.color = val > 50 ? 'var(--discord-accent)' : 'var(--discord-danger)';
+        }
+        const pulseLabels = document.querySelectorAll('.pulse-meter + div span');
+        if (pulseLabels.length >= 2) {
+          pulseLabels[0].textContent = `${val}% Bullish`;
+          pulseLabels[1].textContent = `${100 - val}% Bearish`;
+        }
+
+        if (data.global) {
+          const mChg = data.global.market_cap_change_percentage_24h_usd || 0;
+          gMarket.innerHTML = `
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Cap Change</span><span style="color:${mChg >= 0 ? 'var(--discord-accent)' : 'var(--discord-danger)'}">${mChg >= 0 ? '+' : ''}${mChg.toFixed(1)}%</span></div>
+            <div style="display:flex;justify-content:space-between"><span>Dominance</span><span>BTC: ${data.global.market_cap_percentage?.btc?.toFixed(1) || 0}%</span></div>`;
+        }
+      } catch {}
+    }
+
+    function buildStickerGrid() {
+      document.getElementById('stickerGrid').innerHTML = STICKERS.map(s => 
+        `<button class="sticker-item" onclick="addSticker('${s}')">${s}</button>`
+      ).join('');
+    }
+    function toggleStickerPicker() {
+      const p = document.getElementById('stickerPicker');
+      const isHidden = (p.style.display === 'none') || (!p.style.display && window.getComputedStyle(p).display === 'none');
+      p.style.display = isHidden ? 'block' : 'none';
+    }
+    function addSticker(s) { const ta = document.getElementById('postContent'); ta.value += s; toggleStickerPicker(); ta.focus(); updateCharCount(); }
+    function updateCharCount() { document.getElementById('charCount').textContent = `${document.getElementById('postContent').value.length} / 500`; }
+    function timeAgo(d) {
+        // Accept either unix timestamps or SQL/ISO strings.
+        // Backend stores `CURRENT_TIMESTAMP` (timezone-less) in SQLite,
+        // so when the string has no timezone, treat it as UTC to prevent offset issues.
+        let dt;
+
+        if (typeof d === 'number' || String(d).match(/^\d+(\.\d+)?$/)) {
+          dt = new Date(Number(d));
+        } else {
+          const raw = String(d);
+          // If it's like "YYYY-MM-DD HH:mm:ss" or ISO without Z/offset, force UTC.
+          const hasTimezone = /([zZ]|[+\-]\d\d:\d\d)$/.test(raw);
+          const looksLikeSqlDateTime = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/.test(raw);
+
+          if (hasTimezone) dt = new Date(raw);
+          else if (looksLikeSqlDateTime) dt = new Date(raw.replace(' ', 'T') + 'Z');
+          else dt = new Date(raw);
+        }
+
+        const s = Math.max(0, Math.floor((Date.now() - dt.getTime()) / 1000));
+
+        if (s < 60) return 'just now';
+        if (s < 3600) return Math.floor(s/60) + 'm ago';
+        if (s < 86400) return Math.floor(s/3600) + 'h ago';
+        return Math.floor(s/86400) + 'd ago';
+    }
+    function escHtml(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function attrEsc(s) { return escHtml(s).replace(/'/g, "\\'"); }
+    async function loadCommunityKeys() { try { const u = window.stockwise?.currentUser(); if (u) { document.getElementById('newsApiKey').value = u.news_api_key || ''; document.getElementById('communityApiKey').value = u.community_api_key || ''; } } catch {} }
+    async function saveCommunityKeys() {
+        const news_api_key = document.getElementById('newsApiKey').value.trim();
+        const community_api_key = document.getElementById('communityApiKey').value.trim();
+        const res = await fetch('/api/api-keys', {
+            method: 'POST', credentials: 'include', headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({ news_api_key, community_api_key })
+        });
+        if (res.ok) { window.stockwise?.toast('Keys saved!', 'success'); loadNews(currentCategory === 'crypto' ? 'cryptocurrency bitcoin ethereum' : 'stock market trading wallstreet'); }
+    }
+  </script>
+</body>
+</html>

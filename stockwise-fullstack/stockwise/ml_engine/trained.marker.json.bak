@@ -1,0 +1,23 @@
+{
+  "model_version": "v3.0-real-ohlcv-sentiment-regime",
+  "n_samples": 39824,
+  "n_features": 50,
+  "class_counts": {
+    "HOLD": 18348,
+    "BUY": 8519,
+    "SELL": 12957
+  },
+  "trained_at": 1783088671,
+  "cv_results": {
+    "mean_win_rate": 55.217605711111744,
+    "mean_sharpe": 5.46118820667219,
+    "folds": 5
+  },
+  "holdout": {
+    "win_rate": 57.28,
+    "profit_factor": 1.25,
+    "sharpe": 4.37,
+    "max_drawdown": 67.36,
+    "total_trades": 2041
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "exec": "tsx server.ts",
+  "ext": "ts,json",
+  "ignore": [
+    "stockwise.db",
+    "stockwise.db-journal",
+    "stockwise.db-shm",
+    "stockwise.db-wal",
+    "*.log",
+    "server.log",
+    "node_modules/"
+  ]
+}

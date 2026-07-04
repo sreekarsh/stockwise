@@ -1,0 +1,44 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "noEmit": true,
+    "strict": true,
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": false,
+    "sourceMap": true,
+    "outDir": "dist",
+    "typeRoots": ["./node_modules/@types", "./types"]
+  },
+  "include": [
+    "types/**/*.d.ts",
+    "config/**/*.ts",
+    "schemas/**/*.ts",
+    "middleware/**/*.ts",
+    "routes/**/*.ts",
+    "services/**/*.ts",
+    "server.ts",
+    "backup-db.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    ".venv",
+    "ml_engine",
+    "backups",
+    ".kilo",
+    "js",
+    "tests",
+    "scripts"
+  ]
+}

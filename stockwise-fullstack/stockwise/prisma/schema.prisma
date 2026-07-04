@@ -1,0 +1,338 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                     Int                @id @default(autoincrement())
+  username               String             @unique
+  email                  String             @unique
+  password               String
+  phone                  String             @default("")
+  reset_token            String             @default("")
+  reset_token_expiry     DateTime?
+  coindcx_key            String             @default("")
+  coindcx_secret         String             @default("")
+  news_api_key           String             @default("")
+  community_api_key      String             @default("")
+  coingecko_key          String             @default("")
+  role                   String             @default("user")
+  is_verified            Int                @default(0)
+  created_at             DateTime           @default(now())
+  profile_color          String             @default("")
+  currency               String             @default("")
+  theme                  String             @default("")
+  font_style             String             @default("")
+  tracker_font           String             @default("")
+  avatar_name            String             @default("")
+  avatar_bg_color        String             @default("")
+  avatar_texture         String             @default("")
+  avatar_accessory       String             @default("")
+  avatar_energy          String             @default("")
+  avatar_finish          String             @default("solid")
+  coindcx_sync_status    String             @default("")
+  coindcx_last_synced    String             @default("")
+  coindcx_total_invested String             @default("")
+  coindcx_sync_error     String             @default("")
+  demo_balance           Float              @default(10000.0)
+  trader_xp              Int                @default(0)
+  trader_level           String             @default("Novice")
+  watchlist              String             @default("[]")
+
+  portfolios             Portfolio[]
+  posts                  CommunityPost[]
+  alerts                 Alert[]
+  logins                 LoginLog[]
+
+  @@index([coindcx_sync_status])
+  @@index([email])
+  createdGroups          Group[]            @relation("CreatedBy")
+  memberships            GroupMember[]
+  friends                Friend[]           @relation("UserFriends")
+  friendOf               Friend[]           @relation("UserFriendOf")
+  trades                 TradeHistory[]
+  demoPortfolios         DemoPortfolio[]
+  demoTrades             DemoTrade[]
+  demoBots               DemoBot[]
+  learnings              UserLearning[]
+  postLikes              PostLike[]
+  postReactions          PostReaction[]
+
+  @@map("users")
+}
+
+model Portfolio {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  symbol     String
+  name       String
+  quantity   Float
+  buy_price  Float
+  asset_type String   @default("crypto")
+  created_at DateTime @default(now())
+
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, symbol])
+  @@map("portfolio")
+}
+
+model CommunityPost {
+  id           Int      @id @default(autoincrement())
+  user_id      Int
+  username     String
+  content      String
+  coin         String   @default("")
+  recipient_id Int?
+  likes        Int      @default(0)
+  group_id     Int?
+  updated_at   DateTime @default(now()) @updatedAt
+  created_at   DateTime @default(now())
+
+  user         User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  group        Group?       @relation(fields: [group_id], references: [id], onDelete: SetNull)
+  postLikes    PostLike[]
+  reactions    PostReaction[]
+
+  @@map("community_posts")
+}
+
+model PostLike {
+  post_id    Int
+  user_id    Int
+  created_at DateTime @default(now())
+
+  post       CommunityPost @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  user       User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@id([post_id, user_id])
+  @@map("post_likes")
+}
+
+model PostReaction {
+  id         Int      @id @default(autoincrement())
+  post_id    Int
+  user_id    Int
+  emoji      String
+  created_at DateTime @default(now())
+
+  post       CommunityPost @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  user       User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([post_id, user_id, emoji])
+  @@map("post_reactions")
+}
+
+model Alert {
+  id           Int      @id @default(autoincrement())
+  user_id      Int
+  symbol       String
+  target_price Float
+  direction    String
+  triggered    Int      @default(0)
+  created_at   DateTime @default(now())
+
+  user         User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("alerts")
+}
+
+model LoginLog {
+  id         Int      @id @default(autoincrement())
+  user_id    Int?
+  username   String
+  email      String
+  login_type String   @default("login")
+  ip_address String?
+  user_agent String?
+  success    Int      @default(1)
+  login_at   DateTime @default(now())
+
+  user       User?    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("login_logs")
+}
+
+model Group {
+  id          Int           @id @default(autoincrement())
+  name        String
+  description String        @default("")
+  created_by  Int
+  created_at  DateTime      @default(now())
+
+  creator     User          @relation("CreatedBy", fields: [created_by], references: [id], onDelete: Cascade)
+  members     GroupMember[]
+  posts       CommunityPost[]
+
+  @@map("groups")
+}
+
+model GroupMember {
+  id        Int      @id @default(autoincrement())
+  group_id  Int
+  user_id   Int
+  joined_at DateTime @default(now())
+
+  group     Group    @relation(fields: [group_id], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([group_id, user_id])
+  @@map("group_members")
+}
+
+model Friend {
+  user_id   Int
+  friend_id Int
+  status    String   @default("pending")
+  created_at DateTime @default(now())
+
+  user      User     @relation("UserFriends", fields: [user_id], references: [id], onDelete: Cascade)
+  friend    User     @relation("UserFriendOf", fields: [friend_id], references: [id], onDelete: Cascade)
+
+  @@id([user_id, friend_id])
+  @@map("friends")
+}
+
+model TradeHistory {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  trade_id   String   @unique
+  symbol     String
+  side       String
+  quantity   Float
+  price      Float
+  total      Float?
+  created_at String?
+
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@map("trade_history")
+}
+
+model SignalsMl {
+  id               Int      @id @default(autoincrement())
+  symbol           String
+  asset_type       String   @default("crypto")
+  signal           String
+  confidence       Float?
+  probability_buy  Float?
+  probability_sell Float?
+  probability_hold Float?
+  forecast_pct     Float?
+  expected_price   Float?
+  ci_low           Float?
+  ci_high          Float?
+  entry_price      Float?
+  take_profit      Float?
+  stop_loss        Float?
+  risk_reward      Float?
+  horizon_hours    Int?
+  shap_json        String?
+  generated_at     DateTime @default(now())
+
+  @@index([symbol, generated_at(sort: Desc)])
+  @@map("signals_ml")
+}
+
+model ModelVersions {
+  id         Int      @id @default(autoincrement())
+  version    String
+  trained_at DateTime @default(now())
+  notes      String?
+
+  @@map("model_versions")
+}
+
+model BacktestResults {
+  id            Int      @id @default(autoincrement())
+  model_version String?
+  period_start  String?
+  period_end    String?
+  win_rate      Float?
+  profit_factor Float?
+  sharpe        Float?
+  max_drawdown  Float?
+  total_trades  Int?
+  computed_at   DateTime @default(now())
+
+  @@map("backtest_results")
+}
+
+model DemoPortfolio {
+  id            Int      @id @default(autoincrement())
+  user_id       Int
+  symbol        String
+  name          String
+  quantity      Float
+  avg_buy_price Float
+  created_at    DateTime @default(now())
+
+  user          User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@unique([user_id, symbol])
+  @@map("demo_portfolio")
+}
+
+model DemoTrade {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  symbol     String
+  type       String
+  quantity   Float
+  price      Float
+  created_at DateTime @default(now())
+
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, created_at(sort: Desc)])
+  @@map("demo_trades")
+}
+
+model DemoBot {
+  id              Int           @id @default(autoincrement())
+  user_id         Int
+  name            String
+  strategy        String
+  symbol          String
+  status          String        @default("active")
+  parameters_json String?
+  created_at      DateTime      @default(now())
+
+  user            User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  logs            DemoBotLog[]
+
+  @@index([user_id, status])
+  @@index([status])
+  @@map("demo_bots")
+}
+
+model DemoBotLog {
+  id         Int      @id @default(autoincrement())
+  bot_id     Int
+  message    String
+  created_at DateTime @default(now())
+
+  bot        DemoBot  @relation(fields: [bot_id], references: [id], onDelete: Cascade)
+
+  @@index([bot_id, created_at(sort: Desc)])
+  @@map("demo_bot_logs")
+}
+
+model UserLearning {
+  id           Int      @id @default(autoincrement())
+  user_id      Int
+  lesson_id    String
+  completed    Int      @default(1)
+  completed_at DateTime @default(now())
+
+  user         User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, lesson_id])
+  @@map("user_learning")
+}
