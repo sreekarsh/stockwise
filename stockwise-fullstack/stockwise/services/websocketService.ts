@@ -9,6 +9,7 @@ const SYMBOLS = [
 
 let wsClient: any = null;
 let reconnectTimeout: any = null;
+let wsAttempted = false;
 export const latestPrices: Record<string, any> = {};
 
 export function initWebSocketService(io: any) {
@@ -17,13 +18,14 @@ export function initWebSocketService(io: any) {
     return;
   }
 
-  // Construct Binance WebSocket URL subscribing to multiple ticker streams
   const streams = SYMBOLS.map(sym => `${sym}usdt@ticker`).join("/");
   const wsUrl = `wss://stream.binance.com:9443/ws/${streams}`;
 
   function connect() {
+    if (wsAttempted) return;
+    wsAttempted = true;
     console.log("Connecting to Binance Spot WebSocket stream...");
-    
+
     const WebSocketClass = globalThis.WebSocket || WebSocket;
 
     try {
@@ -56,37 +58,16 @@ export function initWebSocketService(io: any) {
 
       wsClient.onerror = () => {
         console.warn("Binance Spot WS unavailable — using CoinGecko fallback");
-        wsClient.onclose = null;
-        try { wsClient.close(); } catch {}
         wsClient = null;
       };
 
       wsClient.onclose = () => {
-        if (wsClient) {
-          console.warn("Binance Spot WS stream closed. Reconnecting in 5 seconds...");
-          reconnectTimeout = setTimeout(connect, 5000);
-        }
+        console.warn("Binance Spot WS stream closed. Using CoinGecko fallback.");
+        wsClient = null;
       };
     } catch (err) {
       console.warn("Binance Spot WS unavailable — using CoinGecko fallback");
-    }
-  }
-        } catch (err) {
-          console.error("Error parsing Binance WS message:", err);
-        }
-      };
-
-      wsClient.onerror = (err: any) => {
-        console.error("Binance Spot WS error:", err);
-      };
-
-      wsClient.onclose = () => {
-        console.warn("Binance Spot WS stream closed. Reconnecting in 5 seconds...");
-        reconnectTimeout = setTimeout(connect, 5000);
-      };
-    } catch (err) {
-      console.error("Failed to establish Binance WebSocket client:", err);
-      reconnectTimeout = setTimeout(connect, 5000);
+      wsClient = null;
     }
   }
 
@@ -102,7 +83,6 @@ export function closeWebSocketService() {
     wsClient.onclose = null;
     wsClient.onmessage = null;
     wsClient.onopen = null;
-    // Keep a dummy error listener during close to swallow asynchronous errors
     wsClient.onerror = () => {};
     try {
       wsClient.close();
@@ -110,4 +90,3 @@ export function closeWebSocketService() {
     wsClient = null;
   }
 }
-
