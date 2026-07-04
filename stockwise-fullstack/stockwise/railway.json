@@ -4,15 +4,11 @@
     {
       "src": "server.ts",
       "use": "@railway/node"
-    },
-    {
-      "src": "ml_engine/server.py",
-      "use": "@railway/python"
     }
   ],
   "deploy": {
     "startCommand": "npx tsx server.ts",
-    "healthcheckPath": "/api/markets?per_page=1",
+    "healthcheckPath": "/api/health",
     "healthcheckTimeout": 30,
     "restartPolicyType": "on_failure",
     "restartPolicyMaxRetries": 3

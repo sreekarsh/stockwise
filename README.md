@@ -139,4 +139,4 @@ Trains LSTM/PPO models using Binance OHLCV and sentiment data.
 - Signals/ML are **educational only** — not financial advice
 - CoinGecko free tier is rate-limited (~10-30 req/min)
 - Multiple CoinGecko keys can be comma-separated for auto-rotation
-- SQLite auto-created; PostgreSQL via `DATABASE_URL` env var
+- PostgreSQL via `DATABASE_URL` env var
