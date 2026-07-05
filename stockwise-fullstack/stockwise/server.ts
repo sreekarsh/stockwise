@@ -741,6 +741,15 @@ app.use(errorHandler);
 
 const PORT = env.PORT;
 if (process.env.NODE_ENV !== "test" && !process.argv.some((arg) => arg.includes("test"))) {
+  try {
+    await prisma.$queryRaw`SELECT 1 FROM "users" LIMIT 1`;
+  } catch (err) {
+    console.error("FATAL: Prisma migrations have not been applied or the database is not accessible.");
+    console.error("Action: Run 'npx prisma migrate deploy' against DATABASE_URL.");
+    console.error("Details:", err);
+    process.exit(1);
+  }
+
   const srv = server.listen(PORT, "0.0.0.0", () => {
     console.log(`StockWise running at http://localhost:${PORT}`);
     console.log(`News sources: NEWSAPI_KEY=${env.NEWSAPI_KEY ? "present" : "missing"}, CRYPTOCOMPARE_API_KEY=${env.CRYPTOCOMPARE_API_KEY ? "present" : "missing"}`);

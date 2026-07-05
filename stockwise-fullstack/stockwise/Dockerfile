@@ -84,4 +84,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
 
 EXPOSE 3000
 
-CMD sh -c "npx prisma migrate deploy && node dist/server.js"
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/server.js"]

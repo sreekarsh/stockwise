@@ -181,13 +181,14 @@ export default (db: any) => {
           csrfToken,
           message: "Account created! Please contact your administrator for account activation if needed.",
         });
-      } catch (e) {
-        if ((e as any).code === "P2002")
+      } catch (e: any) {
+        const code = e?.code || "UNKNOWN_ERROR";
+        if (code === "P2002")
           return res
             .status(400)
             .json({ error: "Username or email already exists" });
         console.error("Registration error:", e);
-        return res.status(500).json({ error: "Server error" });
+        return res.status(500).json({ error: `Server error (${code})` });
       }
     },
   );
@@ -197,37 +198,72 @@ export default (db: any) => {
     checkLockout,
     rateLimit({ windowMs: 60000, max: 10 }),
     async (req, res) => {
-      const parsed = loginSchema.safeParse(req.body);
-      if (!parsed.success) {
-        return res.status(400).json({ error: parsed.error.errors[0].message });
-      }
-      const { email, password, remember } = parsed.data;
-      const ip = getClientIp(req);
-      const userAgent = req.headers["user-agent"] || "unknown";
+      try {
+        const parsed = loginSchema.safeParse(req.body);
+        if (!parsed.success) {
+          return res.status(400).json({ error: parsed.error.errors[0].message });
+        }
+        const { email, password, remember } = parsed.data;
+        const ip = getClientIp(req);
+        const userAgent = req.headers["user-agent"] || "unknown";
 
-      const user = await prisma.user.findFirst({
-        where: { email: email.toLowerCase() },
-      });
-
-      if (!user) {
-        await recordFailedAttempt(ip);
-        await prisma.loginLog.create({
-          data: {
-            user_id: null,
-            username: "unknown",
-            email: email.toLowerCase(),
-            login_type: "login",
-            ip_address: ip,
-            user_agent: userAgent,
-            success: 0,
-          },
+        const user = await prisma.user.findFirst({
+          where: { email: email.toLowerCase() },
         });
-        return res.status(400).json({ error: "Invalid credentials" });
-      }
 
-      const match = await bcrypt.compare(password, user.password);
-      if (!match) {
-        await recordFailedAttempt(ip);
+        if (!user) {
+          await recordFailedAttempt(ip);
+          await prisma.loginLog.create({
+            data: {
+              user_id: null,
+              username: "unknown",
+              email: email.toLowerCase(),
+              login_type: "login",
+              ip_address: ip,
+              user_agent: userAgent,
+              success: 0,
+            },
+          });
+          return res.status(400).json({ error: "Invalid credentials" });
+        }
+
+        const match = await bcrypt.compare(password, user.password);
+        if (!match) {
+          await recordFailedAttempt(ip);
+          await prisma.loginLog.create({
+            data: {
+              user_id: user.id,
+              username: user.username,
+              email: user.email,
+              login_type: "login",
+              ip_address: ip,
+              user_agent: userAgent,
+              success: 0,
+            },
+          });
+          return res.status(400).json({ error: "Invalid credentials" });
+        }
+
+        await resetFailedAttempts(ip);
+
+        if (
+          email.toLowerCase() === mailService.OWNER_EMAIL.toLowerCase() &&
+          user.role !== "admin"
+        ) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { role: "admin" },
+          });
+          user.role = "admin";
+        }
+
+        await new Promise<void>((resolve, reject) => {
+          req.session.regenerate(err => err ? reject(err) : resolve());
+        });
+        req.session.userId = user.id;
+        req.session.username = user.username;
+        req.session.role = user.role;
+
         await prisma.loginLog.create({
           data: {
             user_id: user.id,
@@ -236,87 +272,58 @@ export default (db: any) => {
             login_type: "login",
             ip_address: ip,
             user_agent: userAgent,
-            success: 0,
+            success: 1,
           },
         });
-        return res.status(400).json({ error: "Invalid credentials" });
-      }
 
-      await resetFailedAttempts(ip);
+        if (remember) {
+          res.cookie("rememberLogin", "true", {
+            maxAge: 30 * 24 * 60 * 60 * 1000,
+            httpOnly: true,
+            secure: env.NODE_ENV === "production" || Boolean(env.DOMAIN),
+            sameSite: "lax",
+          });
+        }
 
-      if (
-        email.toLowerCase() === mailService.OWNER_EMAIL.toLowerCase() &&
-        user.role !== "admin"
-      ) {
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { role: "admin" },
-        });
-        user.role = "admin";
-      }
+        const coindcxKey = safeDecrypt(user.coindcx_key);
+        const coindcxSecret = safeDecrypt(user.coindcx_secret);
 
-      await new Promise<void>((resolve, reject) => {
-        req.session.regenerate(err => err ? reject(err) : resolve());
-      });
-      req.session.userId = user.id;
-      req.session.username = user.username;
-      req.session.role = user.role;
+        const csrfToken =
+          req.session.csrfToken || crypto.randomBytes(32).toString("hex");
+        if (!req.session.csrfToken) req.session.csrfToken = csrfToken;
 
-      await prisma.loginLog.create({
-        data: {
-          user_id: user.id,
+        return res.json({
+          loggedIn: true,
+          id: user.id,
           username: user.username,
           email: user.email,
-          login_type: "login",
-          ip_address: ip,
-          user_agent: userAgent,
-          success: 1,
-        },
-      });
-
-      if (remember) {
-        res.cookie("rememberLogin", "true", {
-          maxAge: 30 * 24 * 60 * 60 * 1000,
-          httpOnly: true,
-          secure: env.NODE_ENV === "production" || Boolean(env.DOMAIN),
-          sameSite: "lax",
+          phone: user.phone || "",
+          profile_color: user.profile_color || "dark",
+          currency: user.currency || user.profile_color || "dark",
+          theme: user.theme || "",
+          font_style: user.font_style || "dm-sans",
+          tracker_font: user.tracker_font || "dm-sans",
+          role: user.role || "user",
+          is_verified: !!user.is_verified,
+          avatar: {
+            name: user.avatar_name || "",
+            bg_color: user.avatar_bg_color || "#00e5a0",
+            texture: user.avatar_texture || "solid",
+            accessory: user.avatar_accessory || "none",
+            energy: user.avatar_energy || "none",
+            finish: user.avatar_finish || "solid",
+          },
+          has_coindcx: Boolean(coindcxKey && coindcxSecret),
+          has_coindcx_secret: Boolean(coindcxSecret),
+          has_news_key: Boolean(user.news_api_key),
+          has_community_key: Boolean(user.community_api_key),
+          csrfToken,
         });
+      } catch (e: any) {
+        const code = e?.code || "UNKNOWN_ERROR";
+        console.error("Login error:", e);
+        return res.status(500).json({ error: `Server error (${code})` });
       }
-
-      const coindcxKey = safeDecrypt(user.coindcx_key);
-      const coindcxSecret = safeDecrypt(user.coindcx_secret);
-
-      const csrfToken =
-        req.session.csrfToken || crypto.randomBytes(32).toString("hex");
-      if (!req.session.csrfToken) req.session.csrfToken = csrfToken;
-
-      return res.json({
-        loggedIn: true,
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        phone: user.phone || "",
-        profile_color: user.profile_color || "dark",
-        currency: user.currency || user.profile_color || "dark",
-        theme: user.theme || "",
-        font_style: user.font_style || "dm-sans",
-        tracker_font: user.tracker_font || "dm-sans",
-        role: user.role || "user",
-        is_verified: !!user.is_verified,
-        avatar: {
-          name: user.avatar_name || "",
-          bg_color: user.avatar_bg_color || "#00e5a0",
-          texture: user.avatar_texture || "solid",
-          accessory: user.avatar_accessory || "none",
-          energy: user.avatar_energy || "none",
-          finish: user.avatar_finish || "solid",
-        },
-        has_coindcx: Boolean(coindcxKey && coindcxSecret),
-        has_coindcx_secret: Boolean(coindcxSecret),
-        has_news_key: Boolean(user.news_api_key),
-        has_community_key: Boolean(user.community_api_key),
-        csrfToken,
-      });
     },
   );
 
